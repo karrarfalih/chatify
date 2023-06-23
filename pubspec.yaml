@@ -1,0 +1,51 @@
+name: chat
+description: A new Flutter package project.
+version: 0.0.1
+homepage: null
+
+environment:
+  sdk: '>=2.19.2 <3.0.0'
+  flutter: ">=1.17.0"
+
+dependencies:
+  bubble: ^1.2.1
+  cached_network_image: ^3.2.3
+  cloud_firestore: ^4.4.3
+  confirm_dialog: ^1.0.1
+  dio: ^5.0.2
+  firebase_storage: ^11.0.14
+  flutter:
+    sdk: flutter
+  flutter_keyboard_size: ^1.0.1
+  flutter_spinkit: any
+  flutter_svg: ^2.0.2
+  fluttericon: ^2.0.0
+  fluttertoast: ^8.2.1
+  get: ^4.6.5
+  get_storage: ^2.1.1
+  iconsax: ^0.0.8
+  image_gallery_saver: ^1.7.1
+  image_picker: ^0.8.6+4
+  just_audio: ^0.9.31
+  kr_builder: ^1.0.0
+  kr_button: ^1.0.1
+  kr_expanded_section: ^1.0.0
+  kr_extensions: ^1.0.4
+  kr_paginate_firestore: ^1.0.2
+  path: any
+  path_provider: ^2.0.13
+  kr_pull_down_button: 
+    path: ../kr_pull_down_button
+  recase: ^4.1.0
+  record: ^4.4.4
+  shimmer: ^2.0.0
+  uuid: ^3.0.7
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  assets:
+    - lib/assets/icons/
