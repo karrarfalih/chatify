@@ -1,6 +1,6 @@
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:chat/ui/chats/new_message.dart';
+// import 'package:chatify/ui/chats/new_message.dart';
 // import 'package:flutter_svg/flutter_svg.dart';
 
 // class ChatSearch extends StatelessWidget {

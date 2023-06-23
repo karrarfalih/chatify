@@ -1,7 +1,7 @@
-import 'package:chat/assets/image.dart';
-import 'package:chat/models/theme.dart';
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/common/bloc.dart';
+import 'package:chatify/assets/image.dart';
+import 'package:chatify/models/theme.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/common/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:kr_builder/future_builder.dart';
@@ -46,7 +46,7 @@ class UserAvatar extends StatelessWidget {
           builder: (user) {
             return InkWell(
               onTap: () async {
-                if (onTap != null) onTap!(user);
+                if (onTap != null) onTap!(user!);
               },
               highlightColor: Colors.transparent,
               hoverColor: Colors.transparent,
@@ -80,7 +80,7 @@ class UserAvatar extends StatelessWidget {
                       if (subTitle != null || user.uid != null)
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text((subTitle ??('@${user.uid!}')).tr,
+                          child: Text((subTitle ?? ('@${user.uid!}')).tr,
                               style: currentTheme.subTitleStyle),
                         ),
                     ],

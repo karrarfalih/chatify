@@ -1,5 +1,5 @@
-import 'package:chat/voice_player/src/contact_noise.dart';
-import 'package:chat/voice_player/src/helpers/utils.dart';
+import 'package:chatify/voice_player/src/contact_noise.dart';
+import 'package:chatify/voice_player/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
 // ignore: library_prefixes
 import 'package:just_audio/just_audio.dart' as jsAudio;
@@ -23,7 +23,12 @@ class VoiceMessage extends StatefulWidget {
     this.contactPlayIconColor = Colors.black26,
     this.meFgColor = const Color(0xffffffff),
     this.played = false,
-    this.onPlay, this.onSeek, required this.height, required this.width, required this.duration, this.isLoading = false,
+    this.onPlay,
+    this.onSeek,
+    required this.height,
+    required this.width,
+    required this.duration,
+    this.isLoading = false,
   }) : super(key: key);
 
   final String audioSrc;
@@ -64,7 +69,7 @@ class _VoiceMessageState extends State<VoiceMessage>
     height = widget.height;
     maxNoiseHeight = 6.w();
     noiseWidth = 26.5.w();
-    if(!widget.isLoading) _setDuration();
+    if (!widget.isLoading) _setDuration();
     super.initState();
   }
 
@@ -76,7 +81,8 @@ class _VoiceMessageState extends State<VoiceMessage>
       child: Container(
         constraints: BoxConstraints(maxWidth: 70.w()),
         child: Padding(
-          padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
+          padding:
+              const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -88,7 +94,10 @@ class _VoiceMessageState extends State<VoiceMessage>
                   const SizedBox(width: 8),
                   _durationWithNoise(context),
                   const SizedBox(width: 8),
-                  Padding(padding: const EdgeInsets.only(bottom: 10), child: _speed(context),)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: _speed(context),
+                  )
                 ],
               ),
               widget.sendAt,
@@ -108,8 +117,7 @@ class _VoiceMessageState extends State<VoiceMessage>
           width: 40,
           height: 40,
           child: InkWell(
-            onTap: () =>
-                !_audioConfigurationDone ? null : togglePlay(),
+            onTap: () => !_audioConfigurationDone ? null : togglePlay(),
             child: !_audioConfigurationDone
                 ? Container(
                     padding: const EdgeInsets.all(14),
@@ -139,10 +147,13 @@ class _VoiceMessageState extends State<VoiceMessage>
           SizedBox(height: .3.w()),
           Row(
             children: [
-              if (!widget.played)
-                ...[Widgets.circle(context, 1.w(),
+              if (!widget.played) ...[
+                Widgets.circle(context, 1.w(),
                     widget.me ? widget.meFgColor : widget.contactFgColor),
-              const SizedBox(width: 5,),],
+                const SizedBox(
+                  width: 5,
+                ),
+              ],
               Text(
                 _remainingTime,
                 style: TextStyle(
@@ -187,7 +198,8 @@ class _VoiceMessageState extends State<VoiceMessage>
                       height: 6.w(),
                       color: widget.me
                           ? widget.meBgColor.withOpacity(.4)
-                          : widget.contactBgColor.withOpacity(!widget.played && !isPlayed? 0:.35),
+                          : widget.contactBgColor.withOpacity(
+                              !widget.played && !isPlayed ? 0 : .35),
                     ),
                   );
                 },
@@ -201,7 +213,7 @@ class _VoiceMessageState extends State<VoiceMessage>
                   min: 0.0,
                   max: maxDurationForSlider,
                   onChangeStart: (__) => _stopPlaying(),
-                  onChangeEnd: (_)=>_startPlaying(),
+                  onChangeEnd: (_) => _startPlaying(),
                   onChanged: (_) => _onChangeSlider(_),
                   value: duration + .0,
                 ),
@@ -220,33 +232,37 @@ class _VoiceMessageState extends State<VoiceMessage>
           padding: EdgeInsets.symmetric(horizontal: 3.w(), vertical: 1.6.w()),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(2.8.w()),
-            color: (widget.me ? widget.meFgColor:widget.contactFgColor).withOpacity(.28),
+            color: (widget.me ? widget.meFgColor : widget.contactFgColor)
+                .withOpacity(.28),
           ),
           width: 9.8.w(),
           child: Text(
             !x2 ? '1X' : '2X',
-            style: TextStyle(fontSize: 9.8, color: (widget.me ? widget.meFgColor:Colors.black)),
+            style: TextStyle(
+                fontSize: 9.8,
+                color: (widget.me ? widget.meFgColor : Colors.black)),
           ),
         ),
       );
 
-
   void togglePlay() async {
-    if(!_isPlaying && widget.onPlay != null) widget.onPlay!();
+    if (!_isPlaying && widget.onPlay != null) widget.onPlay!();
     _isPlaying ? _stopPlaying() : _startPlaying();
   }
 
   _startPlaying() async {
-    if(!isPlayed){
+    if (!isPlayed) {
       _listenToRemainingTime();
       isPlayed = true;
     }
-    player.play().then((value){
+    player.play().then((value) {
       player.pause();
       player.seek(Duration.zero);
-      setState(()=>_isPlaying = false);
+      setState(() => _isPlaying = false);
     });
-    setState(() {_isPlaying = true;});
+    setState(() {
+      _isPlaying = true;
+    });
     _controller!.forward();
   }
 
@@ -257,11 +273,12 @@ class _VoiceMessageState extends State<VoiceMessage>
   }
 
   void _setDuration() async {
-    if(currentPlayer != null) currentPlayer!.pause();
+    if (currentPlayer != null) currentPlayer!.pause();
     currentPlayer = player;
     await player.setUrl(widget.audioSrc);
     duration = widget.duration.inSeconds.toDouble();
     maxDurationForSlider = duration;
+
     /// document will be added
     _controller = AnimationController(
       vsync: this,
@@ -283,7 +300,8 @@ class _VoiceMessageState extends State<VoiceMessage>
 
   void _toggle2x() {
     x2 = !x2;
-    _controller!.duration = Duration(seconds: x2 ? duration ~/ 2 : duration.toInt());
+    _controller!.duration =
+        Duration(seconds: x2 ? duration ~/ 2 : duration.toInt());
     if (_controller!.isAnimating) _controller!.forward();
     player.setSpeed(x2 ? 2 : 1);
     setState(() {});
@@ -297,22 +315,22 @@ class _VoiceMessageState extends State<VoiceMessage>
 
   void _listenToRemainingTime() {
     player.createPositionStream().listen((p) {
-        final _newRemaingTime1 = p.toString().split('.')[0];
-        final _newRemaingTime2 =
-            _newRemaingTime1.substring(_newRemaingTime1.length - 5);
-        if (_newRemaingTime2 != _remainingTime) {
-          setState(() => _remainingTime = _newRemaingTime2);
-        }
+      final _newRemaingTime1 = p.toString().split('.')[0];
+      final _newRemaingTime2 =
+          _newRemaingTime1.substring(_newRemaingTime1.length - 5);
+      if (_newRemaingTime2 != _remainingTime) {
+        setState(() => _remainingTime = _newRemaingTime2);
+      }
     });
   }
 
   /// document will be added
   _onChangeSlider(double d) async {
     if (_isPlaying) togglePlay();
-    duration = widget.me ? maxDurationForSlider - d:d;
+    duration = widget.me ? maxDurationForSlider - d : d;
     _controller?.value = (noiseWidth) * duration / maxDurationForSlider;
     // _remainingTime = VoiceDuration.getDuration(duration.toInt());
-    if(widget.onSeek != null) widget.onSeek!();
+    if (widget.onSeek != null) widget.onSeek!();
     setState(() {});
     player.seek(Duration(seconds: duration.toInt()));
   }

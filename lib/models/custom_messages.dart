@@ -1,4 +1,4 @@
-import 'package:chat/models/message.dart';
+import 'package:chatify/models/message.dart';
 import 'package:flutter/material.dart';
 
 class MessageWidget {
@@ -7,5 +7,10 @@ class MessageWidget {
   final String notificationText;
   final Widget Function(BuildContext context, MessageModel msg) builder;
 
-  MessageWidget({required this.key, required this.builder, this.chatText = 'Attachment', this.notificationText = 'send you an attachment', });
+  MessageWidget({
+    required this.key,
+    required this.builder,
+    this.chatText = 'Attachment',
+    this.notificationText = 'send you an attachment',
+  });
 }

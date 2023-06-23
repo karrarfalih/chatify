@@ -1,9 +1,9 @@
-import 'package:chat/models/theme.dart';
+import 'package:chatify/models/theme.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:chat/ui/chats/chat_room_card.dart';
-import 'package:chat/models/chats.dart';
+import 'package:chatify/ui/chats/chat_room_card.dart';
+import 'package:chatify/models/chats.dart';
 import 'package:kr_paginate_firestore/paginate_firestore.dart';
 
 class RecentChats extends StatelessWidget {

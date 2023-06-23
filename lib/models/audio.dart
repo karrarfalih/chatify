@@ -1,7 +1,7 @@
 import 'dart:typed_data';
-import 'package:chat/models/user.dart';
+import 'package:chatify/models/user.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:chat/models/chats.dart';
+import 'package:chatify/models/chats.dart';
 import 'package:uuid/uuid.dart';
 
 class AudioMessage {
@@ -13,9 +13,7 @@ class AudioMessage {
     await reference.putData(bytes);
     String url = await reference.getDownloadURL();
     await model.sendMessage(
-        type: 'voice',
-        message: url,
-        duration: duration, data: false);
+        type: 'voice', message: url, duration: duration, data: false);
     model.audios.remove(id);
   }
 }

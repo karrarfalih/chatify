@@ -1,6 +1,6 @@
-import 'package:chat/models/connection.dart';
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/models/connection.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';

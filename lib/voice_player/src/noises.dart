@@ -1,6 +1,6 @@
 import 'dart:math' as math;
 
-import 'package:chat/voice_player/src/helpers/utils.dart';
+import 'package:chatify/voice_player/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
 
 /// document will be added

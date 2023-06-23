@@ -1,12 +1,12 @@
 // import 'dart:math';
-// import 'package:chat/assets/confirm.dart';
+// import 'package:chatify/assets/confirm.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 // import 'package:get/get.dart';
-// import 'package:chat/models/chats.dart';
-// import 'package:chat/models/message.dart';
-// import 'package:chat/assets/circular_button.dart';
-// import 'package:chat/ui/chat_view/chatting_room.dart';
+// import 'package:chatify/models/chats.dart';
+// import 'package:chatify/models/message.dart';
+// import 'package:chatify/assets/circular_button.dart';
+// import 'package:chatify/ui/chat_view/chatting_room.dart';
 
 // class MessageMenu extends StatelessWidget {
 //   const MessageMenu({

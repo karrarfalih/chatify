@@ -1,9 +1,9 @@
 // import 'dart:ui';
 
-// import 'package:chat/assets/circular_button.dart';
+// import 'package:chatify/assets/circular_button.dart';
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
-// import 'package:chat/models/message.dart';
+// import 'package:chatify/models/message.dart';
 
 // class Emojis extends StatelessWidget {
 //   const Emojis({

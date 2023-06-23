@@ -1,4 +1,4 @@
-import 'package:chat/models/theme.dart';
+import 'package:chatify/models/theme.dart';
 import 'package:flutter/material.dart';
 
 class MessageCard extends StatelessWidget {
@@ -40,17 +40,13 @@ class MessageCard extends StatelessWidget {
               children: [
                 Text(
                   message,
-                  style: currentTheme.titleStyle.copyWith(
-                      color: isOwner
-                          ? Colors.white
-                          : Colors.black),
+                  style: currentTheme.titleStyle
+                      .copyWith(color: isOwner ? Colors.white : Colors.black),
                 ),
                 Text(
                   time,
-                  style: TextStyle(
-                      color: isOwner
-                          ? Colors.white
-                          : Colors.black),
+                  style:
+                      TextStyle(color: isOwner ? Colors.white : Colors.black),
                 ),
               ],
             ),

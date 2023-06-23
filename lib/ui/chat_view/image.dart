@@ -1,7 +1,7 @@
-import 'package:chat/assets/image.dart';
+import 'package:chatify/assets/image.dart';
 import 'package:flutter/material.dart';
-import 'package:chat/models/message.dart';
-import 'package:chat/ui/chat_view/send_at.dart';
+import 'package:chatify/models/message.dart';
+import 'package:chatify/ui/chat_view/send_at.dart';
 
 class ImageCard extends StatelessWidget {
   const ImageCard({
@@ -21,7 +21,7 @@ class ImageCard extends StatelessWidget {
         ConstrainedBox(
             constraints: BoxConstraints(maxHeight: width, minHeight: 200),
             child: Hero(
-              tag: message.messageAttachment??'',
+              tag: message.messageAttachment ?? '',
               child: MyImage(
                   url: message.messageAttachment,
                   fit: BoxFit.cover,

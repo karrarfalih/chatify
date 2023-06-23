@@ -1,13 +1,13 @@
-import 'package:chat/models/chats.dart';
-import 'package:chat/models/search.dart';
-import 'package:chat/models/theme.dart';
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/common/user_image.dart';
+import 'package:chatify/models/chats.dart';
+import 'package:chatify/models/search.dart';
+import 'package:chatify/models/theme.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/common/user_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:chat/ui/chats/new_message_card.dart';
+import 'package:chatify/ui/chats/new_message_card.dart';
 
 class NewMessages extends StatelessWidget {
   const NewMessages({Key? key}) : super(key: key);

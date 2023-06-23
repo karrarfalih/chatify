@@ -1,6 +1,6 @@
-# Chat Package
+# Chatify
 
-The Chat package is a Flutter package that provides a chat screen and functionality for starting conversations between users in your Flutter applications. It allows users to send text messages, audio recordings, images, and supports customization for additional message types such as videos. The package integrates with Firestore, Firebase Storage, and Firebase Messaging to enable real-time updates, storage, and notifications.
+Chatify is a Flutter package that provides a chat screen and functionality for starting conversations between users in your Flutter applications. It allows users to send text messages, audio recordings, images, and supports customization for additional message types such as videos. The package integrates with Firestore, Firebase Storage, and Firebase Messaging to enable real-time updates, storage, and notifications.
 <div align="center">
   <img src="https://hackmd.io/_uploads/SJV6bF7dh.png" alt="Image 1" style="margin: 10px;" width="300" />
   <img src="https://hackmd.io/_uploads/B1fTbtX_h.png" alt="Image 2" style="margin: 10px;" width="300" />
@@ -22,7 +22,7 @@ The Chat package is a Flutter package that provides a chat screen and functional
 
 ## Dependencies
 
-The Chat package relies on the following dependencies:
+Chatify relies on the following dependencies:
 
 - Firestore: Provides real-time database functionality for storing and retrieving user data and chat messages.
 - Firebase Storage: Enables storing and retrieving audio recordings, images, and other media files.
@@ -30,13 +30,13 @@ The Chat package relies on the following dependencies:
 
 ## Installation
 
-To use the Chat package in your Flutter application, follow these steps:
+To use Chatify in your Flutter application, follow these steps:
 
 1. Add the following dependency to your `pubspec.yaml` file:
 
    ```yaml
    dependencies:
-     chat: ^0.0.1
+     Chatify: ^0.0.1
      ```
 2. Run the following command to install the package:
 ```bash
@@ -45,21 +45,21 @@ flutter pub get
 3. Import the package in your Dart file:
 
 ```dart
-import 'package:chat/chat.dart';
+import 'package:chatify/chatify.dart';
 ```
 4. Configure Firebase in your application by following the Firebase setup documentation for Flutter.
 
 ## Usage
-### Initializing the Chat
-Before using the chat functionality, you need to initialize it with the appropriate options. Use the initChat method to initialize the chat with the desired options:
+### Initializing the Chatify
+Before using Chatify functionality, you need to initialize it with the appropriate options. Use the init method to initialize the chat with the desired options:
 ```dart
-ChatController.initChat(ChatOptions(
+ChatifyController.init(ChatifyOptions(
   // Provide the necessary options here
 ));
 ```
-The initChat method initializes the chat functionality by providing the necessary options. Let's go through each field in the ChatOptions example and explain its purpose:
+The init method initializes the chat functionality by providing the necessary options. Let's go through each field in the ChatifyOptions example and explain its purpose:
 ```dart
-ChatController.initChat(ChatOptions(
+ChatifyController.init(ChatifyOptions(
   usersCollectionName: 'users'
   userData: UserData(
     id: 'id', //required
@@ -67,6 +67,7 @@ ChatController.initChat(ChatOptions(
     clientNotificationId: 'clientNotificationId', //optional
     profileImage: 'profileImage', //optional
     uid: 'uid', //optional
+    searchTerms: 'searchTerms' //optional
   ),
   chatBackground: 'assets/png/chat.png',
   notificationKey: 'notificationKeyFromFirebase',
@@ -83,23 +84,23 @@ ChatController.initChat(ChatOptions(
 ```
 Let's go through each field and its purpose:
 1. **usersCollectionName (required)**: The firestore collection of your users data.
-2. **userData (required)**: It represents the mapping model for user data in Firestore collection. In this example, the UserData class is used, which has properties like id, name, clientNotificationId, profileImage, searchTerms, and uid. You need to provide appropriate values for these properties based on your Firestore user data model.
+2. **userData (required)**: It represents the mapping model for user data in Firestore collection. In this example, the UserData class is used, which has properties like id, name, clientNotificationId, profileImage, searchTerms, and uid. You need to provide appropriate values for these properties based on your Firestore user data model. If you have searchTerms in your model you can specify to add the ablity to search for users.
 3. **chatBackground**: It specifies the chat background image. In this example, the path to the chat background image is set to 'assets/png/chat.png'. You can provide the path to your own image asset or leave it as null if you don't want to set a custom background. 
 4. **notificationKey**: It is used to send notifications using Firebase Messaging. In this example, the value 'notificationKeyFromFirebase' is provided. You need to configure Firebase Messaging in your app and obtain the appropriate notification key to use here. If you don't want to send notifications, you can leave this field as null.
 5. **onUserClick**: It is a callback function that is invoked when a user's image is clicked. In this example, it navigates to a user profile screen using the Get.to method from the GetX package. You can customize this callback function to perform any action you want when a user is clicked.
 
 6. **customMessages**: It allows you to add custom message types to the chat. In this example, a custom message widget is added with the key 'reel' and a builder function that returns a ReelCard widget. You can add your own custom message types by providing a unique key and a builder function that returns the widget for that message type.
 
-By providing the appropriate values for each field in the ChatOptions object, you can customize and configure the chat functionality according to your specific requirements.
+By providing the appropriate values for each field in the ChatifyOptions object, you can customize and configure the chat functionality according to your specific requirements.
 ### Implement the recent chats screen
 To implement the recent chat screen in your Flutter application, follow the example below:
 
 ```dart
 import 'package:flutter/material.dart';
-import 'package:chat/chat.dart';
+import 'package:chatify/chatify.dart';
 
 void main() {
-  ChatController.initChat(ChatOptions(
+  ChatifyController.init(ChatifyOptions(
       usersCollectionName: 'users'
       userData: UserData(
           id: 'id',
@@ -125,23 +126,23 @@ class MyApp extends StatelessWidget {
 
 or you can simply navigate to the recent chat screen by calling this method:
 ```dart
-ChatController.showRecentChats(currentUser);
+ChatifyController.showRecentChats(currentUser);
 ```
 
 ### Additional Functionality
-The Chat package provides more functionality such as sending messages manually, adding scores, stream unread message counts, and more.
+Chatify package provides more functionality such as sending messages manually, adding scores, stream unread message counts, and more.
 
 ```dart
 // To start a chat with a user and add them to recent chats, use the startChat method
-ChatController.startChat(user);
+ChatifyController.startChat(user);
 
 ///to manually send messasges
-ChatController.sendTo(user, message, type);
+ChatifyController.sendTo(user, message, type);
 
 ///To add a score to a user, you can use the addScore method:
-ChatController.addScore(value: 5, user: user);
+ChatifyController.addScore(value: 5, user: user);
 
 //To get the stream of unread messages count, use the unReadMessagesCount method:
-Stream<int> unreadCountStream = ChatController.unReadMessagesCount(currentUser);
+Stream<int> unreadCountStream = ChatifyController.unReadMessagesCount(currentUser);
 ```
 

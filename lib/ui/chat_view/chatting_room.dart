@@ -1,8 +1,8 @@
 import 'dart:math';
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/theme.dart';
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/common/user_image.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/theme.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/common/user_image.dart';
 import 'package:confirm_dialog/confirm_dialog.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -11,17 +11,17 @@ import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:fluttericon/entypo_icons.dart';
 import 'package:get/get.dart';
-import 'package:chat/models/image.dart';
-import 'package:chat/ui/chat_view/date.dart';
-import 'package:chat/ui/chat_view/record.dart';
-import 'package:chat/ui/chat_view/voice_message.dart';
+import 'package:chatify/models/image.dart';
+import 'package:chatify/ui/chat_view/date.dart';
+import 'package:chatify/ui/chat_view/record.dart';
+import 'package:chatify/ui/chat_view/voice_message.dart';
 import 'package:kr_expanded_section/kr_expanded_section.dart';
 import 'package:kr_paginate_firestore/paginate_firestore.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
-import 'package:chat/models/chats.dart';
-import 'package:chat/models/message.dart';
-import 'package:chat/ui/chat_view/message_card.dart';
-import 'package:chat/assets/circular_button.dart';
+import 'package:chatify/models/chats.dart';
+import 'package:chatify/models/message.dart';
+import 'package:chatify/ui/chat_view/message_card.dart';
+import 'package:chatify/assets/circular_button.dart';
 
 bool isKeyboardOpen = false;
 
@@ -66,7 +66,7 @@ class _ChatViewState extends State<ChatView> {
               message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
               reply: chat.replyMessage.value);
           widget.chat.replyMessage.value = null;
-          ChatController.addScore(
+          ChatifyController.addScore(
               value: options.messageConnentionWeight, user: widget.user);
         } else if (chat.editedMessage.value != null) {
           widget.chat.editedMessage.value!

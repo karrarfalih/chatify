@@ -1,5 +1,5 @@
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kr_extensions/kr_extensions.dart';
 import 'package:uuid/uuid.dart';

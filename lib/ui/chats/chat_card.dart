@@ -1,10 +1,10 @@
 import 'dart:math';
 
-import 'package:chat/assets/image.dart';
-import 'package:chat/models/chats.dart';
-import 'package:chat/models/message.dart';
-import 'package:chat/models/theme.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/assets/image.dart';
+import 'package:chatify/models/chats.dart';
+import 'package:chatify/models/message.dart';
+import 'package:chatify/models/theme.dart';
+import 'package:chatify/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:kr_builder/future_builder.dart';

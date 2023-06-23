@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:chat/models/theme.dart';
+import 'package:chatify/models/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:chat/models/audio.dart';
-import 'package:chat/assets/circular_button.dart';
-import 'package:chat/models/chats.dart';
+import 'package:chatify/models/audio.dart';
+import 'package:chatify/assets/circular_button.dart';
+import 'package:chatify/models/chats.dart';
 import 'package:record/record.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';

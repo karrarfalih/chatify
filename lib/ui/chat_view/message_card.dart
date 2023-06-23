@@ -1,19 +1,19 @@
 import 'package:bubble/bubble.dart';
-import 'package:chat/assets/circular_button.dart';
-import 'package:chat/assets/confirm.dart';
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/theme.dart';
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/chat_view/chatting_room.dart';
+import 'package:chatify/assets/circular_button.dart';
+import 'package:chatify/assets/confirm.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/theme.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/chat_view/chatting_room.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:chat/models/chats.dart';
-import 'package:chat/ui/chat_view/image.dart';
-import 'package:chat/ui/chat_view/image_preview.dart';
-import 'package:chat/ui/chat_view/send_at.dart';
-import 'package:chat/ui/chat_view/swipe.dart';
-import 'package:chat/ui/chat_view/voice_message.dart';
-import 'package:chat/models/message.dart';
+import 'package:chatify/models/chats.dart';
+import 'package:chatify/ui/chat_view/image.dart';
+import 'package:chatify/ui/chat_view/image_preview.dart';
+import 'package:chatify/ui/chat_view/send_at.dart';
+import 'package:chatify/ui/chat_view/swipe.dart';
+import 'package:chatify/ui/chat_view/voice_message.dart';
+import 'package:chatify/models/message.dart';
 import 'package:kr_extensions/kr_extensions.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
 
@@ -359,26 +359,26 @@ class TextMessage extends StatelessWidget {
         ),
         if (widget.message.emojis.isNotEmpty)
           Container(
-                          margin: const EdgeInsetsDirectional.only(end: 10),
-
+            margin: const EdgeInsetsDirectional.only(end: 10),
             padding: const EdgeInsets.all(1),
-
-                          decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-    ),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               decoration: BoxDecoration(
-                  color: bkColor.withOpacity(widget.message.isMine ? 0.2:1),
-                  borderRadius: BorderRadius.circular(16),
-),
+                color: bkColor.withOpacity(widget.message.isMine ? 0.2 : 1),
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: widget.message.emojis.entries.map((e) => Text(
-                    e.value,
-                    style: const TextStyle(height: 1.3),
-                  )).toList(),
+                children: widget.message.emojis.entries
+                    .map((e) => Text(
+                          e.value,
+                          style: const TextStyle(height: 1.3),
+                        ))
+                    .toList(),
               ),
             ),
           )

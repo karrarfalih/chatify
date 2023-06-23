@@ -1,16 +1,19 @@
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/icons.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/icons.dart';
+import 'package:chatify/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:chat/ui/chats/new_message.dart';
+import 'package:chatify/ui/chats/new_message.dart';
 import 'chats/recent_chats.dart';
 
 class ChatScreen extends StatelessWidget {
-  ChatScreen({Key? key, required ChatUser currentUser}) : assert(ChatController.isInititialized, 'initialize the chat options. use initChat method in the main entry.'), super(key: key) {
+  ChatScreen({Key? key, required ChatUser currentUser})
+      : assert(ChatifyController.isInititialized,
+            'initialize the chat options. use init method in the main entry.'),
+        super(key: key) {
     ChatUser.current = currentUser;
   }
 
@@ -63,21 +66,23 @@ class ChatScreen extends StatelessWidget {
           //         color: Colors.black,
           //       )),
           // ),
-          if(options.newMessage) InkWell(
-            onTap: () {
-              Get.to(const NewMessages());
-            },
-            child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: SvgPicture.asset(
-                  SVG.newMessage,
-                  package: 'chat',
-                  height: 24,
-                  color: Colors.black,
-                )),
+          if (options.newMessage)
+            InkWell(
+              onTap: () {
+                Get.to(const NewMessages());
+              },
+              child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: SvgPicture.asset(
+                    SVG.newMessage,
+                    package: 'chat',
+                    height: 24,
+                    color: Colors.black,
+                  )),
+            ),
+          const SizedBox(
+            width: 12,
           ),
-                    const SizedBox(width: 12,),
-
         ],
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,

@@ -1,14 +1,14 @@
-import 'package:chat/assets/image.dart';
-import 'package:chat/models/message.dart';
-import 'package:chat/models/theme.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/assets/image.dart';
+import 'package:chatify/models/message.dart';
+import 'package:chatify/models/theme.dart';
+import 'package:chatify/models/user.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:chat/assets/circular_button.dart';
+import 'package:chatify/assets/circular_button.dart';
 import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:kr_extensions/kr_extensions.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
@@ -74,7 +74,7 @@ class ImagePreview extends StatelessWidget {
                     PullDownButton(
                       routeTheme: const PullDownMenuRouteTheme(
                           backgroundColor: Color(0xff222222), width: 150),
-                          offset: Offset(0, 10),
+                      offset: Offset(0, 10),
                       itemBuilder: (context) => [
                         PullDownMenuItem(
                           title: 'Save'.tr,

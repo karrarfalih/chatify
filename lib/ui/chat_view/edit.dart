@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:chat/models/message.dart';
+import 'package:chatify/models/message.dart';
 
 class EditMessage extends StatelessWidget {
   const EditMessage(

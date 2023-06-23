@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/common/bloc.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/common/bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:chat/ui/chats/chat_card.dart';
+import 'package:chatify/ui/chats/chat_card.dart';
 import 'package:kr_builder/future_builder.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:chat/models/chats.dart';
+import 'package:chatify/models/chats.dart';
 
 class ChatRoomCard extends StatefulWidget {
   final ChatModel chat;
@@ -30,7 +30,6 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
             future: widget.chat.getReceiverAccount(),
             onLoading: const ChatRoomBloc(),
             builder: (data) {
-              
               return _card(data!);
             }));
   }

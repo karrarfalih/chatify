@@ -1,4 +1,4 @@
-import 'package:chat/models/controller.dart';
+import 'package:chatify/models/controller.dart';
 
 class UserData {
   final String id;

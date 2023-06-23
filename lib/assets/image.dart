@@ -15,7 +15,6 @@ class MyImage extends StatelessWidget {
       this.isCircle = true,
       this.onPressed,
       this.bytes,
-      this.futureUrl,
       this.radius});
 
   final double? width, height;
@@ -26,7 +25,6 @@ class MyImage extends StatelessWidget {
   final bool isCircle;
   final Function()? onPressed;
   final double? radius;
-  final Future<String>? futureUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -46,19 +44,6 @@ class MyImage extends StatelessWidget {
       );
     } else if (url != null) {
       image = _cachedWidget(url!);
-    } else if(futureUrl != null) {
-      image = FutureBuilder(
-        future: futureUrl!,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return _loadingWidget;
-          } else if (snapshot.hasError) {
-            return _errorWidget;
-          } else {
-            return _cachedWidget(snapshot.data!);
-          }
-        },
-      );
     }
     child = Stack(
       children: [
@@ -67,10 +52,10 @@ class MyImage extends StatelessWidget {
           height: height ?? 0,
           width: width ?? 0,
         ),
-        if ((url != null && url!.isNotEmpty) || bytes != null || futureUrl != null) image
+        if ((url != null && url!.isNotEmpty) || bytes != null) image
       ],
     );
-    if (!((url != null && url!.isNotEmpty) || futureUrl != null || bytes != null)) {
+    if (!((url != null && url!.isNotEmpty) || bytes != null)) {
       child = _errorWidget;
     }
     if (isCircle || radius != null) {

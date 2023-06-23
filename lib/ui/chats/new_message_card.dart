@@ -1,5 +1,5 @@
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/common/user_image.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/common/user_image.dart';
 import 'package:flutter/material.dart';
 
 class NewMessageCard extends StatelessWidget {
@@ -23,9 +23,14 @@ class NewMessageCard extends StatelessWidget {
           Expanded(
             child: IgnorePointer(
               ignoring: actionButton != null,
-              child: UserAvatar(uid: user.id, width: 56, height: 56, onTap: (e) async {
-                await onPressed();
-              },),
+              child: UserAvatar(
+                uid: user.id,
+                width: 56,
+                height: 56,
+                onTap: (e) async {
+                  await onPressed();
+                },
+              ),
             ),
           ),
           if (actionButton != null) actionButton!(user)

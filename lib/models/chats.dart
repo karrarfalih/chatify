@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:chat/assets/loading.dart';
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/assets/loading.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
-import 'package:chat/ui/chat_view/chatting_room.dart';
-import 'package:chat/models/message.dart';
+import 'package:chatify/ui/chat_view/chatting_room.dart';
+import 'package:chatify/models/message.dart';
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 
@@ -25,11 +25,11 @@ class ChatModel {
       List<String>? unSeenBy,
       String? imageUrl,
       String? chatName}) {
-    String _id = id ?? const Uuid().v4();
+    id = id ?? const Uuid().v4();
     return _cache.putIfAbsent(
-        _id,
+        id,
         () => ChatModel._(
-            id: _id,
+            id: id!,
             members: members,
             chatName: chatName,
             imageUrl: imageUrl,

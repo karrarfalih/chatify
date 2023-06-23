@@ -1,5 +1,5 @@
-import 'package:chat/models/controller.dart';
-import 'package:chat/models/user.dart';
+import 'package:chatify/models/controller.dart';
+import 'package:chatify/models/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:recase/recase.dart';
@@ -22,8 +22,10 @@ class MessageModel {
   dynamic data;
   bool get isMine => sender == ChatUser.current!.id;
   bool get isSeen => seenBy.where((e) => e != ChatUser.current?.id).isNotEmpty;
-  String? get myEmoji =>
-      emojis.entries.toList().firstWhereOrNull((e) => e.key == ChatUser.current!.id)?.value;
+  String? get myEmoji => emojis.entries
+      .toList()
+      .firstWhereOrNull((e) => e.key == ChatUser.current!.id)
+      ?.value;
 
   final String type;
   final String? messageAttachment;

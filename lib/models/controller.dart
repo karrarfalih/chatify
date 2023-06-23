@@ -1,28 +1,29 @@
-import 'package:chat/models/chats.dart';
-import 'package:chat/models/connection.dart';
-import 'package:chat/models/custom_messages.dart';
-import 'package:chat/models/user.dart';
-import 'package:chat/ui/scaffold.dart';
+import 'package:chatify/models/chats.dart';
+import 'package:chatify/models/connection.dart';
+import 'package:chatify/models/custom_messages.dart';
+import 'package:chatify/models/user.dart';
+import 'package:chatify/ui/scaffold.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
-ChatOptions? _options;
+ChatifyOptions? _options;
 
-ChatOptions get options {
+ChatifyOptions get options {
   if (_options == null) {
-    throw Exception('You should call ChatController.initChat method first');
+    throw Exception('You should call ChatifyController.init method first');
   }
   return _options!;
 }
-set options(ChatOptions options) {
+
+set options(ChatifyOptions options) {
   _options = options;
 }
 
-abstract class ChatController {
+abstract class ChatifyController {
   static bool isInititialized = false;
   // this method should be called before using any other method
-  static initChat(ChatOptions chatOptions) {
-    options = chatOptions;
+  static init(ChatifyOptions ChatifyOptions) {
+    options = ChatifyOptions;
     isInititialized = true;
     options.userCollections.limit(1).get().then((e) {
       if (e.docs.isNotEmpty &&
@@ -42,7 +43,7 @@ abstract class ChatController {
   static Future<void> addScore(
       {required int value, required ChatUser user}) async {
     if (!options.useConnections) {
-      throw Exception('set useConnections to true in the initChat method.');
+      throw Exception('set useConnections to true in the init method.');
     }
     if (value < 0 || value > 10) {
       throw Exception('The number should between 1 and 10');
@@ -77,7 +78,7 @@ abstract class ChatController {
   }
 }
 
-class ChatOptions {
+class ChatifyOptions {
   final CollectionReference<Map<String, dynamic>> userCollections;
 
   // to send notifications using the firebase messaging (need to use the firebase messaging package in your app)
@@ -111,7 +112,7 @@ class ChatOptions {
               uid: x.data()![userData.uid]),
           toFirestore: (x, _) => {});
 
-  ChatOptions(
+  ChatifyOptions(
       {this.chatBackground,
       this.onUserClick,
       CollectionReference<Map<String, dynamic>>? userCollections,
