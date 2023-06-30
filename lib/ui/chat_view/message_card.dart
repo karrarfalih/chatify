@@ -1,11 +1,13 @@
 import 'package:bubble/bubble.dart';
 import 'package:chatify/assets/circular_button.dart';
 import 'package:chatify/assets/confirm.dart';
+import 'package:chatify/assets/toast.dart';
 import 'package:chatify/models/controller.dart';
 import 'package:chatify/models/theme.dart';
 import 'package:chatify/models/user.dart';
 import 'package:chatify/ui/chat_view/chatting_room.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:chatify/models/chats.dart';
 import 'package:chatify/ui/chat_view/image.dart';
@@ -14,6 +16,7 @@ import 'package:chatify/ui/chat_view/send_at.dart';
 import 'package:chatify/ui/chat_view/swipe.dart';
 import 'package:chatify/ui/chat_view/voice_message.dart';
 import 'package:chatify/models/message.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:kr_extensions/kr_extensions.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
 
@@ -115,10 +118,10 @@ class MessageCard extends StatelessWidget {
                       ),
                     ),
                     itemBuilder: (context) => [
-                      if (message.isText)
+                      if (message.isText && message.isMine)
                         PullDownMenuItem(
                           title: 'Edit'.tr,
-                          icon: Icons.edit,
+                          icon: Iconsax.edit,
                           onTap: () async {
                             chat.replyMessage.value = null;
                             chat.editedMessage.value = message;
@@ -127,8 +130,18 @@ class MessageCard extends StatelessWidget {
                         ),
                       const PullDownMenuDivider(),
                       PullDownMenuItem(
+                        title: 'Copy'.tr,
+                        icon: Iconsax.copy,
+                        onTap: () {
+                          Clipboard.setData(
+                              ClipboardData(text: message.message));
+                          showToast('Copied to clipboard'.tr, Colors.black45);
+                        },
+                      ),
+                      const PullDownMenuDivider(),
+                      PullDownMenuItem(
                         title: 'Reply'.tr,
-                        icon: Icons.reply,
+                        icon: Iconsax.undo,
                         onTap: () {
                           chat.editedMessage.value = null;
                           chat.replyMessage.value = message;

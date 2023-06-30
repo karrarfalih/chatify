@@ -31,7 +31,17 @@ class ChatUser {
       this.clientNotificationId,
       this.profileImage});
 
-  static ChatUser? current;
+  static ChatUser? _current;
+  static ChatUser? get current{
+    if(options.currentUser != null){
+      return _current ?? options.currentUser!();
+    }
+    return _current;
+  }
+  
+  static set current(ChatUser? user){
+    _current = user;
+  }
 
   static final Map<String, ChatUser?> _cahce = {};
 

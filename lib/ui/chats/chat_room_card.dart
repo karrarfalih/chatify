@@ -63,10 +63,10 @@ class ChatRoomBloc extends StatelessWidget {
       child: Shimmer.fromColors(
         baseColor: Colors.grey.withOpacity(0.2),
         highlightColor: Colors.grey.withOpacity(0.4),
-        child: Row(
+        child: const Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Padding(
+            Padding(
               padding: EdgeInsetsDirectional.only(end: 10),
               child: MyBlock(
                 height: 50,
@@ -77,7 +77,7 @@ class ChatRoomBloc extends StatelessWidget {
             Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 MyBlock(height: 15, width: 60, space: 5),
                 MyBlock(height: 12, width: 150),
               ],

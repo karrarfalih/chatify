@@ -26,7 +26,8 @@ class ChatModel {
       String? imageUrl,
       String? chatName}) {
     id = id ?? const Uuid().v4();
-    return _cache.putIfAbsent(
+
+    final chat = _cache.putIfAbsent(
         id,
         () => ChatModel._(
             id: id!,
@@ -35,7 +36,12 @@ class ChatModel {
             imageUrl: imageUrl,
             unSeenBy: unSeenBy,
             updatedAt: updatedAt));
+    chat.updatedAt = updatedAt;
+    chat.unSeenBy = unSeenBy ?? [];
+    chat.getLastMessage;
+    return chat;
   }
+
   ChatModel._(
       {required this.id,
       this.updatedAt,
@@ -51,7 +57,7 @@ class ChatModel {
   RxList<String> audios = <String>[].obs;
   Rx<MessageModel?> editedMessage = (null as MessageModel?).obs;
   Rx<MessageModel?> replyMessage = (null as MessageModel?).obs;
-
+  MessageModel? lastMessage;
   ChatUser get sender => ChatUser.current!;
 
   static String currentId = '';
@@ -59,10 +65,7 @@ class ChatModel {
   Map<String, dynamic> get toJson => {
         'id': id,
         'members': members.toSet().toList(),
-        // 'lastMessage': lastMessage.message,
-        // 'sender': lastMessage.sender,
         'updatedAt': FieldValue.serverTimestamp(),
-        // 'isSeen': lastMessage.seenBy.length > 1,
         'imageUrl': imageUrl,
         'chatName': chatName,
         'unSeenBy': unSeenBy.toSet().toList()
@@ -92,9 +95,6 @@ class ChatModel {
         );
   }
 
-  int? count;
-  MessageModel? lastMessage;
-
   Query<MessageModel> get unSeenMessages {
     return FirebaseFirestore.instance
         .collection("messages")
@@ -108,6 +108,21 @@ class ChatModel {
         );
   }
 
+  Stream<int> get unSeenMessagesCount =>
+      unSeenMessages.snapshots().map((e) => e.size).map((e) {
+        if (e == 0) {
+          markAsSeen();
+        }
+        return e;
+      });
+
+  Future<MessageModel?> get getLastMessage async {
+    if (lastMessage != null) return lastMessage!;
+    var data = await messages.limit(1).get();
+    if (data.docs.isNotEmpty) lastMessage = data.docs.first.data();
+    return lastMessage;
+  }
+
   static Query<ChatModel> getRooms() {
     var data = _instance
         .where('members', arrayContains: ChatUser.current!.id)
@@ -116,10 +131,19 @@ class ChatModel {
   }
 
   static Stream<int> getUnread() {
-    var data = _instance.where("unSeenBy", arrayContains: ChatUser.current!.id);
     return ChatUser.current == null
-        ? const Stream.empty()
-        : data.snapshots().map((event) => event.size);
+        ? Stream.value(0)
+        : _instance
+            .where("unSeenBy", arrayContains: ChatUser.current!.id)
+            .snapshots()
+            .map((event) => event.size);
+  }
+
+  static Future<List<ChatModel>> getUnreads() async {
+    var data = await _instance
+        .where("unSeenBy", arrayContains: ChatUser.current!.id)
+        .get();
+    return data.docs.map((e) => e.data()).toList();
   }
 
   Future<ChatUser?> getReceiverAccount() async {
@@ -172,8 +196,8 @@ class ChatModel {
     for (var e in members) {
       ChatUser.getById(e).then((user) {
         if (user != null && user.clientNotificationId != null) {
-          sendNotification(user.clientNotificationId!, msg.notifiactionMessage,
-              {'roomId': id});
+          sendNotification(
+              user.clientNotificationId!, msg.notifiactionMessage, id, msg.id);
         }
       });
     }
@@ -196,7 +220,7 @@ class ChatModel {
   }
 
   static sendNotification(String? clientNotificationId, String message,
-      [Map? data]) async {
+      String roomId, String id) async {
     try {
       await http.post(
         Uri.parse('https://fcm.googleapis.com/fcm/send'),
@@ -206,22 +230,34 @@ class ChatModel {
         },
         body: json.encode({
           'to': clientNotificationId,
+          "mutable_content": true,
           "notification": {
             "title": ChatUser.current!.name,
             "body": message,
           },
-          "data": {"uid": ChatUser.current!.id, if (data != null) ...data}
+          "data": {
+            "content": {
+              "id": id,
+              "channelKey": 'chat',
+              "largeIcon": ChatUser.current!.profileImage,
+              "summary": 'Chat',
+              "notificationLayout": "Messaging",
+              "category": "Message"
+            },
+            "uid": ChatUser.current!.id,
+            "roomId": roomId,
+          }
         }),
       );
     } catch (e) {}
   }
 
-  // static sendTo(ChatUser user, String msg) async {
-  //   ChatModel model = await createModel(user);
-  //   await model.sendMessage(msg);
-  // }
-
   static createModel(ChatUser user) async {
+    if (ChatUser.current == null ||
+        ChatUser.current?.id == 'id' ||
+        ChatUser.current?.id == user.id) {
+      throw Exception('Invalid user');
+    }
     QuerySnapshot<ChatModel> chats = await _instance.where('members', whereIn: [
       [user.id, ChatUser.current!.id],
       [ChatUser.current!.id, user.id]

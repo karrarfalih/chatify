@@ -72,8 +72,7 @@ abstract class ChatifyController {
   }
 
   // return stream of the unread messages count
-  static Stream<int> unReadMessagesCount(ChatUser currentUser) {
-    ChatUser.current = currentUser;
+  static Stream<int> unReadMessagesCount() {
     return ChatModel.getUnread();
   }
 }
@@ -101,6 +100,8 @@ class ChatifyOptions {
 
   final String usersCollectionName;
 
+  final ChatUser? Function()? currentUser;
+
   CollectionReference<ChatUser> get userReference =>
       userCollections.withConverter<ChatUser>(
           fromFirestore: (x, _) => ChatUser(
@@ -118,6 +119,7 @@ class ChatifyOptions {
       CollectionReference<Map<String, dynamic>>? userCollections,
       required this.userData,
       required this.usersCollectionName,
+      this.currentUser,
       this.useConnections = true,
       this.notificationKey,
       this.newMessage = true,
