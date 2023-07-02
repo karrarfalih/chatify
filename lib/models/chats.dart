@@ -237,15 +237,12 @@ class ChatModel {
           },
           "data": {
             "content": {
-              "id": id,
+              "notificationId": roomId,
               "channelKey": 'chat',
-              "largeIcon": ChatUser.current!.profileImage,
-              "summary": 'Chat',
-              "notificationLayout": "Messaging",
-              "category": "Message"
+              "uid": ChatUser.current!.id,
+              "id1": roomId,
             },
-            "uid": ChatUser.current!.id,
-            "roomId": roomId,
+            'roomId': roomId,
           }
         }),
       );
