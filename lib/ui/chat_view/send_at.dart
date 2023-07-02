@@ -23,7 +23,7 @@ class SendAtWidget extends StatelessWidget {
               message.isSeen
                   ? 'lib/assets/icons/seen.png'
                   : 'lib/assets/icons/sent.png',
-              package: 'chat',
+              package: 'chatify',
               height: 14,
               color: !message.isMine && message.isText
                   ? Colors.black

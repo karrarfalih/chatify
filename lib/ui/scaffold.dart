@@ -61,7 +61,7 @@ class ChatScreen extends StatelessWidget {
           //       padding: const EdgeInsets.symmetric(horizontal: 10),
           //       child: SvgPicture.asset(
           //         SVG.searchIcon,
-          //         package: 'chat',
+          //         package: 'chatify',
           //         height: 24,
           //         color: Colors.black,
           //       )),
@@ -75,7 +75,7 @@ class ChatScreen extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(horizontal: 10),
                   child: SvgPicture.asset(
                     SVG.newMessage,
-                    package: 'chat',
+                    package: 'chatify',
                     height: 24,
                     color: Colors.black,
                   )),
