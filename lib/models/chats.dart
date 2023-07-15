@@ -193,7 +193,7 @@ class ChatModel {
     msg.save();
     unSeenBy = members.where((e) => e != ChatUser.current?.id).toList();
     save();
-    for (var e in members) {
+    for (var e in unSeenBy) {
       ChatUser.getById(e).then((user) {
         if (user != null && user.clientNotificationId != null) {
           sendNotification(
@@ -237,7 +237,7 @@ class ChatModel {
           },
           "data": {
             "content": {
-              "notificationId": roomId,
+              "notificationId": roomId.hashCode,
               "channelKey": 'chat',
               "uid": ChatUser.current!.id,
               "id1": roomId,
