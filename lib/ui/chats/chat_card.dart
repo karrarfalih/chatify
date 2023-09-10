@@ -23,6 +23,7 @@ class ChatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    chat.getLastMessage();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -69,8 +70,8 @@ class ChatCard extends StatelessWidget {
                     ),
                     Row(
                       children: [
-                        KrFutureBuilder<MessageModel?>(
-                            future: chat.getLastMessage,
+                        KrStreamBuilder<MessageModel?>(
+                            stream: chat.lastMessageStream,
                             onLoading: const Padding(
                               padding: EdgeInsets.only(top: 3),
                               child:
@@ -79,7 +80,7 @@ class ChatCard extends StatelessWidget {
                             builder: (message) {
                               return Expanded(
                                 child: Text(
-                                  message?.message??'',
+                                  message?.message ?? '',
                                   style: TextStyle(
                                       height: 1.4,
                                       color: currentTheme.subTitleStyle.color),

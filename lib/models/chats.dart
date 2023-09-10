@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 import 'package:chatify/ui/chat_view/chatting_room.dart';
 import 'package:chatify/models/message.dart';
+import 'package:rxdart/rxdart.dart' as rx;
 import 'package:uuid/uuid.dart';
 import 'package:http/http.dart' as http;
 
@@ -58,6 +59,8 @@ class ChatModel {
   Rx<MessageModel?> editedMessage = (null as MessageModel?).obs;
   Rx<MessageModel?> replyMessage = (null as MessageModel?).obs;
   MessageModel? lastMessage;
+  rx.BehaviorSubject<MessageModel?> lastMessageStream = rx.BehaviorSubject()
+    ..startWith(null);
   ChatUser get sender => ChatUser.current!;
 
   static String currentId = '';
@@ -116,11 +119,9 @@ class ChatModel {
         return e;
       });
 
-  Future<MessageModel?> get getLastMessage async {
-    if (lastMessage != null) return lastMessage!;
+  Future<void> getLastMessage() async {
     var data = await messages.limit(1).get();
-    if (data.docs.isNotEmpty) lastMessage = data.docs.first.data();
-    return lastMessage;
+    if (data.docs.isNotEmpty) lastMessageStream.add(data.docs.first.data());
   }
 
   static Query<ChatModel> getRooms() {

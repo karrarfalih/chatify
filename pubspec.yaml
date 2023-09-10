@@ -1,6 +1,6 @@
 name: chatify
 description: Chat package for flutter
-version: 0.0.6
+version: 0.0.7
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -23,11 +23,12 @@ dependencies:
   fluttertoast: ^8.2.1
   get: ^4.6.5
   get_storage: ^2.1.1
+  http: ^0.13.0
   iconsax: ^0.0.8
-  image_gallery_saver: ^1.7.1
+  image_gallery_saver: ^2.0.3
   image_picker: ^0.8.6+4
   just_audio: ^0.9.31
-  kr_builder: ^1.0.0
+  kr_builder: ^1.0.3
   kr_button: ^1.0.1
   kr_expanded_section: ^1.0.0
   kr_extensions: ^1.0.4
@@ -37,9 +38,9 @@ dependencies:
   path_provider: ^2.0.13
   recase: ^4.1.0
   record: ^4.4.4
-  shimmer: ^2.0.0
+  rxdart: ^0.27.7
+  shimmer: ^3.0.0
   uuid: ^3.0.7
-  http: ^0.13.0
 
 dev_dependencies:
   flutter_lints: ^2.0.0
