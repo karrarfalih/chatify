@@ -88,7 +88,7 @@ class ChatModel {
 
   Query<MessageModel> get messages {
     return FirebaseFirestore.instance
-        .collection("messages")
+        .collection(options.messagesCollectionName??'messages')
         .where("roomId", isEqualTo: id)
         .orderBy("sendAt", descending: true)
         .withConverter<MessageModel>(
@@ -100,7 +100,7 @@ class ChatModel {
 
   Query<MessageModel> get unSeenMessages {
     return FirebaseFirestore.instance
-        .collection("messages")
+        .collection(options.messagesCollectionName??"messages")
         .where("roomId", isEqualTo: id)
         .where("unSeenBy", arrayContains: ChatUser.current?.id)
         .orderBy('sendAt', descending: true)

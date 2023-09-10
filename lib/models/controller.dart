@@ -100,6 +100,8 @@ class ChatifyOptions {
 
   final String usersCollectionName;
 
+  final String? messagesCollectionName;
+
   final ChatUser? Function()? currentUser;
 
   CollectionReference<ChatUser> get userReference =>
@@ -119,6 +121,7 @@ class ChatifyOptions {
       CollectionReference<Map<String, dynamic>>? userCollections,
       required this.userData,
       required this.usersCollectionName,
+      this.messagesCollectionName,
       this.currentUser,
       this.useConnections = true,
       this.notificationKey,

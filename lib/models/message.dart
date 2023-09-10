@@ -172,12 +172,12 @@ class MessageModel {
 
   Future<void> save() async {
     await FirebaseFirestore.instance
-        .collection('messages')
+        .collection(options.messagesCollectionName??'messages')
         .doc(id)
         .set(toJson, SetOptions(merge: true));
   }
 
   delete() async {
-    await FirebaseFirestore.instance.collection('messages').doc(id).delete();
+    await FirebaseFirestore.instance.collection(options.messagesCollectionName??'messages').doc(id).delete();
   }
 }
