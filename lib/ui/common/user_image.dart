@@ -15,6 +15,7 @@ class UserAvatar extends StatelessWidget {
     this.width,
     required this.uid,
     this.subTitle,
+    this.isDark = false,
   }) : super(key: key);
 
   final double? height;
@@ -22,6 +23,7 @@ class UserAvatar extends StatelessWidget {
   final String uid;
   final String? subTitle;
   final Function(ChatUser)? onTap;
+  final bool isDark;
 
   static Widget loading({
     double? height,
@@ -73,7 +75,7 @@ class UserAvatar extends StatelessWidget {
                         child: Text(
                           user.name,
                           maxLines: 1,
-                          style: currentTheme.titleStyle,
+                          style: currentTheme.titleStyle.copyWith(color: isDark ? Colors.white: null),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
@@ -81,7 +83,7 @@ class UserAvatar extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: Text((subTitle ?? ('@${user.uid!}')).tr,
-                              style: currentTheme.subTitleStyle),
+                              style: currentTheme.subTitleStyle.copyWith(color: isDark ? Colors.white: null,),),
                         ),
                     ],
                   )

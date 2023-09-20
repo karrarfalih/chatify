@@ -1,6 +1,6 @@
 name: chatify
 description: Chat package for flutter
-version: 0.0.8
+version: 0.0.10
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -8,6 +8,7 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
+  blur: ^3.1.0
   bubble: ^1.2.1
   cached_network_image: ^3.2.3
   cloud_firestore: ^4.4.3
@@ -32,7 +33,7 @@ dependencies:
   kr_button: ^1.0.1
   kr_expanded_section: ^1.0.0
   kr_extensions: ^1.0.4
-  kr_paginate_firestore: ^1.0.2
+  kr_paginate_firestore: ^1.0.4
   kr_pull_down_button: ^1.0.0
   path: ^1.8.3
   path_provider: ^2.0.13

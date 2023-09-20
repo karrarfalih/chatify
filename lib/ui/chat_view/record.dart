@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:chatify/models/controller.dart';
 import 'package:chatify/models/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -100,14 +101,14 @@ class _AudioRecordWidgetState extends State<AudioRecordWidget> {
             margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 10),
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12.5),
             decoration: BoxDecoration(
-                color: Colors.white, borderRadius: BorderRadius.circular(50)),
+                color: options.isDark ? Colors.black.withOpacity(0.2):  Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(50)),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                     child: Text(
                   '··········································································',
                   overflow: TextOverflow.clip,
-                  style: TextStyle(fontSize: 26, height: 0.85),
+                  style: TextStyle(fontSize: 26, height: 0.85, color: options.isDark ? Colors.white: Colors.black,),
                   maxLines: 1,
                 )),
                 const SizedBox(
@@ -118,7 +119,7 @@ class _AudioRecordWidgetState extends State<AudioRecordWidget> {
                   int m = duration.value.inMinutes;
                   return Text(
                     '${m < 10 ? '0$m' : m}:${s < 10 ? '0$s' : s}',
-                    style: TextStyle(height: 1),
+                    style: TextStyle(height: 1, color: options.isDark ? Colors.white: Colors.black,),
                   );
                 }),
               ],
@@ -128,13 +129,14 @@ class _AudioRecordWidgetState extends State<AudioRecordWidget> {
             return Visibility(
                 visible: isRecording.value,
                 child: CircularButton(
-                    icon: const Icon(Icons.pause_circle_filled_outlined,
-                        size: 32),
-                    onPressed: stop));
+                    icon: Icon(Icons.pause_circle_filled_outlined,
+                        size: 32,
+                        color: options.isDark ? Colors.white: Colors.black,
+                        ),
+                    onPressed: stop,),);
           }),
           Container(
             decoration: const BoxDecoration(
-                // color: Theme.of(context).primaryColor,
                 shape: BoxShape.circle),
             child: CircularButton(
                 onPressed: submit,

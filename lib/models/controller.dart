@@ -43,7 +43,7 @@ abstract class ChatifyController {
   static Future<void> addScore(
       {required int value, required ChatUser user}) async {
     if (!options.useConnections) {
-      throw Exception('set useConnections to true in the init method.');
+      return;
     }
     if (value < 0 || value > 10) {
       throw Exception('The number should between 1 and 10');
@@ -57,8 +57,8 @@ abstract class ChatifyController {
   }
 
   // this method will navigtae to the chat screen
-  static showRecentChats(ChatUser currentUser) {
-    return Get.to(ChatScreen(currentUser: currentUser));
+  static showRecentChats() {
+    return Get.to(ChatScreen());
   }
 
   // this method will start conversation with the user and add the user to the recent chats
@@ -98,6 +98,8 @@ class ChatifyOptions {
   // if false, you should start the chat manually using the startChat method
   final bool newMessage;
 
+  final bool isDark;
+
   final String usersCollectionName;
 
   final String? messagesCollectionName;
@@ -126,6 +128,7 @@ class ChatifyOptions {
       this.useConnections = true,
       this.notificationKey,
       this.newMessage = true,
+      this.isDark = false,
       this.customeMessages = const [],
       this.messageConnentionWeight = 1})
       : userCollections = userCollections ??

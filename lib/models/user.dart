@@ -32,14 +32,14 @@ class ChatUser {
       this.profileImage});
 
   static ChatUser? _current;
-  static ChatUser? get current{
-    if(options.currentUser != null){
+  static ChatUser? get current {
+    if (options.currentUser != null) {
       return _current ?? options.currentUser!();
     }
     return _current;
   }
-  
-  static set current(ChatUser? user){
+
+  static set current(ChatUser? user) {
     _current = user;
   }
 

@@ -1,6 +1,5 @@
 import 'package:chatify/models/controller.dart';
 import 'package:chatify/models/icons.dart';
-import 'package:chatify/models/user.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,12 +9,10 @@ import 'package:chatify/ui/chats/new_message.dart';
 import 'chats/recent_chats.dart';
 
 class ChatScreen extends StatelessWidget {
-  ChatScreen({Key? key, required ChatUser currentUser})
+  ChatScreen({Key? key})
       : assert(ChatifyController.isInititialized,
             'initialize the chat options. use init method in the main entry.'),
-        super(key: key) {
-    ChatUser.current = currentUser;
-  }
+        super(key: key);
 
   @override
   Widget build(BuildContext context) {
