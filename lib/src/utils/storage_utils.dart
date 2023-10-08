@@ -8,6 +8,7 @@ Future<String?> uploadAttachment(Uint8List bytes, String path) async {
     await reference.putData(bytes);
     final url = await reference.getDownloadURL();
     ChatifyLog.d('Uploaded attachment to $url');
+    return url;
   } catch (e) {
     ChatifyLog.d('Failed to upload attachment: ${e.toString()}', isError: true);
   }

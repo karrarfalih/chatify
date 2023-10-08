@@ -4,7 +4,6 @@ import 'package:chatify/chatify.dart';
 
 final chatifyConfig = ChatifyConfig(
   getUserById: (id) async {
-    print(id);
     if (id == karrar.id) return karrar;
     if (id == sara.id) return sara;
     return Future.value(

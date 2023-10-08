@@ -8,58 +8,39 @@ import 'package:path_provider/path_provider.dart';
 
 class VoiceRecordingController extends ValueNotifier {
   VoiceRecordingController() : super(null) {
-    startTimer();
+    _startTimer();
   }
 
-  bool isRecording = false;
-  Duration duration = Duration.zero;
-
-  Timer? timer;
-  int current = 0;
+  Timer? _timer;
+  int seconds = 0;
   final record = Record();
   String? path;
 
-  Future<void> startTimer() async {
+  Future<void> _startTimer() async {
     if (await record.hasPermission()) {
       Directory documents = await getApplicationDocumentsDirectory();
-
       await record.start(
         path:
             Platform.isIOS ? '${documents.path}/${Uuid.generate()}.m4a' : null,
         encoder: AudioEncoder.aacLc,
-        bitRate: 128000,
-        samplingRate: 44100,
       );
     }
-    timer = Timer.periodic(const Duration(seconds: 1), (_) => increase());
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => _increase());
   }
 
-  void increase() {
-    current++;
-    duration = Duration(seconds: current);
+  void _increase() {
+    seconds++;
     notifyListeners();
   }
 
   Future<void> stop() async {
-    isRecording = false;
-    notifyListeners();
-    timer?.cancel();
+    _timer?.cancel();
     path = await record.stop();
-  }
-
-  changeStatus(bool isRecording) {
-    isRecording = isRecording;
-    notifyListeners();
-  }
-
-  setDuration(Duration duration) {
-    duration = duration;
-    notifyListeners();
   }
 
   @override
   void dispose() {
-    timer?.cancel();
+    _timer?.cancel();
     record.dispose();
     super.dispose();
   }

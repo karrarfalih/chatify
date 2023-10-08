@@ -3,6 +3,7 @@ import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 class ChatInputField extends StatelessWidget {
   const ChatInputField({
@@ -16,8 +17,23 @@ class ChatInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final iconColor = ChatifyTheme.of(
+      context,
+    ).chatBackgroundColor.withOpacity(0.5);
     return Row(
       children: [
+        CircularButton(
+          onPressed: () {},
+          size: 60,
+          icon: Padding(
+            padding: const EdgeInsets.all(3),
+            child: Icon(
+              Iconsax.emoji_normal,
+              color: iconColor,
+              size: 26,
+            ),
+          ),
+        ),
         Expanded(
           child: TextFormField(
             controller: controller.textController,
@@ -26,9 +42,7 @@ class ChatInputField extends StatelessWidget {
             style: TextStyle(
               color: ChatifyTheme.of(
                 context,
-              ).isChatDark
-                  ? Colors.white
-                  : Theme.of(context).textTheme.headline1!.color,
+              ).chatBackgroundColor,
             ),
             onFieldSubmitted: (x) {
               controller.submitMessage(
@@ -44,13 +58,12 @@ class ChatInputField extends StatelessWidget {
             decoration: InputDecoration(
               fillColor: Colors.transparent,
               filled: true,
-              hintText: 'Type a message ...',
+              hintText: 'Message',
               hintStyle: TextStyle(
+                fontWeight: FontWeight.normal,
                 color: ChatifyTheme.of(
                   context,
-                ).isChatDark
-                    ? Colors.white54
-                    : null,
+                ).chatBackgroundColor.withOpacity(0.4),
               ),
               isDense: true,
               enabledBorder: const OutlineInputBorder(
@@ -115,27 +128,32 @@ class ChatInputField extends StatelessWidget {
                           },
                           size: 60,
                           icon: Icon(
-                            Icons.attach_file,
-                            color: ChatifyTheme.of(
-                              context,
-                            ).chatBackgroundColor.withOpacity(
-                                  0.5,
-                                ),
-                            size: 20,
+                            Iconsax.document_1,
+                            color: iconColor,
+                            size: 24,
                           ),
                         ),
-                        CircularButton(
-                          onPressed: () => controller.isRecording.value = true,
-                          size: 60,
-                          icon: Padding(
+                        GestureDetector(
+                          // onLongPressDown: (_) => controller.record(),
+                          // onLongPressEnd: (_) => controller.stopRecord(),
+                          // onLongPressMoveUpdate: (d) {
+                          //   controller.micPos.value = d.localPosition;
+                          // },
+                          onHorizontalDragStart: (_) => controller.record(),
+                          onHorizontalDragUpdate: (d) {
+                            controller.micPos.value = d.localPosition;
+                          },
+                          onHorizontalDragEnd: (_) =>
+                              controller.stopRecord(chat),
+                          onHorizontalDragCancel: () =>
+                              controller.stopRecord(chat),
+                          child: Padding(
                             padding: const EdgeInsets.all(
                               3,
                             ),
                             child: Icon(
-                              Icons.mic_none,
-                              color: ChatifyTheme.of(context)
-                                  .chatBackgroundColor
-                                  .withOpacity(0.5),
+                              Iconsax.microphone,
+                              color: iconColor,
                               size: 26,
                             ),
                           ),
@@ -149,3 +167,5 @@ class ChatInputField extends StatelessWidget {
     );
   }
 }
+
+bool isDrag = false;
