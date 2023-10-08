@@ -1,11 +1,11 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/assets/bloc.dart';
+import 'package:chatify/src/ui/common/bloc.dart';
 import 'package:chatify/src/ui/common/kr_builder.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'package:chatify/src/assets/date_format.dart';
-import 'package:chatify/src/assets/image.dart';
+import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 

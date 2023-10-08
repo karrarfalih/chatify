@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
-import 'package:chatify/src/voice_player/src/helpers/utils.dart';
+import 'package:chatify/src/packages/voice_player/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
 
 /// document will be added
-class Noises extends StatelessWidget {
-  const Noises({Key? key}) : super(key: key);
+class ContactNoise extends StatelessWidget {
+  const ContactNoise({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class Noises extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1000),
-        color: Colors.white,
+        color: Colors.grey,
       ),
     );
   }

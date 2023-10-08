@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -39,28 +37,5 @@ class MultiValuesListenableBuilder extends StatelessWidget {
         return _buildRecursive(index + 1, context, child);
       },
     );
-  }
-}
-
-
-
-class Debouncer {
-  final int milliseconds;
-  VoidCallback? action;
-  Timer? _timer;
-
-  Debouncer({required this.milliseconds});
-
-  void debounce(VoidCallback action) {
-    this.action = action;
-    _timer?.cancel();
-    _timer = Timer(Duration(milliseconds: milliseconds), _fire);
-  }
-
-  void _fire() {
-    if (action != null) {
-      action!();
-      action = null;
-    }
   }
 }

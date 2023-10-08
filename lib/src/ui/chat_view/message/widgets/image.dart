@@ -1,5 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/assets/image.dart';
+import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:flutter/material.dart';
 

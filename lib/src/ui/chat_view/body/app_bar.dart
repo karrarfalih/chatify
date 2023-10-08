@@ -1,11 +1,11 @@
 import 'dart:ui';
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/assets/image.dart';
+import 'package:chatify/src/ui/common/circular_button.dart';
+import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
-import 'package:chatify/src/assets/circular_button.dart';
 
 class ChatAppBar extends StatelessWidget {
   const ChatAppBar({

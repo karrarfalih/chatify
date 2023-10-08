@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/assets/circular_button.dart';
-import 'package:chatify/src/assets/confirm.dart';
+import 'package:chatify/src/ui/common/circular_button.dart';
+import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';

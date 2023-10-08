@@ -1,5 +1,5 @@
-import 'package:chatify/src/voice_player/src/contact_noise.dart';
-import 'package:chatify/src/voice_player/src/helpers/utils.dart';
+import 'package:chatify/src/packages/voice_player/src/contact_noise.dart';
+import 'package:chatify/src/packages/voice_player/src/helpers/utils.dart';
 import 'package:flutter/material.dart';
 // ignore: library_prefixes
 import 'package:just_audio/just_audio.dart' as jsAudio;

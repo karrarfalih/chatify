@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:chatify/src/assets/toast.dart';
+import 'package:chatify/src/ui/common/toast.dart';
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/utils/uuid.dart';

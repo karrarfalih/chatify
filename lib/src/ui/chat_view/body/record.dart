@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/message/controllers/voice_controller.dart';
+import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:flutter/material.dart';
-import 'package:chatify/src/assets/circular_button.dart';
 
 class ChatRecord extends StatefulWidget {
   const ChatRecord({Key? key, required this.onClose, required this.chat})

@@ -2,9 +2,9 @@ import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
-import 'package:chatify/src/voice_player/voice_message_package.dart';
+import 'package:chatify/src/utils/extensions.dart';
+import 'package:chatify/src/packages/voice_player/voice_message_package.dart';
 import 'package:flutter/material.dart';
-import 'package:chatify/src/assets/date_format.dart';
 
 class MyVoiceMessage extends StatelessWidget {
   const MyVoiceMessage({

@@ -1,5 +1,5 @@
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:chatify/src/assets/date_format.dart';
 
 class ChatDateWidget extends StatefulWidget {
   const ChatDateWidget({

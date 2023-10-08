@@ -1,5 +1,10 @@
 import 'dart:math' as math;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
+
 RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
 String mathFunc(Match match) => '${match[1]},';
 
@@ -88,3 +93,17 @@ extension Url on String? {
 bool hasMatch(String? value, String pattern) {
   return (value == null) ? false : RegExp(pattern).hasMatch(value);
 }
+
+extension DateTimeFormat on DateTime{
+  String fullDate(BuildContext context) => format(context, 'MMM d, yyyy - HH:mm a');
+
+  String format(BuildContext context, String format){
+    initializeDateFormatting();
+    return DateFormat(format, Localizations.maybeLocaleOf(context)?.languageCode).format(this);
+  }
+
+  DateTime get withoutTime => DateTime(year, month, day);
+  DateTime get onlyMonth => DateTime(year, month);
+  Timestamp get stamp => Timestamp.fromDate(this);
+}
+
