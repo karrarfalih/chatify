@@ -5,43 +5,42 @@ import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide SearchController;
-import 'package:flutter/services.dart';
-import 'package:chatify/src/ui/chats/new_chat/new_message_card.dart';
+import 'package:chatify/src/ui/chats/new_chat/result_card.dart';
 
-class NewMessages extends StatelessWidget {
-  const NewMessages({Key? key}) : super(key: key);
+class NewChat extends StatelessWidget {
+  const NewChat({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final theme = ChatifyTheme.of(context);
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text(
           'New Message',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: Colors.black,
+            color: theme.recentChatsBackgroundColor,
           ),
         ),
-        leading: InkWell(
-          onTap: () {
+        leading: IconButton(
+          onPressed: () {
             Navigator.pop(context);
           },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: const Icon(CupertinoIcons.back, color: Colors.black),
+          padding: EdgeInsets.all(14),
+          icon: Icon(
+            CupertinoIcons.back,
+            color: theme.recentChatsBackgroundColor,
           ),
         ),
         centerTitle: true,
-        actionsIconTheme: const IconThemeData(
-          color: Colors.black,
+        actionsIconTheme: IconThemeData(
+          color: theme.recentChatsBackgroundColor,
           size: 24,
-          // weight: 100,
         ),
       ),
       body: SafeArea(
@@ -88,7 +87,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
       children: [
         Container(
           height: 56,
-          color: Colors.black.withOpacity(0.07),
+          color: theme.recentChatsBackgroundColor.withOpacity(0.07),
           width: MediaQuery.of(context).size.width,
           margin: const EdgeInsets.only(top: 2, bottom: 12),
           alignment: Alignment.center,
@@ -185,7 +184,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                         physics: const NeverScrollableScrollPhysics(),
                         itemBuilder: (context, index) {
                           var e = search.results.value.elementAt(index);
-                          return NewMessageCard(
+                          return UserResultCard(
                             user: e,
                             onTap: widget.onSelect,
                           );
@@ -218,7 +217,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                               physics: const NeverScrollableScrollPhysics(),
                               itemBuilder: (context, index) {
                                 var e = search.history.value.elementAt(index);
-                                return NewMessageCard(
+                                return UserResultCard(
                                   user: e,
                                   onTap: widget.onSelect,
                                 );

@@ -1,4 +1,6 @@
 import 'dart:ui';
+import 'package:chatify/chatify.dart';
+import 'package:chatify/src/assets/image.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -8,10 +10,14 @@ import 'package:chatify/src/assets/circular_button.dart';
 class ChatAppBar extends StatelessWidget {
   const ChatAppBar({
     super.key,
+    required this.user,
   });
+
+  final ChatifyUser user;
 
   @override
   Widget build(BuildContext context) {
+    final theme = ChatifyTheme.of(context);
     return Column(
       children: [
         ClipRRect(
@@ -20,14 +26,12 @@ class ChatAppBar extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.only(bottom: 4),
               decoration: BoxDecoration(
-                color: ChatifyTheme.of(context).isChatDark
+                color: theme.isChatDark
                     ? Colors.black.withOpacity(0.4)
                     : Colors.white.withOpacity(0.4),
                 border: Border(
                   bottom: BorderSide(
-                    color: (ChatifyTheme.of(context).isChatDark
-                            ? Colors.white
-                            : Colors.black)
+                    color: (theme.isChatDark ? Colors.white : Colors.black)
                         .withOpacity(0.07),
                     width: 1,
                   ),
@@ -51,25 +55,39 @@ class ChatAppBar extends StatelessWidget {
                         ),
                         child: Icon(
                           CupertinoIcons.back,
-                          color:
-                              ChatifyTheme.of(context).isChatDark
-                                  ? Colors.white
-                                  : Colors.black,
+                          color: theme.isChatDark ? Colors.white : Colors.black,
                         ),
                       ),
                     ),
-                    // UserAvatar(
-                    //   uid: widget.user.id,
-                    //   onTap: options.onUserClick,
-                    // ),
+                    InkWell(
+                      onTap: () => Chatify.config.onUserClick?.call(user),
+                      child: Row(
+                        children: [
+                          CustomImage(
+                            url: user.profileImage,
+                            width: 45,
+                            height: 45,
+                            radius: 45,
+                          ),
+                          SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            user.name,
+                            style: TextStyle(
+                              color: theme.chatBackgroundColor,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const Spacer(),
                     PullDownButton(
                       routeTheme: PullDownMenuRouteTheme(
                         width: 140,
                         backgroundColor:
-                            ChatifyTheme.of(context).isChatDark
-                                ? Colors.black
-                                : Colors.white,
+                            theme.isChatDark ? Colors.black : Colors.white,
                       ),
                       itemBuilder: (context) => [
                         PullDownMenuItem(
@@ -104,14 +122,10 @@ class ChatAppBar extends StatelessWidget {
                       ],
                       position: PullDownMenuPosition.automatic,
                       applyOpacity: false,
-                      buttonBuilder: (context, showMenu) =>
-                          CircularButton(
+                      buttonBuilder: (context, showMenu) => CircularButton(
                         icon: Icon(
                           Icons.more_vert,
-                          color:
-                              ChatifyTheme.of(context).isChatDark
-                                  ? Colors.white
-                                  : Colors.black,
+                          color: theme.isChatDark ? Colors.white : Colors.black,
                         ),
                         onPressed: showMenu,
                       ),

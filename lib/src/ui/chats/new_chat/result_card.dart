@@ -3,8 +3,8 @@ import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:flutter/material.dart';
 
-class NewMessageCard extends StatelessWidget {
-  const NewMessageCard({
+class UserResultCard extends StatelessWidget {
+  const UserResultCard({
     Key? key,
     required this.user,
     required this.onTap,

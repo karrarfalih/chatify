@@ -78,7 +78,7 @@ class _ChatViewState extends State<ChatView> {
                       ChatInputBox(controller: controller, chat: widget.chat),
                     ],
                   ),
-                  ChatAppBar(),
+                  ChatAppBar(user: widget.user,),
                 ],
               ),
             ),

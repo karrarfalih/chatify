@@ -66,7 +66,8 @@ class ChatRoomCard extends StatelessWidget {
                                             context,
                                             DateTime.now()
                                                         .difference(
-                                                            chat.updatedAt!)
+                                                          chat.updatedAt!,
+                                                        )
                                                         .inHours <
                                                     24
                                                 ? 'h:mm a'
@@ -92,14 +93,10 @@ class ChatRoomCard extends StatelessWidget {
                                     onLoading: const Padding(
                                       padding: EdgeInsets.only(top: 3),
                                       child: ShimmerBloc(
-                                          size: Size(200, 18), radius: 5),
+                                        size: Size(200, 18),
+                                        radius: 5,
+                                      ),
                                     ),
-                                    onEmpty: Container(
-                                      height: 300,
-                                      width: 300,
-                                      color: Colors.red,
-                                    ),
-                                    onError: (p0) => Text(p0?.toString() ?? ''),
                                     builder: (message) {
                                       return Expanded(
                                         child: Text(
@@ -127,7 +124,9 @@ class ChatRoomCard extends StatelessWidget {
                                         width: 20,
                                         margin:
                                             const EdgeInsetsDirectional.only(
-                                                start: 5),
+                                          start: 5,
+                                          top: 4,
+                                        ),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
                                           color: ChatifyTheme.of(context)

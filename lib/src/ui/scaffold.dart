@@ -1,6 +1,6 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
-import 'package:chatify/src/ui/chats/new_chat/new_message.dart';
+import 'package:chatify/src/ui/chats/new_chat/new_chat.dart';
 import 'package:chatify/src/ui/chats/search.dart';
 import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -19,6 +19,7 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ChatifyTheme.of(context);
     return Scaffold(
       key: ContextProvider.recentChatsKey,
       appBar: AppBar(
@@ -26,51 +27,49 @@ class ChatScreen extends StatelessWidget {
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        systemOverlayStyle: theme.recentChatsBrightness == Brightness.light
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light,
         title: Text(
           'Messages',
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: ChatifyTheme.of(context).recentChatsBackgroundColor,
+            color: theme.recentChatsBackgroundColor,
           ),
         ),
-        leading: InkWell(
-          onTap: () {
+        leading: IconButton(
+          onPressed: () {
             Navigator.pop(context);
           },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 22),
-            child: const Icon(
-              CupertinoIcons.back,
-              color: Colors.black,
-              opticalSize: 1,
-            ),
+          padding: EdgeInsets.all(14),
+          icon: Icon(
+            CupertinoIcons.back,
+            color: theme.recentChatsBackgroundColor,
+            opticalSize: 1,
           ),
         ),
         centerTitle: true,
         actionsIconTheme: IconThemeData(
-          color: ChatifyTheme.of(context).recentChatsBackgroundColor,
+          color: theme.recentChatsBackgroundColor,
           size: 24,
         ),
         actions: [
           if (Chatify.config.canCreateNewChat)
-            InkWell(
-              onTap: () {
+            IconButton(
+              onPressed: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const NewMessages(),
+                    builder: (context) => const NewChat(),
                   ),
                 );
               },
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: Icon(
-                  Iconsax.message_add_1,
-                  size: 24,
-                  color: ChatifyTheme.of(context).recentChatsBackgroundColor,
-                ),
+              padding: const EdgeInsets.all(14),
+              icon: Icon(
+                Iconsax.message_add_1,
+                size: 24,
+                color: theme.recentChatsBackgroundColor,
               ),
             ),
           const SizedBox(
