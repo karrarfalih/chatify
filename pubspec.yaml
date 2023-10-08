@@ -1,6 +1,6 @@
 name: chatify
 description: Chat package for flutter
-version: 0.0.10
+version: 0.1.0
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -14,6 +14,7 @@ dependencies:
   cloud_firestore: ^4.4.3
   confirm_dialog: ^1.0.1
   dio: ^5.0.2
+  firebase_database: ^10.2.6
   firebase_storage: ^11.0.14
   flutter:
     sdk: flutter
@@ -22,12 +23,10 @@ dependencies:
   flutter_svg: ^2.0.2
   fluttericon: ^2.0.0
   fluttertoast: ^8.2.1
-  get: ^4.6.5
-  get_storage: ^2.1.1
-  http: ^0.13.0
   iconsax: ^0.0.8
   image_gallery_saver: ^2.0.3
   image_picker: ^0.8.6+4
+  intl: ^0.18.1
   just_audio: ^0.9.31
   kr_builder: ^1.0.3
   kr_button: ^1.0.1
@@ -35,13 +34,13 @@ dependencies:
   kr_extensions: ^1.0.4
   kr_paginate_firestore: ^1.0.4
   kr_pull_down_button: ^1.0.0
+  optimized_cached_image: ^3.0.1
   path: ^1.8.3
   path_provider: ^2.0.13
   recase: ^4.1.0
   record: ^4.4.4
   rxdart: ^0.27.7
   shimmer: ^3.0.0
-  uuid: ^3.0.7
 
 dev_dependencies:
   flutter_lints: ^2.0.0
@@ -50,4 +49,4 @@ dev_dependencies:
 
 flutter:
   assets:
-    - lib/assets/icons/
+    - assets/icons/
