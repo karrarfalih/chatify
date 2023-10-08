@@ -2,10 +2,10 @@ import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:flutter/material.dart';
 
-class KrFutureBuilder<T> extends StatelessWidget {
+class KrStreamBuilder<T> extends StatelessWidget {
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null.
-  final Future<T> future;
+  final Stream<T> stream;
 
   ///The builder return the proper widget according to the connections state and the data.
   ///return loading widget if the connection is waiting.
@@ -30,9 +30,9 @@ class KrFutureBuilder<T> extends StatelessWidget {
   final Color? baseColor;
   final Color? highlightColor;
 
-  const KrFutureBuilder({
+  const KrStreamBuilder({
     Key? key,
-    required this.future,
+    required this.stream,
     required this.builder,
     this.onError,
     this.shimmerSize,
@@ -46,8 +46,8 @@ class KrFutureBuilder<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<T>(
-      future: future,
+    return StreamBuilder<T>(
+      stream: stream,
       builder: (context, data) {
         if (data.connectionState == ConnectionState.waiting) {
           if (shimmerSize != null) {

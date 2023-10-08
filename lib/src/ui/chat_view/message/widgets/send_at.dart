@@ -1,6 +1,6 @@
 import 'package:chatify/chatify.dart';
 import 'package:flutter/material.dart';
-import 'package:kr_extensions/kr_extensions.dart';
+import 'package:chatify/src/assets/date_format.dart';
 
 class SendAtWidget extends StatelessWidget {
   const SendAtWidget({
@@ -33,7 +33,7 @@ class SendAtWidget extends StatelessWidget {
                   : Colors.white.withOpacity(isText || isVoice ? 0.7 : 1),
             ),
           Text(
-            (message.sendAt ?? DateTime.now()).format('h:mm a'),
+            (message.sendAt ?? DateTime.now()).format(context, 'h:mm a'),
             style: TextStyle(
               fontSize: 12,
               color: !isMine && isText

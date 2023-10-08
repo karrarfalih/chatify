@@ -1,14 +1,13 @@
+import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 showToast(String message, [Color? color]) {
-  Fluttertoast.showToast(
-                            msg: message,
-                            toastLength: Toast.LENGTH_SHORT,
-                            gravity: ToastGravity.CENTER,
-                            timeInSecForIosWeb: 3,
-                            backgroundColor: color ?? Colors.red,
-                            textColor: Colors.white,
-                            
-                            fontSize: 16.0);
+  final scaffold = ScaffoldMessenger.of(ContextProvider.context!);
+    scaffold.showSnackBar(
+      SnackBar(
+        content: Text(message),
+        duration: Duration(seconds: 2),
+        backgroundColor: color,
+      ),
+    );
 }

@@ -5,9 +5,11 @@ import 'package:chatify/src/ui/chat_view/body/input_box.dart';
 import 'package:chatify/src/ui/chat_view/body/messages.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/chat_view/body/app_bar.dart';
+import 'package:chatify/src/ui/common/keyboard_size.dart';
+import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_keyboard_size/flutter_keyboard_size.dart';
+import 'package:provider/provider.dart';
 
 class ChatView extends StatefulWidget {
   const ChatView({
@@ -44,6 +46,7 @@ class _ChatViewState extends State<ChatView> {
             return child!;
           },
           child: Scaffold(
+            key: ContextProvider.chatKey,
             resizeToAvoidBottomInset: true,
             body: Container(
               decoration: ChatifyTheme.of(context).backgroundImage == null

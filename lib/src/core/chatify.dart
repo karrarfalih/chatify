@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/config.dart';
 import 'package:chatify/src/firebase/firestore.dart';
 import 'package:chatify/src/ui/chat_view/chatting_room.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class Chatify {
   static late ChatifyDatasource _datasource;
@@ -116,12 +114,29 @@ class Chatify {
     );
   }
 
-  static openChat(BuildContext context, {required Chat chat, required ChatifyUser user}) {
+  static openChatByUser(
+    BuildContext context, {
+    required ChatifyUser user,
+  }) async {
+    final chat = await datasource.findChatOrCreate([user.id, currentUserId]);
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ChatView(chat: chat, user: user),
       ),
-    );  }
+    );
+  }
+
+  static openChat(
+    BuildContext context, {
+    required Chat chat,
+    required ChatifyUser user,
+  }) async {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ChatView(chat: chat, user: user),
+      ),
+    );
+  }
 
   static Stream<int> get unreadMessagesCount {
     return datasource.getUnreadMessagesCount;

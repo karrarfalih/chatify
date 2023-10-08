@@ -1,67 +1,60 @@
-// import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
-// import 'package:chatify/ui/chats/new_message.dart';
-// import 'package:flutter_svg/flutter_svg.dart';
+import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
-// class ChatSearch extends StatelessWidget {
-//   const ChatSearch({
-//     Key? key,
-//   }) : super(key: key);
+class ChatSearch extends StatelessWidget {
+  const ChatSearch({
+    Key? key,
+  }) : super(key: key);
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       height: 72,
-//       color: Secondary.level2.value,
-//       width: Get.width,
-//       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-
-//       // height: 56,
-//       child: SizedBox(
-//         height: 48,
-//         child: InkWell(
-//           onTap: () {
-//             Get.to(const NewMessages());
-//           },
-//           child: IgnorePointer(
-//             child: TextFormField(
-//               style: titleStyle,
-//               textAlign: TextAlign.start,
-//               textAlignVertical: TextAlignVertical.bottom,
-//               textInputAction: TextInputAction.search,
-//               decoration: InputDecoration(
-//                 hintText: 'Search'.tr,
-//                 enabled: true,
-//                 hintStyle: titleStyle.copyWith(color: Secondary.level5.value),
-//                 isDense: true,
-//                 filled: true,
-//                 fillColor: Secondary.level1.value,
-//                 prefixIcon: SizedBox(
-//                   child: Padding(
-//                     padding: const EdgeInsets.all(12),
-//                     child: SvgPicture.asset(
-//                       SVG().searchIcon,
-//                       color: Secondary.level4.value,
-//                     ),
-//                   ),
-//                 ),
-//                 enabledBorder: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(8),
-//                   borderSide: BorderSide(
-//                     color: Secondary.level3.value,
-//                   ),
-//                 ),
-//                 focusedBorder: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(8),
-//                   borderSide: BorderSide(
-//                     color: Secondary.level3.value,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }
+  @override
+  Widget build(BuildContext context) {
+    final theme = ChatifyTheme.of(context);
+    return Container(
+      height: 55,
+      color: Colors.transparent,
+      width: MediaQuery.of(context).size.width,
+      padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
+      child: SizedBox(
+        height: 48,
+        child: TextFormField(
+          style: TextStyle(),
+          textAlign: TextAlign.start,
+          textAlignVertical: TextAlignVertical.bottom,
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
+            hintText: 'Search',
+            enabled: true,
+            hintStyle: TextStyle(
+              color: theme.recentChatsBackgroundColor.withOpacity(0.5),
+            ),
+            isDense: true,
+            filled: true,
+            fillColor: theme.recentChatsBackgroundColor.withOpacity(0.05),
+            prefixIcon: SizedBox(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Icon(
+                  Iconsax.search_normal,
+                  color: theme.recentChatsBackgroundColor.withOpacity(0.7),
+                ),
+              ),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: Colors.transparent,
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(
+                color: theme.recentChatsBackgroundColor.withOpacity(0.1),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

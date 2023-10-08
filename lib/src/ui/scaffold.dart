@@ -1,9 +1,12 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/ui/chats/new_chat/new_message.dart';
+import 'package:chatify/src/ui/chats/search.dart';
+import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:iconsax/iconsax.dart';
 import 'chats/recent_chats.dart';
 
 class ChatScreen extends StatelessWidget {
@@ -17,6 +20,7 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: ContextProvider.recentChatsKey,
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.transparent,
@@ -53,19 +57,18 @@ class ChatScreen extends StatelessWidget {
           if (Chatify.config.canCreateNewChat)
             InkWell(
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (context) => const NewMessages(),
-                //   ),
-                // );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const NewMessages(),
+                  ),
+                );
               },
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: SvgPicture.asset(
-                  'assets/icons/new_message.svg',
-                  package: 'chatify',
-                  height: 24,
+                child: Icon(
+                  Iconsax.message_add_1,
+                  size: 24,
                   color: ChatifyTheme.of(context).recentChatsBackgroundColor,
                 ),
               ),
@@ -78,7 +81,12 @@ class ChatScreen extends StatelessWidget {
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: const Padding(
         padding: EdgeInsetsDirectional.only(top: 10),
-        child: RecentChats(),
+        child: Column(
+          children: [
+            ChatSearch(),
+            Expanded(child: RecentChats()),
+          ],
+        ),
       ),
     );
   }

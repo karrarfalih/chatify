@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kr_extensions/date_format.dart';
+import 'package:chatify/src/assets/date_format.dart';
 
 class ChatDateWidget extends StatefulWidget {
   const ChatDateWidget({
@@ -26,7 +26,7 @@ class _ChatDateWidgetState extends State<ChatDateWidget> {
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Text(
-            widget.date.format('d MMMM'),
+            widget.date.format(context, 'd MMMM'),
             style:
                 const TextStyle(fontSize: 12, color: Colors.white, height: 1),
             textDirection: TextDirection.ltr,

@@ -4,7 +4,7 @@ import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/voice_player/voice_message_package.dart';
 import 'package:flutter/material.dart';
-import 'package:kr_extensions/kr_extensions.dart';
+import 'package:chatify/src/assets/date_format.dart';
 
 class MyVoiceMessage extends StatelessWidget {
   const MyVoiceMessage({
@@ -66,7 +66,7 @@ class MyVoiceMessageBloc extends StatelessWidget {
         sendAt: Directionality(
             textDirection: TextDirection.ltr,
             child: Text(
-              DateTime.now().format('h:mm a'),
+              DateTime.now().format(context, 'h:mm a'),
               style: TextStyle(
                   fontSize: 12,
                   color: Colors.white.withOpacity(0.7),

@@ -1,7 +1,7 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
-import 'package:chatify/src/models/message.dart';
-import 'package:chatify/src/models/chat.dart';
+import 'package:chatify/src/utils/cache.dart';
+import 'package:chatify/src/utils/identical_list.dart';
+import 'package:chatify/src/utils/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ChatifyDatasource {
@@ -39,14 +39,17 @@ class ChatifyDatasource {
   }
 
   Future<void> updateMessageUsingFieldValue(
-      String messageId, Map<String, FieldValue> data) async {
+    String messageId,
+    Map<String, FieldValue> data,
+  ) async {
     await _messages.doc(messageId).update(data);
   }
 
   Future<void> addMessageEmojis(String messageId, String emoji) async {
     await _messages.doc(messageId).update({
       'emojis': FieldValue.arrayUnion(
-          [MessageEmoji(emoji: emoji, uid: Chatify.currentUserId)])
+        [MessageEmoji(emoji: emoji, uid: Chatify.currentUserId)],
+      )
     });
   }
 
@@ -56,7 +59,9 @@ class ChatifyDatasource {
       final emojis = msg.data()!.emojis;
       emojis.removeWhere((e) => e.uid == Chatify.currentUserId);
       t.update(
-          _messages.doc(messageId), {'emojis': emojis.map((e) => e.toJson)});
+        _messages.doc(messageId),
+        {'emojis': emojis.map((e) => e.toJson)},
+      );
     });
   }
 
@@ -93,12 +98,39 @@ class ChatifyDatasource {
     });
   }
 
-  Future<void> deletechat(String id) async {
-    await _chats.doc(id).delete();
+  Future<void> addChat(Chat chat) async {
+    await _chats.doc(chat.id).set(chat, SetOptions(merge: true));
   }
 
-  Future<void> addchat(Chat chat) async {
-    await _chats.doc(chat.id).set(chat, SetOptions(merge: true));
+  Future<Chat?> readChat(String id) async {
+    return Cache.get<Chat>(id) ?? (await _chats.doc(id).get()).data();
+  }
+
+  Future<Chat> findChatOrCreate(List<String> members) async {
+    bool isExist = Cache.cache.entries.any(
+      (e) =>
+          e.value is Chat &&
+          (e.value as Chat).members.hasSameElementsAs(members),
+    );
+    if (isExist) {
+      return Cache.cache.entries
+          .firstWhere(
+            (e) =>
+                e.value is Chat &&
+                (e.value as Chat).members.hasSameElementsAs(members),
+          )
+          .value as Chat;
+    }
+    final res = await _chats
+        .where('membersCount', isEqualTo: members.length)
+        .where('members', whereIn: [members, members.reversed.toList()]).get();
+    if (res.size > 0) return res.docs.first.data();
+    final chat = Chat(id: Uuid.generate(), members: members);
+    return chat;
+  }
+
+  Future<void> deletechat(String id) async {
+    await _chats.doc(id).delete();
   }
 
   Query<Message> messagesQuery(String chatId) {

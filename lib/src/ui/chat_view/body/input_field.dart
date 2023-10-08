@@ -2,7 +2,6 @@ import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:flutter/material.dart';
-import 'package:fluttericon/entypo_icons.dart';
 import 'package:chatify/src/assets/circular_button.dart';
 
 class ChatInputField extends StatelessWidget {
@@ -116,7 +115,7 @@ class ChatInputField extends StatelessWidget {
                           },
                           size: 60,
                           icon: Icon(
-                            Entypo.attach,
+                            Icons.attach_file,
                             color: ChatifyTheme.of(
                               context,
                             ).chatBackgroundColor.withOpacity(

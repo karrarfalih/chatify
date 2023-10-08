@@ -10,32 +10,40 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await Chatify.init(
-    config: ChatifyConfig(
-      getUserById: (id) async {
-        return Future.value(ChatifyUser(
-            id: 'id${Random().nextInt(10000)}',
-            name: 'name',
-            profileImage: 'https://picsum.photos/200'));
-      },
-      getUsersBySearch: (query) => Future.value([
+    config: ChatifyConfig(getUserById: (id) async {
+      return Future.value(
         ChatifyUser(
-            id: 'id${Random().nextInt(10000)}',
-            name: 'user name',
-            profileImage: 'https://picsum.photos/200'),
-      ]),
-    ),
+          id: 'id${Random().nextInt(10000)}',
+          name: 'name',
+          profileImage:
+              'https://xsgames.co/randomusers/avatar.php?g=female&i=${Random().nextInt(10000)}',
+        ),
+      );
+    }, getUsersBySearch: (query) async {
+      await Future.delayed(Duration(seconds: 2));
+      return [
+        ChatifyUser(
+          id: 'id${Random().nextInt(10000)}',
+          name: 'user name',
+          profileImage:
+              'https://xsgames.co/randomusers/avatar.php?g=female&i=${Random().nextInt(10000)}',
+        ),
+        ChatifyUser(
+          id: 'id${Random().nextInt(10000)}',
+          name: 'user name',
+          profileImage:
+              'https://xsgames.co/randomusers/avatar.php?g=female&i=${Random().nextInt(10000)}',
+        ),
+        ChatifyUser(
+          id: 'id${Random().nextInt(10000)}',
+          name: 'user name',
+          profileImage:
+              'https://xsgames.co/randomusers/avatar.php?g=female&i=${Random().nextInt(10000)}',
+        ),
+      ];
+    }),
     currentUserId: 'id',
   );
-  // Chatify.datasource.addchat(Chat(id: 'id2', members: ['id', 'id3']));
-  //   Chatify.datasource.addMessage(
-  //   Message(
-  //     id: 'id2',
-  //     message: 'hello!',
-  //     chatId: 'id2',
-  //     sender: 'id3',
-  //     unSeenBy: ['id'],
-  //   ),
-  // );
   runApp(const MyApp());
 }
 

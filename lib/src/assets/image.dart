@@ -1,7 +1,7 @@
-import 'package:chatify/src/assets/shimmer.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/ui/common/circular_loading.dart';
+import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:optimized_cached_image/optimized_cached_image.dart';
 
 const _kImageMaxWidthCache = 1000;
@@ -86,9 +86,10 @@ class CustomImage extends StatelessWidget {
   Widget _onLoading(BuildContext context) {
     if (onLoading != null) return onLoading!;
     if (_size == null) {
-      return SpinKitCircle(
+      return LoadingWidget(
         color: ChatifyTheme.of(context).primaryColor,
         size: 40,
+        lineWidth: 4,
       );
     }
     return ShimmerBloc(

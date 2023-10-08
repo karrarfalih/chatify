@@ -1,3 +1,4 @@
+import 'package:chatify/src/utils/cache.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -5,6 +6,7 @@ import 'package:flutter/cupertino.dart';
 class Chat {
   final String id;
   final List<String> members;
+  final int membersCount;
   final String? imageUrl;
   final String? title;
   final DateTime? updatedAt;
@@ -15,7 +17,7 @@ class Chat {
     this.imageUrl,
     this.title,
     this.updatedAt,
-  });
+  }) : membersCount = members.length;
 
   static Chat fromJson(Map data, String id) {
     return Chat(
@@ -24,12 +26,13 @@ class Chat {
       imageUrl: data['imageUrl'],
       title: data['title'],
       updatedAt: data['updatedAt']?.toDate(),
-    );
+    ).saveToCache();
   }
 
   Map<String, dynamic> get toJson => {
         'id': id,
         'members': members.toSet().toList(),
+        'membersCount': members.length,
         'imageUrl': imageUrl,
         'title': title,
         'updatedAt': updatedAt == null

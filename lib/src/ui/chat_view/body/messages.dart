@@ -3,8 +3,8 @@ import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
+import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
 import 'package:kr_paginate_firestore/paginate_firestore.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
@@ -121,7 +121,7 @@ class ChatMessages extends StatelessWidget {
                                       ).scaffoldBackgroundColor,
                                     ),
                                     child: Center(
-                                      child: SpinKitRing(
+                                      child: LoadingWidget(
                                         color: Theme.of(
                                           context,
                                         ).primaryColor,

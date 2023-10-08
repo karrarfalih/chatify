@@ -1,8 +1,8 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/common/expanded_section.dart';
 import 'package:flutter/material.dart';
-import 'package:kr_expanded_section/kr_expanded_section.dart';
 import 'package:chatify/src/assets/circular_button.dart';
 
 class MessageActionHeader extends StatelessWidget {
