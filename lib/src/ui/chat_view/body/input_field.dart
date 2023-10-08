@@ -124,30 +124,21 @@ class ChatInputField extends StatelessWidget {
                             size: 20,
                           ),
                         ),
-                        ValueListenableBuilder<bool>(
-                          valueListenable: controller.isRecording,
-                          builder: (
-                            contex,
-                            value,
-                            child,
-                          ) {
-                            return CircularButton(
-                              onPressed: () => value,
-                              size: 60,
-                              icon: Padding(
-                                padding: const EdgeInsets.all(
-                                  3,
-                                ),
-                                child: Icon(
-                                  Icons.mic_none,
-                                  color: ChatifyTheme.of(context)
-                                      .chatBackgroundColor
-                                      .withOpacity(0.5),
-                                  size: 26,
-                                ),
-                              ),
-                            );
-                          },
+                        CircularButton(
+                          onPressed: () => controller.isRecording.value = true,
+                          size: 60,
+                          icon: Padding(
+                            padding: const EdgeInsets.all(
+                              3,
+                            ),
+                            child: Icon(
+                              Icons.mic_none,
+                              color: ChatifyTheme.of(context)
+                                  .chatBackgroundColor
+                                  .withOpacity(0.5),
+                              size: 26,
+                            ),
+                          ),
                         ),
                       ],
                     );

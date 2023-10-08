@@ -159,8 +159,12 @@ class _MainButton extends StatelessWidget {
     return TextButton(
       onPressed: onPressed,
       style: TextButton.styleFrom(
-        backgroundColor: Colors.grey.shade200,
-        foregroundColor: Colors.black,
+        backgroundColor:
+            Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+        foregroundColor:
+            Theme.of(context).colorScheme.brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -196,8 +200,12 @@ class _UserButton extends StatelessWidget {
       style: TextButton.styleFrom(
         backgroundColor: _currentUser == user
             ? Theme.of(context).primaryColor
-            : Colors.grey.shade200,
-        foregroundColor: _currentUser == user ? Colors.white : Colors.black,
+            : Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+        foregroundColor: _currentUser == user
+            ? Colors.white
+            : Theme.of(context).colorScheme.brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black,
         padding: EdgeInsets.only(
           left: 6,
           right: 20,
