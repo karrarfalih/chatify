@@ -6,6 +6,7 @@ import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide SearchController;
 import 'package:chatify/src/ui/chats/new_chat/result_card.dart';
+import 'package:flutter/services.dart';
 
 class NewChat extends StatelessWidget {
   const NewChat({Key? key}) : super(key: key);
@@ -19,6 +20,9 @@ class NewChat extends StatelessWidget {
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: theme.recentChatsBrightness == Brightness.light
+            ? SystemUiOverlayStyle.dark
+            : SystemUiOverlayStyle.light,
         title: Text(
           'New Message',
           style: TextStyle(

@@ -65,8 +65,10 @@ class Message {
       replyUid: data['replyUid'],
       data: data['data'],
       attachment: data['attachment'],
-      type: MessageType.values.firstWhere((e) => e.name == data['type'],
-          orElse: () => MessageType.unSupported),
+      type: MessageType.values.firstWhere(
+        (e) => e.name == data['type'],
+        orElse: () => MessageType.unSupported,
+      ),
     );
   }
 

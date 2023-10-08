@@ -48,18 +48,21 @@ class ChatController {
     }
     if (msg != '') {
       for (int i = 0; i <= (msg.length ~/ 1000); i++) {
-        Chatify.datasource.addMessage(Message(
-          id: Uuid.generate(),
-          message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
-          chatId: chat.id,
-          sender: Chatify.currentUserId,
-          unSeenBy:
-              chat.members.where((e) => e != Chatify.currentUserId).toList(),
-          seenBy: [Chatify.currentUserId],
-          replyId: messageAction.value?.message?.id,
-          replyUid: messageAction.value?.message?.sender,
-        ));
+        Chatify.datasource.addMessage(
+          Message(
+            id: Uuid.generate(),
+            message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
+            chatId: chat.id,
+            sender: Chatify.currentUserId,
+            unSeenBy:
+                chat.members.where((e) => e != Chatify.currentUserId).toList(),
+            seenBy: [Chatify.currentUserId],
+            replyId: messageAction.value?.message?.id,
+            replyUid: messageAction.value?.message?.sender,
+          ),
+        );
       }
+      Chatify.datasource.addChat(chat);
     }
     messageAction.value = null;
     isTyping.value = false;

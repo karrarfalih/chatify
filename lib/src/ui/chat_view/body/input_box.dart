@@ -48,7 +48,7 @@ class ChatInputBox extends StatelessWidget {
                 builder: (contex, value, child) {
                   return value
                       ? ChatRecord(
-                          onClose: () => value = false,
+                          onClose: () => controller.isRecording.value = false,
                           chat: chat,
                         )
                       : ChatInputField(controller: controller, chat: chat);

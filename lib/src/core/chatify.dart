@@ -80,7 +80,6 @@ class Chatify {
     _onMessageAddedSubscription =
         FirebaseDatabase.instance.ref('.info/connected').onValue.listen(
       (event) {
-        print(event.snapshot.value);
         final isConnected = event.snapshot.value == true;
         ref.set({
           'online': isConnected,

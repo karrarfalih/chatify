@@ -35,9 +35,7 @@ class Chat {
         'membersCount': members.length,
         'imageUrl': imageUrl,
         'title': title,
-        'updatedAt': updatedAt == null
-            ? FieldValue.serverTimestamp()
-            : Timestamp.fromDate(updatedAt!),
+        'updatedAt': FieldValue.serverTimestamp(),
       };
 
   Chat copyWith({

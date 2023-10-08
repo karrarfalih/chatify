@@ -27,7 +27,6 @@ class SearchController {
   String _currentId = '';
 
   _search(String query) async {
-    print(query);
     isSearching.value = true;
     final id = Uuid.generate();
     _currentId = id;

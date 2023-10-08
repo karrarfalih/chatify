@@ -21,7 +21,9 @@ class ChatRoomCard extends StatelessWidget {
     return ColoredBox(
       color: Colors.transparent,
       child: KrFutureBuilder<ChatifyUser?>(
-        future: Chatify.config.getUserById(chat.id),
+        future: Chatify.config.getUserById(
+          chat.members.where((e) => e != Chatify.currentUserId).first,
+        ),
         onLoading: const ChatRoomBloc(),
         builder: (user) {
           return InkWell(
@@ -42,6 +44,7 @@ class ChatRoomCard extends StatelessWidget {
                         height: 50,
                         width: 50,
                         radius: 50,
+                        fit: BoxFit.cover,
                         onError: const Icon(Icons.person, color: Colors.grey),
                       ),
                       Expanded(

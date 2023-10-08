@@ -26,6 +26,8 @@ class UserResultCard extends StatelessWidget {
               width: 56,
               height: 56,
               radius: 56,
+              fit: BoxFit.cover,
+              onError: const Icon(Icons.person, color: Colors.grey),
             ),
             SizedBox(
               width: 14,

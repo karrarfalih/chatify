@@ -68,6 +68,9 @@ class ChatAppBar extends StatelessWidget {
                             width: 45,
                             height: 45,
                             radius: 45,
+                            fit: BoxFit.cover,
+                            onError:
+                                const Icon(Icons.person, color: Colors.grey),
                           ),
                           SizedBox(
                             width: 10,

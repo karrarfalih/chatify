@@ -44,7 +44,7 @@ class ChatInputField extends StatelessWidget {
             decoration: InputDecoration(
               fillColor: Colors.transparent,
               filled: true,
-              hintText: 'Type a message ......',
+              hintText: 'Type a message ...',
               hintStyle: TextStyle(
                 color: ChatifyTheme.of(
                   context,
