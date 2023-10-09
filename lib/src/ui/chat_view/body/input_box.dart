@@ -46,24 +46,21 @@ class ChatInputBox extends StatelessWidget {
               child: ValueListenableBuilder<bool>(
                 valueListenable: controller.isRecording,
                 builder: (contex, value, child) {
-                  return SizedBox(
-                    height: 55,
-                    child: Stack(
-                      children: [
-                        Opacity(
-                          opacity: value ? 0 : 1,
-                          child: ChatInputField(
-                            controller: controller,
-                            chat: chat,
-                          ),
+                  return Stack(
+                    children: [
+                      Opacity(
+                        opacity: value ? 0 : 1,
+                        child: ChatInputField(
+                          controller: controller,
+                          chat: chat,
                         ),
-                        if (value)
-                          ChatRecordDetails(
-                            controller: controller.voiceRecordingController!,
-                            chat: chat,
-                          )
-                      ],
-                    ),
+                      ),
+                      if (value)
+                        ChatRecordDetails(
+                          controller: controller.voiceRecordingController!,
+                          chat: chat,
+                        )
+                    ],
                   );
                 },
               ),

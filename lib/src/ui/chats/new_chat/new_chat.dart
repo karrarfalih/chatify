@@ -20,9 +20,17 @@ class NewChat extends StatelessWidget {
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
-        systemOverlayStyle: theme.recentChatsBrightness == Brightness.light
-            ? SystemUiOverlayStyle.dark
-            : SystemUiOverlayStyle.light,
+        systemOverlayStyle: theme.isRecentChatsDark
+            ? SystemUiOverlayStyle.light.copyWith(
+                systemNavigationBarDividerColor: Colors.black,
+                systemNavigationBarColor: Colors.black,
+                systemNavigationBarIconBrightness: Brightness.light,
+              )
+            : SystemUiOverlayStyle.dark.copyWith(
+                systemNavigationBarDividerColor: Colors.white,
+                systemNavigationBarColor: Colors.white,
+                systemNavigationBarIconBrightness: Brightness.dark,
+              ),
         title: Text(
           'New Message',
           style: TextStyle(

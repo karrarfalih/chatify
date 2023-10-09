@@ -3,8 +3,10 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/ui/chat_view/body/record_thumb.dart';
 import 'package:chatify/src/ui/chat_view/message/controllers/voice_controller.dart';
 import 'package:chatify/src/ui/common/toast.dart';
+import 'package:chatify/src/utils/load_images_video.dart';
 import 'package:chatify/src/utils/storage_utils.dart';
 import 'package:chatify/src/utils/uuid.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -37,12 +39,19 @@ class ChatController {
     micPos.value = Offset(0, 0);
     micRadius.value = 80.0;
     voiceRecordingController = VoiceRecordingController();
+    _min = 0;
     timer = Timer.periodic(Duration(milliseconds: 200), (timer) {
       voiceRecordingController!.record.getAmplitude().then((value) {
+        if (value.current.isInfinite ||
+            value.current.isNaN ||
+            !value.current.isFinite) return;
         if (value.current < _min) {
           _min = value.current;
         }
-        micRadius.value = Random().nextInt(100) + (80 * _min / value.current);
+        print('${value.current} ==> $_min ==> ${_min / value.current}');
+        micRadius.value = (Random().nextInt(10)) +
+            60.0 +
+            (30 * (_min / value.current).withRange(1, 5));
       });
     });
   }
@@ -133,6 +142,41 @@ class ChatController {
     messageAction.value = null;
     isTyping.value = false;
     textController.clear();
+  }
+
+  sendImage(Chat chat) async {
+    final imgs = await getImages();
+    for (final img in imgs) {
+      final pendingMsg = Message(
+        id: 'id',
+        message: 'Image attachment',
+        chatId: chat.id,
+        sender: Chatify.currentUserId,
+        type: MessageType.image,
+        unSeenBy: [],
+      );
+      pendingMessages.value = [
+        ...pendingMessages.value,
+        pendingMsg,
+      ];
+      final id = Uuid.generate();
+      final url = await uploadAttachment(img, 'chats/${chat.id}/$id.jpg');
+      if (url == null) return;
+      await Chatify.datasource.addMessage(
+        Message(
+          id: id,
+          message: 'Image attachment',
+          chatId: chat.id,
+          sender: Chatify.currentUserId,
+          attachment: url,
+          type: MessageType.image,
+          unSeenBy:
+              chat.members.where((e) => e != Chatify.currentUserId).toList(),
+        ),
+      );
+      pendingMessages.value.remove(pendingMsg);
+      pendingMessages.value = pendingMessages.value.toList();
+    }
   }
 
   void dispose() {

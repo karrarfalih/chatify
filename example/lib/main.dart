@@ -36,6 +36,7 @@ class _MyAppState extends State<MyApp> {
     final primary = Colors.deepPurple;
     return MaterialApp(
       title: 'Chatify Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: primary,

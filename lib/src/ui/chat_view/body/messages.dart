@@ -58,6 +58,10 @@ class ChatMessages extends StatelessWidget {
           }
           return Column(
             children: [
+              if (i == docs.length - 1)
+                SizedBox(
+                  height: MediaQuery.of(context).padding.top + 70,
+                ),
               if (showTime)
                 ChatDateWidget(
                   date: date ?? DateTime.now(),
@@ -88,22 +92,19 @@ class ChatMessages extends StatelessWidget {
                               children: [
                                 if (e.type.isVoice)
                                   Padding(
-                                    padding:
-                                        const EdgeInsetsDirectional.only(
+                                    padding: const EdgeInsetsDirectional.only(
                                       bottom: 4,
                                       end: 12,
                                       start: 12,
                                     ),
                                     child: MyVoiceMessageBloc(
                                       linkedWithTop: true,
-                                      linkedWithBottom:
-                                          i != value.length - 1,
+                                      linkedWithBottom: i != value.length - 1,
                                     ),
                                   ),
                                 if (e.type.isImage)
                                   Container(
-                                    margin:
-                                        const EdgeInsetsDirectional.only(
+                                    margin: const EdgeInsetsDirectional.only(
                                       bottom: 4,
                                       end: 12,
                                       start: 12,
@@ -116,9 +117,11 @@ class ChatMessages extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(
                                         12,
                                       ),
-                                      color: Theme.of(
+                                      color: ChatifyTheme.of(
                                         context,
-                                      ).scaffoldBackgroundColor,
+                                      )
+                                          .recentChatsBackgroundColor
+                                          .withOpacity(0.07),
                                     ),
                                     child: Center(
                                       child: LoadingWidget(

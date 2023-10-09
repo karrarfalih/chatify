@@ -35,7 +35,7 @@ class ChatInputField extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: TextFormField(
+          child: TextField(
             controller: controller.textController,
             maxLines: 5,
             minLines: 1,
@@ -44,17 +44,12 @@ class ChatInputField extends StatelessWidget {
                 context,
               ).chatBackgroundColor,
             ),
-            onFieldSubmitted: (x) {
-              controller.submitMessage(
-                x,
-                chat,
-              );
-            },
             onChanged: (x) {
               controller.isTyping.value = x.isNotEmpty;
             },
             focusNode: controller.focus,
             textInputAction: TextInputAction.newline,
+            keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               fillColor: Colors.transparent,
               filled: true,
@@ -121,10 +116,7 @@ class ChatInputField extends StatelessWidget {
                       children: [
                         CircularButton(
                           onPressed: () {
-                            // ImageMessage
-                            //     .upload(
-                            //   widget.chat,
-                            // );
+                            controller.sendImage(chat);
                           },
                           size: 60,
                           icon: Icon(
@@ -134,11 +126,6 @@ class ChatInputField extends StatelessWidget {
                           ),
                         ),
                         GestureDetector(
-                          // onLongPressDown: (_) => controller.record(),
-                          // onLongPressEnd: (_) => controller.stopRecord(),
-                          // onLongPressMoveUpdate: (d) {
-                          //   controller.micPos.value = d.localPosition;
-                          // },
                           onHorizontalDragStart: (_) => controller.record(),
                           onHorizontalDragUpdate: (d) {
                             controller.micPos.value = d.localPosition;

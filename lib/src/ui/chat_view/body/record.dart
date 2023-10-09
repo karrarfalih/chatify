@@ -15,7 +15,7 @@ class ChatRecordDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints.tightFor(width: 500, height: 61),
+      constraints: const BoxConstraints.tightFor(width: 500, height: 55),
       child: Row(
         children: [
           SizedBox(

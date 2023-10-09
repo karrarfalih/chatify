@@ -86,10 +86,12 @@ class CustomImage extends StatelessWidget {
   Widget _onLoading(BuildContext context) {
     if (onLoading != null) return onLoading!;
     if (_size == null) {
-      return LoadingWidget(
-        color: ChatifyTheme.of(context).primaryColor,
-        size: 40,
-        lineWidth: 4,
+      return Center(
+        child: LoadingWidget(
+          color: ChatifyTheme.of(context).primaryColor,
+          size: 40,
+          lineWidth: 4,
+        ),
       );
     }
     return ShimmerBloc(
