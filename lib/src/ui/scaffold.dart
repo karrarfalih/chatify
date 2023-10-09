@@ -44,7 +44,7 @@ class ChatScreen extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: theme.recentChatsBackgroundColor,
+            color: theme.recentChatsForegroundColor,
           ),
         ),
         leading: IconButton(
@@ -54,13 +54,13 @@ class ChatScreen extends StatelessWidget {
           padding: EdgeInsets.all(14),
           icon: Icon(
             CupertinoIcons.back,
-            color: theme.recentChatsBackgroundColor,
+            color: theme.recentChatsForegroundColor,
             opticalSize: 1,
           ),
         ),
         centerTitle: true,
         actionsIconTheme: IconThemeData(
-          color: theme.recentChatsBackgroundColor,
+          color: theme.recentChatsForegroundColor,
           size: 24,
         ),
         actions: [
@@ -78,7 +78,7 @@ class ChatScreen extends StatelessWidget {
               icon: Icon(
                 Iconsax.message_add_1,
                 size: 24,
-                color: theme.recentChatsBackgroundColor,
+                color: theme.recentChatsForegroundColor,
               ),
             ),
           const SizedBox(

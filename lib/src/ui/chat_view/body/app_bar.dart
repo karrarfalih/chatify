@@ -78,7 +78,7 @@ class ChatAppBar extends StatelessWidget {
                           Text(
                             user.name,
                             style: TextStyle(
-                              color: theme.chatBackgroundColor,
+                              color: theme.chatForegroundColor,
                               fontSize: 16,
                             ),
                           ),

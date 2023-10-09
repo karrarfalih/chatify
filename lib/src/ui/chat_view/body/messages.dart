@@ -120,7 +120,7 @@ class ChatMessages extends StatelessWidget {
                                       color: ChatifyTheme.of(
                                         context,
                                       )
-                                          .recentChatsBackgroundColor
+                                          .recentChatsForegroundColor
                                           .withOpacity(0.07),
                                     ),
                                     child: Center(
@@ -153,7 +153,7 @@ class ChatMessages extends StatelessWidget {
               Text(
                 'Say Hi',
                 style: TextStyle(
-                  color: ChatifyTheme.of(context).chatBackgroundColor,
+                  color: ChatifyTheme.of(context).chatForegroundColor,
                 ),
               ),
             ],

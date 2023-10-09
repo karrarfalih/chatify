@@ -48,7 +48,7 @@ class ChatifyDatasource {
   Future<void> addMessageEmojis(String messageId, String emoji) async {
     await _messages.doc(messageId).update({
       'emojis': FieldValue.arrayUnion(
-        [MessageEmoji(emoji: emoji, uid: Chatify.currentUserId)],
+        [MessageEmoji(emoji: emoji, uid: Chatify.currentUserId).toJson],
       )
     });
   }

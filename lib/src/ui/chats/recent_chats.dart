@@ -39,7 +39,7 @@ class RecentChats extends StatelessWidget {
               Icon(
                 CupertinoIcons.chat_bubble,
                 color: ChatifyTheme.of(context)
-                    .recentChatsBackgroundColor
+                    .recentChatsForegroundColor
                     .withOpacity(0.7),
                 size: 50,
               ),
@@ -50,7 +50,7 @@ class RecentChats extends StatelessWidget {
                 'No messages',
                 style: TextStyle(
                   color: ChatifyTheme.of(context)
-                      .recentChatsBackgroundColor
+                      .recentChatsForegroundColor
                       .withOpacity(0.8),
                   fontSize: 16,
                 ),

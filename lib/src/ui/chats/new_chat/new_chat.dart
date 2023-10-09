@@ -36,7 +36,7 @@ class NewChat extends StatelessWidget {
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w500,
-            color: theme.recentChatsBackgroundColor,
+            color: theme.recentChatsForegroundColor,
           ),
         ),
         leading: IconButton(
@@ -46,12 +46,12 @@ class NewChat extends StatelessWidget {
           padding: EdgeInsets.all(14),
           icon: Icon(
             CupertinoIcons.back,
-            color: theme.recentChatsBackgroundColor,
+            color: theme.recentChatsForegroundColor,
           ),
         ),
         centerTitle: true,
         actionsIconTheme: IconThemeData(
-          color: theme.recentChatsBackgroundColor,
+          color: theme.recentChatsForegroundColor,
           size: 24,
         ),
       ),
@@ -99,14 +99,14 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
       children: [
         Container(
           height: 56,
-          color: theme.recentChatsBackgroundColor.withOpacity(0.07),
+          color: theme.recentChatsForegroundColor.withOpacity(0.07),
           width: MediaQuery.of(context).size.width,
           margin: const EdgeInsets.only(top: 2, bottom: 12),
           alignment: Alignment.center,
           child: SizedBox(
             height: 48,
             child: TextFormField(
-              style: TextStyle(color: theme.recentChatsBackgroundColor),
+              style: TextStyle(color: theme.recentChatsForegroundColor),
               textAlignVertical: TextAlignVertical.bottom,
               onChanged: (x) => search.query.value = x,
               textInputAction: TextInputAction.done,
@@ -120,7 +120,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                   children: [
                     Text(
                       'To :',
-                      style: TextStyle(color: theme.recentChatsBackgroundColor),
+                      style: TextStyle(color: theme.recentChatsForegroundColor),
                     ),
                   ],
                 ),
@@ -217,7 +217,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                             child: Text(
                               'History',
                               style: TextStyle(
-                                color: theme.recentChatsBackgroundColor,
+                                color: theme.recentChatsForegroundColor,
                               ),
                             ),
                           ),

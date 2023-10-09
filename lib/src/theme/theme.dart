@@ -27,9 +27,13 @@ class ChatifyThemeData {
   bool get isChatDark => recentChatsBrightness == Brightness.dark;
   bool get isRecentChatsDark => recentChatsBrightness == Brightness.dark;
 
-  Color get chatBackgroundColor =>
+  Color get chatForegroundColor =>
       chatBrightness == Brightness.dark ? Colors.white : Colors.black;
 
-  Color get recentChatsBackgroundColor =>
+  Color get chatGreyForegroundColor => chatBrightness == Brightness.dark
+      ? Colors.grey.shade900
+      : Colors.grey.shade300;
+
+  Color get recentChatsForegroundColor =>
       recentChatsBrightness == Brightness.dark ? Colors.white : Colors.black;
 }

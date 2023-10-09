@@ -35,7 +35,7 @@ class UserResultCard extends StatelessWidget {
             Text(
               user.name,
               style: TextStyle(
-                color: ChatifyTheme.of(context).recentChatsBackgroundColor,
+                color: ChatifyTheme.of(context).recentChatsForegroundColor,
                 fontSize: 16,
               ),
             )

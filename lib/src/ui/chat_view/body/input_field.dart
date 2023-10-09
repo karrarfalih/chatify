@@ -19,7 +19,7 @@ class ChatInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final iconColor = ChatifyTheme.of(
       context,
-    ).chatBackgroundColor.withOpacity(0.5);
+    ).chatForegroundColor.withOpacity(0.5);
     return Row(
       children: [
         CircularButton(
@@ -42,7 +42,7 @@ class ChatInputField extends StatelessWidget {
             style: TextStyle(
               color: ChatifyTheme.of(
                 context,
-              ).chatBackgroundColor,
+              ).chatForegroundColor,
             ),
             onChanged: (x) {
               controller.isTyping.value = x.isNotEmpty;
@@ -58,7 +58,7 @@ class ChatInputField extends StatelessWidget {
                 fontWeight: FontWeight.normal,
                 color: ChatifyTheme.of(
                   context,
-                ).chatBackgroundColor.withOpacity(0.4),
+                ).chatForegroundColor.withOpacity(0.4),
               ),
               isDense: true,
               enabledBorder: const OutlineInputBorder(
@@ -104,7 +104,7 @@ class ChatInputField extends StatelessWidget {
                       icon: Padding(
                         padding: const EdgeInsets.all(3),
                         child: Icon(
-                          Icons.send,
+                          Iconsax.send_1,
                           color: ChatifyTheme.of(
                             context,
                           ).primaryColor,
@@ -128,12 +128,15 @@ class ChatInputField extends StatelessWidget {
                         GestureDetector(
                           onHorizontalDragStart: (_) => controller.record(),
                           onHorizontalDragUpdate: (d) {
-                            controller.micPos.value = d.localPosition;
+                            controller.setMicPos(d.localPosition);
+                            if (d.localPosition.dx < -250) {
+                              controller.stopRecord();
+                            }
                           },
                           onHorizontalDragEnd: (_) =>
-                              controller.stopRecord(chat),
+                              controller.endMicDarg(chat),
                           onHorizontalDragCancel: () =>
-                              controller.stopRecord(chat),
+                              controller.endMicDarg(chat),
                           child: Padding(
                             padding: const EdgeInsets.all(
                               3,

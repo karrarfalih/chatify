@@ -37,11 +37,11 @@ class MessageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = ChatifyTheme.of(context);
     final isMine = message.sender == Chatify.currentUserId;
     message.type == MessageType.unSupported;
-    final textColor = isMine ? Colors.white : Colors.black;
-    final bkColor =
-        isMine ? ChatifyTheme.of(context).primaryColor : Colors.grey.shade100;
+    final textColor = isMine ? Colors.white : theme.chatForegroundColor;
+    final bkColor = isMine ? theme.primaryColor : theme.chatGreyForegroundColor;
     final width = MediaQuery.of(context).size.width - 100;
     final myEmoji = message.emojis
         .cast<MessageEmoji?>()
@@ -340,15 +340,6 @@ class TextMessage extends StatelessWidget {
                                   KrFutureBuilder<Message?>(
                                     future: Chatify.datasource
                                         .readMessage(widget.message.replyId!),
-                                    onLoading: const Text(
-                                      'Hi',
-                                      style: TextStyle(
-                                        color: Colors.transparent,
-                                        fontSize: 12,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
                                     onEmpty: Text(
                                       'An error occured!',
                                       style: TextStyle(
@@ -432,7 +423,7 @@ class TextMessage extends StatelessWidget {
             margin: const EdgeInsetsDirectional.only(end: 10),
             padding: const EdgeInsets.all(1),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: Theme.of(context).scaffoldBackgroundColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Container(

@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
@@ -15,9 +16,10 @@ class SendAtWidget extends StatelessWidget {
     final isMine = message.sender == Chatify.currentUserId;
     final isSeen =
         message.seenBy.where((e) => e != Chatify.currentUserId).isNotEmpty;
-    final isText = message.type == MessageType.text ||
-        message.type == MessageType.unSupported;
+    final isTextOrVoice =
+        message.type.isTextOrUnsupported || message.type.isVoice;
     final isVoice = message.type == MessageType.voice;
+    final theme = ChatifyTheme.of(context);
     return Padding(
       padding: const EdgeInsetsDirectional.only(end: 6),
       child: Row(
@@ -28,17 +30,21 @@ class SendAtWidget extends StatelessWidget {
               isSeen ? 'assets/icons/seen.png' : 'assets/icons/sent.png',
               package: 'chatify',
               height: 14,
-              color: !isMine && isText
-                  ? Colors.black.withOpacity(isText || isVoice ? 0.7 : 1)
-                  : Colors.white.withOpacity(isText || isVoice ? 0.7 : 1),
+              color: !isMine && isTextOrVoice
+                  ? theme.chatForegroundColor
+                      .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
+                  : Colors.white
+                      .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
             ),
           Text(
             (message.sendAt ?? DateTime.now()).format(context, 'h:mm a'),
             style: TextStyle(
               fontSize: 12,
-              color: !isMine && isText
-                  ? Colors.black.withOpacity(isText || isVoice ? 0.7 : 1)
-                  : Colors.white.withOpacity(isText || isVoice ? 0.7 : 1),
+              color: !isMine && isTextOrVoice
+                  ? theme.chatForegroundColor
+                      .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
+                  : Colors.white
+                      .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
               height: 1,
             ),
             textDirection: TextDirection.ltr,
@@ -47,9 +53,11 @@ class SendAtWidget extends StatelessWidget {
             message.isEdited ? ' ${'edited'} ' : '',
             style: TextStyle(
               fontSize: 12,
-              color: !isMine && isText
-                  ? Colors.black.withOpacity(isText || isVoice ? 0.7 : 1)
-                  : Colors.white.withOpacity(isText || isVoice ? 0.7 : 1),
+              color: !isMine && isTextOrVoice
+                  ? theme.chatForegroundColor
+                      .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
+                  : Colors.white
+                      .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
               height: 1,
             ),
           ),

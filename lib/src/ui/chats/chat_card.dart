@@ -80,7 +80,7 @@ class ChatRoomCard extends StatelessWidget {
                                       style: TextStyle(
                                         height: 1,
                                         color: ChatifyTheme.of(context)
-                                            .recentChatsBackgroundColor
+                                            .recentChatsForegroundColor
                                             .withOpacity(.5),
                                         fontSize: 12,
                                       ),
@@ -107,7 +107,7 @@ class ChatRoomCard extends StatelessWidget {
                                           style: TextStyle(
                                             height: 1.4,
                                             color: ChatifyTheme.of(context)
-                                                .recentChatsBackgroundColor
+                                                .recentChatsForegroundColor
                                                 .withOpacity(.5),
                                           ),
                                           overflow: TextOverflow.ellipsis,

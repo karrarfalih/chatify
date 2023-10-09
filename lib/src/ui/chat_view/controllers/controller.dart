@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 
 import 'package:chatify/chatify.dart';
@@ -14,7 +13,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class ChatController {
-  ChatController();
+  final Chat chat;
+  ChatController(this.chat);
 
   final FocusNode focus = FocusNode();
   final isTyping = false.obs;
@@ -29,18 +29,23 @@ class ChatController {
 
   final micRadius = 80.0.obs;
   final micPos = Offset(0, 0).obs;
+  final micLockPos = Offset(0, 0).obs;
 
-  Timer? timer;
+  Timer? micRadiusTimer;
+  Timer? micLockTimer;
   VoiceRecordingController? voiceRecordingController;
   double _min = -30;
+  final isLocked = false.obs;
 
   record() {
     isRecording.value = true;
     micPos.value = Offset(0, 0);
     micRadius.value = 80.0;
+    isLocked.value = false;
     voiceRecordingController = VoiceRecordingController();
     _min = 0;
-    timer = Timer.periodic(Duration(milliseconds: 200), (timer) {
+    micRadiusTimer = Timer.periodic(Duration(milliseconds: 200), (timer) {
+      if (!isRecording.value) return;
       voiceRecordingController!.record.getAmplitude().then((value) {
         if (value.current.isInfinite ||
             value.current.isNaN ||
@@ -48,18 +53,47 @@ class ChatController {
         if (value.current < _min) {
           _min = value.current;
         }
-        print('${value.current} ==> $_min ==> ${_min / value.current}');
         micRadius.value = (Random().nextInt(10)) +
             60.0 +
             (30 * (_min / value.current).withRange(1, 5));
       });
     });
+    micLockTimer = Timer.periodic(Duration(milliseconds: 1500), (timer) {
+      if (!isRecording.value) return;
+      final isZero = micLockPos.value.dy == 0;
+      micLockPos.value = Offset(0, isZero ? 1 : 0);
+    });
   }
 
-  stopRecord(Chat chat) async {
-    timer?.cancel();
+  endMicDarg(Chat chat) {
+    if (!isLocked.value) {
+      stopRecord();
+    }
+  }
+
+  setMicPos(Offset offset) {
+    if (isLocked.value) return;
+    micPos.value = offset;
+    if (offset.dy < -150) {
+      lock();
+    }
+  }
+
+  lock() {
+    isLocked.value = true;
+    micPos.value = Offset.zero;
+    micLockTimer?.cancel();
+    micLockPos.value = Offset.zero;
+  }
+
+  stopRecord([bool submit = true]) async {
+    if (!isRecording.value) return;
+    micRadiusTimer?.cancel();
+    micLockTimer?.cancel();
     isRecording.value = false;
-    if (micPos.value.dx > -150) {
+    if (micPos.value.dx > -150 &&
+        voiceRecordingController!.seconds > 1 &&
+        submit) {
       final pendingMsg = Message(
         id: 'id',
         message: 'voice message',
@@ -74,23 +108,23 @@ class ChatController {
         pendingMsg,
       ];
       await voiceRecordingController!.stop();
-      final file = await File(voiceRecordingController!.path!).readAsBytes();
-      final id = Uuid.generate();
-      final url = await uploadAttachment(file, 'chats/${chat.id}/$id.m4a');
-      if (url == null) return;
-      await Chatify.datasource.addMessage(
-        Message(
-          id: id,
-          message: 'voice message',
-          chatId: chat.id,
-          sender: Chatify.currentUserId,
-          attachment: url,
-          type: MessageType.voice,
-          duration: Duration(seconds: voiceRecordingController!.seconds),
-          unSeenBy:
-              chat.members.where((e) => e != Chatify.currentUserId).toList(),
-        ),
-      );
+      // final file = await File(voiceRecordingController!.path!).readAsBytes();
+      // final id = Uuid.generate();
+      // final url = await uploadAttachment(file, 'chats/${chat.id}/$id.m4a');
+      // if (url == null) return;
+      // await Chatify.datasource.addMessage(
+      //   Message(
+      //     id: id,
+      //     message: 'voice message',
+      //     chatId: chat.id,
+      //     sender: Chatify.currentUserId,
+      //     attachment: url,
+      //     type: MessageType.voice,
+      //     duration: Duration(seconds: voiceRecordingController!.seconds),
+      //     unSeenBy:
+      //         chat.members.where((e) => e != Chatify.currentUserId).toList(),
+      //   ),
+      // );
       pendingMessages.value.remove(pendingMsg);
       pendingMessages.value = pendingMessages.value.toList();
     }

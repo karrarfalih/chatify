@@ -26,17 +26,17 @@ class ChatSearch extends StatelessWidget {
             hintText: 'Search',
             enabled: true,
             hintStyle: TextStyle(
-              color: theme.recentChatsBackgroundColor.withOpacity(0.5),
+              color: theme.recentChatsForegroundColor.withOpacity(0.5),
             ),
             isDense: true,
             filled: true,
-            fillColor: theme.recentChatsBackgroundColor.withOpacity(0.05),
+            fillColor: theme.recentChatsForegroundColor.withOpacity(0.05),
             prefixIcon: SizedBox(
               child: Padding(
                 padding: const EdgeInsets.all(12),
                 child: Icon(
                   Iconsax.search_normal,
-                  color: theme.recentChatsBackgroundColor.withOpacity(0.7),
+                  color: theme.recentChatsForegroundColor.withOpacity(0.7),
                 ),
               ),
             ),
@@ -49,7 +49,7 @@ class ChatSearch extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(16),
               borderSide: BorderSide(
-                color: theme.recentChatsBackgroundColor.withOpacity(0.1),
+                color: theme.recentChatsForegroundColor.withOpacity(0.1),
               ),
             ),
           ),

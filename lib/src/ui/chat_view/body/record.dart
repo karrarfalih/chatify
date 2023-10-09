@@ -36,7 +36,7 @@ class ChatRecordDetails extends StatelessWidget {
                   '$m:${s < 10 ? '0$s' : s}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: ChatifyTheme.of(context).chatBackgroundColor,
+                    color: ChatifyTheme.of(context).chatForegroundColor,
                   ),
                 );
               },
@@ -46,7 +46,7 @@ class ChatRecordDetails extends StatelessWidget {
             Icons.arrow_back_ios,
             size: 20,
             color:
-                ChatifyTheme.of(context).chatBackgroundColor.withOpacity(0.6),
+                ChatifyTheme.of(context).chatForegroundColor.withOpacity(0.6),
           ),
           Text(
             'Slide to cancel',
@@ -54,7 +54,7 @@ class ChatRecordDetails extends StatelessWidget {
             style: TextStyle(
               fontSize: 16,
               color:
-                  ChatifyTheme.of(context).chatBackgroundColor.withOpacity(0.7),
+                  ChatifyTheme.of(context).chatForegroundColor.withOpacity(0.7),
             ),
             maxLines: 1,
           ),
@@ -98,8 +98,8 @@ class _RecordingCircleState extends State<RecordingCircle>
         return Opacity(
           opacity: _animation.value,
           child: Container(
-            width: 16,
-            height: 16,
+            width: 12,
+            height: 12,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: Colors.red,

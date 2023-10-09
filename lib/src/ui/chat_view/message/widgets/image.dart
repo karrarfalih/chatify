@@ -40,7 +40,7 @@ class ImageCard extends StatelessWidget {
                   ),
                   color: ChatifyTheme.of(
                     context,
-                  ).recentChatsBackgroundColor.withOpacity(0.07),
+                  ).recentChatsForegroundColor.withOpacity(0.07),
                 ),
                 child: Center(
                   child: LoadingWidget(

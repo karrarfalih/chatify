@@ -20,21 +20,22 @@ class RecordThumb extends StatelessWidget {
         if (!isRecording) return SizedBox.shrink();
         return ValueListenableBuilder<double>(
           valueListenable: controller.micRadius,
-          child: Icon(
-            Iconsax.microphone,
-            color: Colors.white,
+          child: ValueListenableBuilder<bool>(
+            valueListenable: controller.isLocked,
+            builder: (contex, isLocked, _) {
+              return Icon(
+                isLocked ? Iconsax.send_1 : Iconsax.microphone5,
+                color: Colors.white,
+              );
+            },
           ),
           builder: (contex, radius, child) {
             final screenSize = MediaQuery.of(context).size;
             return ValueListenableBuilder<Offset>(
               valueListenable: controller.micPos,
               builder: (contex, offset, _) {
-                final left = screenSize.width -
-                    (radius / 2) -
-                    32 +
-                    offset.dx;
-                final primaryColor =
-                    Theme.of(context).primaryColor;
+                final left = screenSize.width - (radius / 2) - 32 + offset.dx;
+                final primaryColor = Theme.of(context).primaryColor;
                 return AnimatedPositioned(
                   duration: Duration(milliseconds: 300),
                   left: left,
@@ -43,21 +44,23 @@ class RecordThumb extends StatelessWidget {
                       (offset.dy / exp(2)) -
                       MediaQuery.of(context).padding.bottom -
                       30,
-                  child: AnimatedContainer(
-                    duration: Duration(milliseconds: 300),
-                    height: radius,
-                    width: radius,
-                    decoration: BoxDecoration(
-                      color: interpolateColor(
-                        primaryColor,
-                        (screenSize.width -
-                            (left / screenSize.width) *
-                                screenSize.width),
-                        screenSize.width,
+                  child: GestureDetector(
+                    onTap: () => controller.stopRecord(),
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 300),
+                      height: radius,
+                      width: radius,
+                      decoration: BoxDecoration(
+                        color: interpolateColor(
+                          primaryColor,
+                          (screenSize.width -
+                              (left / screenSize.width) * screenSize.width),
+                          screenSize.width,
+                        ),
+                        shape: BoxShape.circle,
                       ),
-                      shape: BoxShape.circle,
+                      child: child,
                     ),
-                    child: child,
                   ),
                 );
               },

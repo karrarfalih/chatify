@@ -34,8 +34,8 @@ class MyVoiceMessage extends StatelessWidget {
       me: message.sender == Chatify.currentUserId,
       meBgColor: ChatifyTheme.of(context).primaryColor,
       contactPlayIconColor: Colors.white,
-      contactBgColor: Theme.of(context).scaffoldBackgroundColor,
-      contactFgColor: Theme.of(context).primaryColor,
+      contactBgColor: ChatifyTheme.of(context).chatGreyForegroundColor,
+      contactFgColor: ChatifyTheme.of(context).primaryColor,
     );
   }
 }
@@ -64,15 +64,17 @@ class MyVoiceMessageBloc extends StatelessWidget {
       ),
       child: VoiceMessage(
         sendAt: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Text(
+            DateTime.now().format(context, 'h:mm a'),
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.white.withOpacity(0.7),
+              height: 1,
+            ),
             textDirection: TextDirection.ltr,
-            child: Text(
-              DateTime.now().format(context, 'h:mm a'),
-              style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.white.withOpacity(0.7),
-                  height: 1),
-              textDirection: TextDirection.ltr,
-            )),
+          ),
+        ),
         isLoading: true,
         duration: Duration.zero,
         height: 50,

@@ -74,8 +74,7 @@ class _VoiceMessageState extends State<VoiceMessage>
   }
 
   @override
-  Widget build(BuildContext context) => _sizerChild(context);
-  Widget _sizerChild(BuildContext context) {
+  Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
@@ -148,8 +147,11 @@ class _VoiceMessageState extends State<VoiceMessage>
           Row(
             children: [
               if (!widget.played) ...[
-                Widgets.circle(context, 1.w(),
-                    widget.me ? widget.meFgColor : widget.contactFgColor),
+                Widgets.circle(
+                  context,
+                  1.w(),
+                  widget.me ? widget.meFgColor : widget.contactFgColor,
+                ),
                 const SizedBox(
                   width: 5,
                 ),
@@ -199,26 +201,12 @@ class _VoiceMessageState extends State<VoiceMessage>
                       color: widget.me
                           ? widget.meBgColor.withOpacity(.4)
                           : widget.contactBgColor.withOpacity(
-                              !widget.played && !isPlayed ? 0 : .35),
+                              !widget.played && !isPlayed ? 0 : .35,
+                            ),
                     ),
                   );
                 },
               ),
-            Opacity(
-              opacity: .0,
-              child: Container(
-                width: noiseWidth,
-                color: Colors.amber.withOpacity(1),
-                child: Slider(
-                  min: 0.0,
-                  max: maxDurationForSlider,
-                  onChangeStart: (__) => _stopPlaying(),
-                  onChangeEnd: (_) => _startPlaying(),
-                  onChanged: (_) => _onChangeSlider(_),
-                  value: duration + .0,
-                ),
-              ),
-            ),
           ],
         ),
       ),
@@ -239,8 +227,10 @@ class _VoiceMessageState extends State<VoiceMessage>
           child: Text(
             !x2 ? '1X' : '2X',
             style: TextStyle(
-                fontSize: 9.8,
-                color: (widget.me ? widget.meFgColor : Colors.black)),
+              fontSize: 9.8,
+              color:
+                  (widget.me ? widget.meFgColor : widget.contactPlayIconColor),
+            ),
           ),
         ),
       );
