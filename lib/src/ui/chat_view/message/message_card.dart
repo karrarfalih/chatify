@@ -3,7 +3,7 @@ import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
-import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
@@ -171,7 +171,7 @@ class MessageCard extends StatelessWidget {
                               message: 'Delete selcetd message?',
                               textOK: 'Yes',
                               textCancel: 'No',
-                              isKeyboardShown: controller.isKeyboardOpen,
+                              isKeyboardShown: controller.keyboardController.isKeybaordOpen,
                             )) {}
                           },
                         ),

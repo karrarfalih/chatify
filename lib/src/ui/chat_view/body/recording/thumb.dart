@@ -1,9 +1,8 @@
 import 'dart:math';
-
-import 'package:chatify/src/ui/chat_view/chatting_room.dart';
-import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:chatify/src/utils/extensions.dart';
 
 class RecordThumb extends StatelessWidget {
   const RecordThumb({
@@ -16,13 +15,13 @@ class RecordThumb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isRecording,
+      valueListenable: controller.voiceController.isRecording,
       builder: (contex, isRecording, child) {
         if (!isRecording) return SizedBox.shrink();
         return ValueListenableBuilder<double>(
-          valueListenable: controller.micRadius,
+          valueListenable: controller.voiceController.micRadius,
           child: ValueListenableBuilder<bool>(
-            valueListenable: controller.isLocked,
+            valueListenable: controller.voiceController.isLocked,
             builder: (contex, isLocked, _) {
               return Icon(
                 isLocked ? Iconsax.send_1 : Iconsax.microphone5,
@@ -33,21 +32,25 @@ class RecordThumb extends StatelessWidget {
           builder: (contex, radius, child) {
             final screenSize = MediaQuery.of(context).size;
             return ValueListenableBuilder<Offset>(
-              valueListenable: controller.micPos,
-              builder: (contex, offset, _) {
-                final left = screenSize.width - (radius / 2) - 32 + offset.dx;
+              valueListenable: controller.voiceController.micPos,
+              builder: (contex, micPos, _) {
+                final left = screenSize.width - (radius / 2) - 32 + micPos.dx;
                 final primaryColor = Theme.of(context).primaryColor;
                 return AnimatedPositioned(
                   duration: Duration(milliseconds: 300),
                   left: left,
                   top: screenSize.height -
-                      (radius / 2) +
-                      (offset.dy / exp(2)) -
-                      (isKeybaordOpen ? currentKeyboardHieght : 0) -
+                      (radius / 2) -
+                      pow((-micPos.dy + 15).withRange(0, 1000), 1 / 1.3) -
+                      (controller.keyboardController.isKeybaordOpen ||
+                              controller.isEmoji.value
+                          ? controller.keyboardController.keyboardHeight -
+                              MediaQuery.of(context).padding.bottom
+                          : 0) -
                       MediaQuery.of(context).padding.bottom -
                       30,
                   child: GestureDetector(
-                    onTap: () => controller.stopRecord(),
+                    onTap: () => controller.voiceController.stopRecord(),
                     child: AnimatedContainer(
                       duration: Duration(milliseconds: 300),
                       height: radius,
@@ -72,11 +75,6 @@ class RecordThumb extends StatelessWidget {
       },
     );
   }
-}
-
-extension Range on double {
-  withRange(double minNumber, double maxNumber) =>
-      min(max(this, minNumber), maxNumber);
 }
 
 Color interpolateColor(

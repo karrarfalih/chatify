@@ -2,8 +2,8 @@ import 'dart:ui';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/body/input_field.dart';
-import 'package:chatify/src/ui/chat_view/body/record.dart';
-import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/chat_view/body/recording/details.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:flutter/material.dart';
 
 class ChatInputBox extends StatelessWidget {
@@ -42,7 +42,7 @@ class ChatInputBox extends StatelessWidget {
               right: 16,
             ),
             child: ValueListenableBuilder<bool>(
-              valueListenable: controller.isRecording,
+              valueListenable: controller.voiceController.isRecording,
               builder: (contex, value, child) {
                 return Stack(
                   children: [
@@ -55,7 +55,7 @@ class ChatInputBox extends StatelessWidget {
                     ),
                     if (value)
                       ChatRecordDetails(
-                        controller: controller.voiceRecordingController!,
+                        controller: controller.voiceController,
                         chat: chat,
                       )
                   ],

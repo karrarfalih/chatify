@@ -3,9 +3,7 @@ pubspec.lock
 .dart_tool/
 .flutter-plugins
 .flutter-plugins-dependencies
-example/.gitignore
 example/.metadata
-.gitignore
 example/lib/firebase_options.dart
 example/android/app/google-services.json
 example/ios/firebase_app_id_file.json

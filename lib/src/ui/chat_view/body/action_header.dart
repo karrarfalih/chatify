@@ -1,6 +1,6 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +23,8 @@ class MessageActionHeader extends StatelessWidget {
         final isMine = value?.message?.sender == Chatify.currentUserId;
         final name = isMine ? 'Me' : user.name;
         final message = value?.message;
-        final icon = value?.type == MessageActionType.reply
-            ? Icons.reply
-            : Icons.edit;
+        final icon =
+            value?.type == MessageActionType.reply ? Icons.reply : Icons.edit;
         return Directionality(
           textDirection: TextDirection.ltr,
           child: KrExpandedSection(

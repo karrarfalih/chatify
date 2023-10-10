@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'dart:math';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -107,3 +108,8 @@ extension DateTimeFormat on DateTime{
   Timestamp get stamp => Timestamp.fromDate(this);
 }
 
+
+extension Range on double {
+  withRange(double minNumber, double maxNumber) =>
+      min(max(this, minNumber), maxNumber);
+}

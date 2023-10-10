@@ -1,6 +1,6 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
-import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/packages/voice_player/voice_message_package.dart';

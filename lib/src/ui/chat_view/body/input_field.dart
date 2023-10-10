@@ -1,13 +1,12 @@
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
-import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconsax/iconsax.dart';
-
-bool forceEmoji = false;
+import 'package:photo_gallery/photo_gallery.dart';
 
 class ChatInputField extends StatelessWidget {
   const ChatInputField({
@@ -30,12 +29,12 @@ class ChatInputField extends StatelessWidget {
           onPressed: () {
             if (controller.isEmoji.value) {
               controller.isEmojiIcon.value = false;
-              forceEmoji = false;
+              controller.keyboardController.forceEmoji = false;
 
               controller.focus.requestFocus();
               SystemChannels.textInput.invokeMethod('TextInput.show');
             } else {
-              forceEmoji = true;
+              controller.keyboardController.forceEmoji = true;
               controller.isEmoji.value = true;
               controller.isEmojiIcon.value = true;
               SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -156,8 +155,12 @@ class ChatInputField extends StatelessWidget {
                   : Row(
                       children: [
                         CircularButton(
-                          onPressed: () {
-                            controller.sendImage(chat);
+                          onPressed: () async {
+                            final List<Album> imageAlbums =
+                                await PhotoGallery.listAlbums();
+                            print(imageAlbums.length);
+
+                            // controller.sendImage(chat);
                           },
                           size: 60,
                           icon: Animate(
@@ -178,17 +181,19 @@ class ChatInputField extends StatelessWidget {
                           ),
                         ),
                         GestureDetector(
-                          onHorizontalDragStart: (_) => controller.record(),
+                          onHorizontalDragStart: (_) =>
+                              controller.voiceController.record(),
                           onHorizontalDragUpdate: (d) {
-                            controller.setMicPos(d.localPosition);
+                            controller.voiceController
+                                .setMicPos(d.localPosition);
                             if (d.localPosition.dx < -250) {
-                              controller.stopRecord();
+                              controller.voiceController.stopRecord();
                             }
                           },
                           onHorizontalDragEnd: (_) =>
-                              controller.endMicDarg(chat),
+                              controller.voiceController.endMicDarg(chat),
                           onHorizontalDragCancel: () =>
-                              controller.endMicDarg(chat),
+                              controller.voiceController.endMicDarg(chat),
                           child: Padding(
                             padding: const EdgeInsets.all(
                               3,

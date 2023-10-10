@@ -23,6 +23,7 @@ dependencies:
   kr_pull_down_button: ^1.0.0
   optimized_cached_image: ^3.0.1
   path_provider: ^2.0.13
+  photo_gallery: ^2.1.1
   record: ^4.4.4
 
 dev_dependencies:
