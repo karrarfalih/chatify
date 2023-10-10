@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:chatify/chatify.dart';
@@ -21,6 +22,8 @@ class ChatController {
   final isRecording = false.obs;
   final pendingMessages = <Message>[].obs;
   final messageAction = Rx<MessageActionArgs?>(null);
+  final isEmoji = false.obs;
+  final isEmojiIcon = false.obs;
 
   bool isKeyboardOpen = false;
   bool preventEmoji = false;
@@ -58,11 +61,23 @@ class ChatController {
             (30 * (_min / value.current).withRange(1, 5));
       });
     });
-    micLockTimer = Timer.periodic(Duration(milliseconds: 1500), (timer) {
-      if (!isRecording.value) return;
-      final isZero = micLockPos.value.dy == 0;
-      micLockPos.value = Offset(0, isZero ? 1 : 0);
+    _initLockTimer();
+  }
+
+  _initLockTimer() {
+    Future.delayed(Duration(milliseconds: 100)).then((value) {
+      _updateLockPos();
+      micLockTimer = Timer.periodic(
+        Duration(milliseconds: 1500),
+        (timer) => _updateLockPos(),
+      );
     });
+  }
+
+  _updateLockPos() {
+    if (!isRecording.value) return;
+    final isZero = micLockPos.value.dy == 0;
+    micLockPos.value = Offset(0, isZero ? 1 : 0);
   }
 
   endMicDarg(Chat chat) {
@@ -73,8 +88,9 @@ class ChatController {
 
   setMicPos(Offset offset) {
     if (isLocked.value) return;
+    if (offset.distance.round() == micPos.value.distance.round()) return;
     micPos.value = offset;
-    if (offset.dy < -150) {
+    if (offset.dy < -90) {
       lock();
     }
   }
@@ -91,6 +107,7 @@ class ChatController {
     micRadiusTimer?.cancel();
     micLockTimer?.cancel();
     isRecording.value = false;
+    micLockPos.value = Offset.zero;
     if (micPos.value.dx > -150 &&
         voiceRecordingController!.seconds > 1 &&
         submit) {
@@ -108,23 +125,23 @@ class ChatController {
         pendingMsg,
       ];
       await voiceRecordingController!.stop();
-      // final file = await File(voiceRecordingController!.path!).readAsBytes();
-      // final id = Uuid.generate();
-      // final url = await uploadAttachment(file, 'chats/${chat.id}/$id.m4a');
-      // if (url == null) return;
-      // await Chatify.datasource.addMessage(
-      //   Message(
-      //     id: id,
-      //     message: 'voice message',
-      //     chatId: chat.id,
-      //     sender: Chatify.currentUserId,
-      //     attachment: url,
-      //     type: MessageType.voice,
-      //     duration: Duration(seconds: voiceRecordingController!.seconds),
-      //     unSeenBy:
-      //         chat.members.where((e) => e != Chatify.currentUserId).toList(),
-      //   ),
-      // );
+      final file = await File(voiceRecordingController!.path!).readAsBytes();
+      final id = Uuid.generate();
+      final url = await uploadAttachment(file, 'chats/${chat.id}/$id.m4a');
+      if (url == null) return;
+      await Chatify.datasource.addMessage(
+        Message(
+          id: id,
+          message: 'voice message',
+          chatId: chat.id,
+          sender: Chatify.currentUserId,
+          attachment: url,
+          type: MessageType.voice,
+          duration: Duration(seconds: voiceRecordingController!.seconds),
+          unSeenBy:
+              chat.members.where((e) => e != Chatify.currentUserId).toList(),
+        ),
+      );
       pendingMessages.value.remove(pendingMsg);
       pendingMessages.value = pendingMessages.value.toList();
     }

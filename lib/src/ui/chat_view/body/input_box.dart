@@ -36,34 +36,31 @@ class ChatInputBox extends StatelessWidget {
               ),
             ),
           ),
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.only(
-                left: 16,
-                right: 16,
-              ),
-              child: ValueListenableBuilder<bool>(
-                valueListenable: controller.isRecording,
-                builder: (contex, value, child) {
-                  return Stack(
-                    children: [
-                      Opacity(
-                        opacity: value ? 0 : 1,
-                        child: ChatInputField(
-                          controller: controller,
-                          chat: chat,
-                        ),
+          child: Padding(
+            padding: const EdgeInsets.only(
+              left: 16,
+              right: 16,
+            ),
+            child: ValueListenableBuilder<bool>(
+              valueListenable: controller.isRecording,
+              builder: (contex, value, child) {
+                return Stack(
+                  children: [
+                    Opacity(
+                      opacity: value ? 0 : 1,
+                      child: ChatInputField(
+                        controller: controller,
+                        chat: chat,
                       ),
-                      if (value)
-                        ChatRecordDetails(
-                          controller: controller.voiceRecordingController!,
-                          chat: chat,
-                        )
-                    ],
-                  );
-                },
-              ),
+                    ),
+                    if (value)
+                      ChatRecordDetails(
+                        controller: controller.voiceRecordingController!,
+                        chat: chat,
+                      )
+                  ],
+                );
+              },
             ),
           ),
         ),

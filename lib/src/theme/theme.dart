@@ -32,7 +32,7 @@ class ChatifyThemeData {
 
   Color get chatGreyForegroundColor => chatBrightness == Brightness.dark
       ? Colors.grey.shade900
-      : Colors.grey.shade300;
+      : Colors.grey.shade200;
 
   Color get recentChatsForegroundColor =>
       recentChatsBrightness == Brightness.dark ? Colors.white : Colors.black;

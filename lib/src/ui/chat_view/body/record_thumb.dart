@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chatify/src/ui/chat_view/chatting_room.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -42,6 +43,7 @@ class RecordThumb extends StatelessWidget {
                   top: screenSize.height -
                       (radius / 2) +
                       (offset.dy / exp(2)) -
+                      (isKeybaordOpen ? currentKeyboardHieght : 0) -
                       MediaQuery.of(context).padding.bottom -
                       30,
                   child: GestureDetector(

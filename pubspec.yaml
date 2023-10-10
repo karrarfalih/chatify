@@ -9,6 +9,7 @@ environment:
 
 dependencies:
   cloud_firestore: ^4.4.3
+  emoji_picker_flutter: ^1.6.2
   firebase_database: ^10.2.6
   firebase_storage: ^11.0.14
   flutter:

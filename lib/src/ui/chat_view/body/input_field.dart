@@ -3,7 +3,11 @@ import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconsax/iconsax.dart';
+
+bool forceEmoji = false;
 
 class ChatInputField extends StatelessWidget {
   const ChatInputField({
@@ -23,14 +27,50 @@ class ChatInputField extends StatelessWidget {
     return Row(
       children: [
         CircularButton(
-          onPressed: () {},
+          onPressed: () {
+            if (controller.isEmoji.value) {
+              controller.isEmojiIcon.value = false;
+              forceEmoji = false;
+
+              controller.focus.requestFocus();
+              SystemChannels.textInput.invokeMethod('TextInput.show');
+            } else {
+              forceEmoji = true;
+              controller.isEmoji.value = true;
+              controller.isEmojiIcon.value = true;
+              SystemChannels.textInput.invokeMethod('TextInput.hide');
+            }
+          },
           size: 60,
           icon: Padding(
             padding: const EdgeInsets.all(3),
-            child: Icon(
-              Iconsax.emoji_normal,
-              color: iconColor,
-              size: 26,
+            child: ValueListenableBuilder<bool>(
+              valueListenable: controller.isEmojiIcon,
+              builder: (context, isEmoji, child) {
+                return AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  transitionBuilder:
+                      (Widget child, Animation<double> animation) {
+                    return ScaleTransition(
+                      scale: animation,
+                      child: child,
+                    );
+                  },
+                  child: isEmoji
+                      ? Icon(
+                          Iconsax.keyboard,
+                          key: ValueKey('keyboard_icon'),
+                          color: iconColor,
+                          size: 26,
+                        )
+                      : Icon(
+                          Iconsax.emoji_normal,
+                          key: ValueKey('emoji_icon'),
+                          color: iconColor,
+                          size: 26,
+                        ),
+                );
+              },
             ),
           ),
         ),
@@ -87,12 +127,8 @@ class ChatInputField extends StatelessWidget {
           margin: const EdgeInsetsDirectional.only(start: 10),
           child: ValueListenableBuilder<bool>(
             valueListenable: controller.isTyping,
-            builder: (
-              contex,
-              value,
-              child,
-            ) {
-              return value
+            builder: (contex, isTyping, child) {
+              return isTyping
                   ? CircularButton(
                       onPressed: () {
                         controller.submitMessage(
@@ -103,12 +139,17 @@ class ChatInputField extends StatelessWidget {
                       size: 60,
                       icon: Padding(
                         padding: const EdgeInsets.all(3),
-                        child: Icon(
-                          Iconsax.send_1,
-                          color: ChatifyTheme.of(
-                            context,
-                          ).primaryColor,
-                          size: 26,
+                        child: Animate(
+                          effects: [
+                            ScaleEffect(duration: Duration(milliseconds: 120))
+                          ],
+                          child: Icon(
+                            Iconsax.send_1,
+                            color: ChatifyTheme.of(
+                              context,
+                            ).primaryColor,
+                            size: 26,
+                          ),
                         ),
                       ),
                     )
@@ -119,10 +160,21 @@ class ChatInputField extends StatelessWidget {
                             controller.sendImage(chat);
                           },
                           size: 60,
-                          icon: Icon(
-                            Iconsax.document_1,
-                            color: iconColor,
-                            size: 24,
+                          icon: Animate(
+                            effects: [
+                              FadeEffect(
+                                duration: Duration(milliseconds: 100),
+                              ),
+                              ScaleEffect(
+                                duration: Duration(milliseconds: 100),
+                                begin: Offset(0, 0),
+                              )
+                            ],
+                            child: Icon(
+                              Iconsax.document_1,
+                              color: iconColor,
+                              size: 24,
+                            ),
                           ),
                         ),
                         GestureDetector(
@@ -141,10 +193,18 @@ class ChatInputField extends StatelessWidget {
                             padding: const EdgeInsets.all(
                               3,
                             ),
-                            child: Icon(
-                              Iconsax.microphone,
-                              color: iconColor,
-                              size: 26,
+                            child: Animate(
+                              effects: [
+                                ScaleEffect(
+                                  duration: Duration(milliseconds: 100),
+                                  begin: Offset(0.5, 0.5),
+                                )
+                              ],
+                              child: Icon(
+                                Iconsax.microphone,
+                                color: iconColor,
+                                size: 26,
+                              ),
                             ),
                           ),
                         ),
