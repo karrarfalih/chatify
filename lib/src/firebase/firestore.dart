@@ -1,6 +1,7 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/identical_list.dart';
+import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -36,6 +37,7 @@ class ChatifyDatasource {
   Future<void> addMessage(Message message) async {
     await _messages.doc(message.id).set(message, SetOptions(merge: true));
     Chatify.config.onSendMessage?.call(message);
+    ChatifyLog.d('addMessage');
   }
 
   Future<void> updateMessageUsingFieldValue(
@@ -43,6 +45,7 @@ class ChatifyDatasource {
     Map<String, FieldValue> data,
   ) async {
     await _messages.doc(messageId).update(data);
+    ChatifyLog.d('updateMessageUsingFieldValue');
   }
 
   Future<void> addMessageEmojis(String messageId, String emoji) async {
@@ -51,9 +54,12 @@ class ChatifyDatasource {
         [MessageEmoji(emoji: emoji, uid: Chatify.currentUserId).toJson],
       )
     });
+    ChatifyLog.d('addMessageEmojis');
   }
 
   Future<void> removeMessageEmojis(String messageId) async {
+    ChatifyLog.d('removeMessageEmojis');
+
     return FirebaseFirestore.instance.runTransaction((t) async {
       final msg = await t.get(_messages.doc(messageId));
       final emojis = msg.data()!.emojis;
@@ -67,15 +73,19 @@ class ChatifyDatasource {
 
   Future<void> deleteMessageForAll(String id) async {
     await _messages.doc(id).delete();
+    ChatifyLog.d('deleteMessageForAll');
   }
 
   Future<void> deleteMessageForMe(String id) async {
     await _messages.doc(id).update({
       'deletedBy': FieldValue.arrayUnion([Chatify.currentUserId])
     });
+    ChatifyLog.d('deleteMessageForMe');
   }
 
   Future<void> markAsSeen(String id) async {
+    ChatifyLog.d('markAsSeen');
+
     await _messages.doc(id).update({
       'unSeenBy': FieldValue.arrayRemove([Chatify.currentUserId]),
       'seenBy': FieldValue.arrayUnion([Chatify.currentUserId])
@@ -90,30 +100,33 @@ class ChatifyDatasource {
     for (final message in unSeenMessages.docs) {
       await markAsSeen(message.id);
     }
+    ChatifyLog.d('markAllMessagesAsSeen');
   }
 
   Future<void> markAsDelivered(String id) async {
     await _messages.doc(id).update({
       'deliveredTo': FieldValue.arrayUnion([Chatify.currentUserId])
     });
+    ChatifyLog.d('markAsDelivered');
   }
 
   Future<void> addChat(Chat chat) async {
     await _chats.doc(chat.id).set(chat, SetOptions(merge: true));
+    ChatifyLog.d('addChat');
   }
 
   Future<Chat?> readChat(String id) async {
-    return Cache.get<Chat>(id) ?? (await _chats.doc(id).get()).data();
+    return MemoryCache.get<Chat>(id) ?? (await _chats.doc(id).get()).data();
   }
 
   Future<Chat> findChatOrCreate(List<String> members) async {
-    bool isExist = Cache.cache.entries.any(
+    bool isExist = MemoryCache.cache.entries.any(
       (e) =>
           e.value is Chat &&
           (e.value as Chat).members.hasSameElementsAs(members),
     );
     if (isExist) {
-      return Cache.cache.entries
+      return MemoryCache.cache.entries
           .firstWhere(
             (e) =>
                 e.value is Chat &&

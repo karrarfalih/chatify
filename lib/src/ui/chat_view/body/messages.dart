@@ -33,7 +33,9 @@ class ChatMessages extends StatelessWidget {
         physics: const BouncingScrollPhysics(),
         itemBuilder: (context, docs, i) {
           Message msg = docs.elementAt(i).data() as Message;
-          Chatify.datasource.markAsSeen(msg.id);
+          if (msg.unSeenBy.contains(Chatify.currentUserId)) {
+            Chatify.datasource.markAsSeen(msg.id);
+          }
           Message? prevMsg;
           Message? nextMsg;
           if (docs.length != i + 1) {

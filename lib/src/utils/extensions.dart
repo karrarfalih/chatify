@@ -95,12 +95,15 @@ bool hasMatch(String? value, String pattern) {
   return (value == null) ? false : RegExp(pattern).hasMatch(value);
 }
 
-extension DateTimeFormat on DateTime{
-  String fullDate(BuildContext context) => format(context, 'MMM d, yyyy - HH:mm a');
+extension DateTimeFormat on DateTime {
+  String fullDate(BuildContext context) =>
+      format(context, 'MMM d, yyyy - HH:mm a');
 
-  String format(BuildContext context, String format){
+  String format(BuildContext context, String format) {
     initializeDateFormatting();
-    return DateFormat(format, Localizations.maybeLocaleOf(context)?.languageCode).format(this);
+    return DateFormat(
+            format, Localizations.maybeLocaleOf(context)?.languageCode)
+        .format(this);
   }
 
   DateTime get withoutTime => DateTime(year, month, day);
@@ -108,8 +111,15 @@ extension DateTimeFormat on DateTime{
   Timestamp get stamp => Timestamp.fromDate(this);
 }
 
-
 extension Range on double {
   withRange(double minNumber, double maxNumber) =>
       min(max(this, minNumber), maxNumber);
+}
+
+extension DurationInt on int {
+  String get toDurationString {
+    int s = this % 60;
+    int m = this ~/ 60;
+    return '$m:${s < 10 ? '0$s' : s}';
+  }
 }

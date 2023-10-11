@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
@@ -7,8 +9,7 @@ import 'package:optimized_cached_image/optimized_cached_image.dart';
 const _kImageMaxWidthCache = 1000;
 
 class CustomImage extends StatelessWidget {
-  const CustomImage(
-    {
+  const CustomImage({
     Key? key,
     this.url,
     this.radius,
@@ -23,9 +24,11 @@ class CustomImage extends StatelessWidget {
     this.loadingRadius,
     this.shimmerSize,
     this.borderRadius,
+    this.file,
   }) : super(key: key);
 
   final String? url;
+  final File? file;
   final String? onEmptyOrNull;
   final double? radius;
   final double? loadingRadius;
@@ -41,16 +44,24 @@ class CustomImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if ((url == null || url!.isEmpty) && (onEmptyOrNull == null || onEmptyOrNull!.isEmpty)) {
+    if ((url == null || url!.isEmpty) &&
+        file == null &&
+        (onEmptyOrNull == null || onEmptyOrNull!.isEmpty)) {
       return Padding(
         padding: padding ?? EdgeInsets.zero,
         child: const Center(child: ErrorImage()),
       );
     }
-    Widget image = SizedBox(
-      width: width,
-      height: height,
-      child: OptimizedCacheImage(
+    Widget image;
+    if (file != null) {
+      image = Image.file(
+        file!,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) =>
+            Center(child: onError ?? ErrorImage()),
+      );
+    } else {
+      image = OptimizedCacheImage(
         imageUrl: url != null && url!.isNotEmpty ? url! : onEmptyOrNull ?? '',
         placeholder: (context, url) => _onLoading(context),
         errorWidget: (context, url, error) {
@@ -59,7 +70,12 @@ class CustomImage extends StatelessWidget {
         memCacheWidth: _kImageMaxWidthCache,
         maxWidthDiskCache: _kImageMaxWidthCache,
         fit: fit,
-      ),
+      );
+    }
+    image = SizedBox(
+      width: width,
+      height: height,
+      child: image,
     );
     if (onTap != null) {
       image = InkWell(

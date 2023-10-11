@@ -8,6 +8,7 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
+  camera: ^0.10.5+5
   cloud_firestore: ^4.4.3
   emoji_picker_flutter: ^1.6.2
   firebase_database: ^10.2.6
@@ -23,9 +24,10 @@ dependencies:
   kr_pull_down_button: ^1.0.0
   optimized_cached_image: ^3.0.1
   path_provider: ^2.0.13
+  permission_handler: ^11.0.1
   photo_gallery: ^2.1.1
   record: ^4.4.4
-  transparent_image: ^2.0.1
+  shared_preferences: ^2.2.2
 
 dev_dependencies:
   flutter_lints: ^2.0.0

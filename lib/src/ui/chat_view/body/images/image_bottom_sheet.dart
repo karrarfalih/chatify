@@ -1,237 +1,314 @@
+import 'package:chatify/src/const.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/ui/chat_view/body/images/camera_thumnail.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
+import 'package:chatify/src/ui/chat_view/body/images/image_preview.dart';
+import 'package:chatify/src/ui/chat_view/body/images/input_field.dart';
+import 'package:chatify/src/ui/common/bottom_sheet/flexible_bottom_sheet_route.dart';
 import 'package:chatify/src/ui/common/sliver/sliver_container.dart';
 import 'package:chatify/src/ui/common/sliver_group.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:photo_gallery/photo_gallery.dart';
-import 'package:transparent_image/transparent_image.dart';
 
-showImagesGallery(BuildContext context) {
+showImagesGallery(BuildContext context) async {
   final controller = GalleryController();
-
-  showModalBottomSheet(
+  await showFlexibleBottomSheet(
+    minHeight: 0,
+    initHeight: 0.7,
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.black.withOpacity(0.1),
-    builder: (BuildContext bc) {
-      return _ChatImages(
-        controller: controller,
-      );
-    },
+    builder: (context, scrollController, bottomSheetOffset) => _ChatImages(
+      controller: controller,
+      scrollController: scrollController,
+    ),
+    anchors: [0, 0.7],
+    isSafeArea: false,
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    bottomSheetBorderRadius: BorderRadius.vertical(top: Radius.circular(20)),
   );
+  controller.dispos();
 }
 
-class _ChatImages extends StatelessWidget {
+class _ChatImages extends StatefulWidget {
   _ChatImages({
     required this.controller,
+    required this.scrollController,
   });
 
   final GalleryController controller;
+  final ScrollController scrollController;
+
+  @override
+  State<_ChatImages> createState() => _ChatImagesState();
+}
+
+class _ChatImagesState extends State<_ChatImages> {
+  @override
+  void initState() {
+    widget.controller.init().then((isSuccess) {
+      if (!isSuccess) Navigator.of(context).pop();
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = ChatifyTheme.of(context);
-    bool isClosed = false;
     return Stack(
       children: [
         NotificationListener(
-          onNotification: (not) {
-            if (isClosed) return false;
-            if (not is ScrollUpdateNotification) {
-              if (not.metrics.pixels < -100) {
-                isClosed = true;
-                Navigator.pop(context);
+          onNotification: (x) {
+            if (x is ScrollMetricsNotification &&
+                widget.controller.images.value.isNotEmpty) {
+              final rowsCount =
+                  ((widget.controller.images.value.length + 1) / 3).ceil() - 6;
+              final spacing = (rowsCount ~/ 2) * 4;
+              final imageHeight = (MediaQuery.of(context).size.width - 20) / 3;
+              final imagesHeight = (rowsCount * imageHeight) + spacing - 50;
+              if (x.metrics.pixels >= imagesHeight) {
+                widget.controller.loadMoreImages();
               }
             }
             return false;
           },
           child: CustomScrollView(
-            physics: BouncingScrollPhysics(),
+            physics: ClampingScrollPhysics(),
+            controller: widget.scrollController,
             slivers: [
               SliverToBoxAdapter(
-                child: GestureDetector(
-                  onTap: Navigator.of(context).pop,
-                  child: ValueListenableBuilder<List<Medium>>(
-                    valueListenable: controller.selected,
-                    builder: (context, selected, child) {
-                      return Container(
-                        height: selected.isEmpty ? 300 : 265,
-                        color: Colors.transparent,
-                      );
-                    },
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Container(
-                  height: 20,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(20),
-                    ),
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
                 child: ValueListenableBuilder<List<Medium>>(
-                  valueListenable: controller.selected,
+                  valueListenable: widget.controller.selected,
                   builder: (context, selected, child) {
-                    if (selected.isEmpty) return SizedBox.shrink();
-                    return Container(
-                      height: 35,
-                      color: Theme.of(context).scaffoldBackgroundColor,
+                    return Padding(
                       padding: EdgeInsetsDirectional.only(
                         start: 20,
-                        bottom: 10,
+                        bottom: 14,
+                        top: 16,
                       ),
                       child: Text(
-                        '${selected.length} photo slected',
+                        selected.isEmpty
+                            ? 'Select Media'
+                            : '${selected.length} photo selected',
                         style: TextStyle(fontSize: 16),
                       ),
                     );
                   },
                 ),
               ),
-              ValueListenableBuilder<List<Medium>>(
-                valueListenable: controller.images,
-                builder: (context, images, child) {
-                  return DecoratedSliver(
-                    decoration: BoxDecoration(color: Colors.white),
-                    sliver: SliverPadding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      sliver: SliverContainer(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(20)),
-                        sliver: SliverGrid.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithMaxCrossAxisExtent(
-                            maxCrossAxisExtent: 170,
-                            crossAxisSpacing: 4,
-                            mainAxisSpacing: 4,
-                          ),
-                          itemCount: images.length,
-                          itemBuilder: (context, index) {
-                            return StatefulBuilder(
-                              builder: (context, setState) {
-                                final image = images.elementAt(index);
-                                bool isSelected =
-                                    controller.selected.value.contains(image);
-                                return Stack(
-                                  alignment: AlignmentDirectional.topEnd,
-                                  children: [
-                                    AnimatedScale(
-                                      duration: Duration(milliseconds: 300),
+              DecoratedSliver(
+                decoration: BoxDecoration(color: Colors.white),
+                sliver: SliverContainer(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  background: Container(
+                    color: Colors.white,
+                  ),
+                  margin: EdgeInsets.symmetric(horizontal: 6),
+                  sliver: ValueListenableBuilder<List<Medium>>(
+                    valueListenable: widget.controller.images,
+                    builder: (context, images, child) {
+                      return SliverGrid.builder(
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3,
+                          childAspectRatio: 1,
+                          crossAxisSpacing: 4,
+                          mainAxisSpacing: 4,
+                        ),
+                        itemCount: images.length + 1,
+                        itemBuilder: (context, index) {
+                          if (index == 0) {
+                            return CameraThumnail(
+                              controller: widget.controller,
+                            );
+                          }
+                          return StatefulBuilder(
+                            builder: (context, setState) {
+                              final image = images.elementAt(index - 1);
+                              bool isSelected = widget.controller.selected.value
+                                  .contains(image);
+                              return Stack(
+                                alignment: AlignmentDirectional.topEnd,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (context) => ImagePreview(
+                                            image: image,
+                                            isSelecetd: isSelected,
+                                            controller: widget.controller,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    child: AnimatedScale(
+                                      duration: Duration(milliseconds: 170),
                                       scale: isSelected ? 0.8 : 1,
                                       child: Container(
                                         height: double.maxFinite,
                                         width: double.maxFinite,
                                         color: Theme.of(context)
                                             .scaffoldBackgroundColor,
-                                        child: FadeInImage(
-                                          fit: BoxFit.cover,
-                                          placeholder:
-                                              MemoryImage(kTransparentImage),
-                                          image: ThumbnailProvider(
-                                            mediumId: image.id,
-                                            width: 300,
-                                            height: 300,
-                                          ),
+                                        child: Stack(
+                                          children: [
+                                            Container(
+                                              width: double.maxFinite,
+                                              height: double.maxFinite,
+                                              color: theme.chatForegroundColor
+                                                  .withOpacity(0.07),
+                                              child: Icon(
+                                                Iconsax.gallery,
+                                                color: theme.chatForegroundColor
+                                                    .withOpacity(0.4),
+                                              ),
+                                            ),
+                                            AspectRatio(
+                                              aspectRatio: 1,
+                                              child: FadeInImage(
+                                                fit: BoxFit.cover,
+                                                placeholder: MemoryImage(
+                                                  kTransparentImage,
+                                                ),
+                                                image: ThumbnailProvider(
+                                                  mediumId: image.id,
+                                                  highQuality: true,
+                                                ),
+                                              ),
+                                            ),
+                                            if (image.mediumType ==
+                                                MediumType.video)
+                                              Align(
+                                                alignment: AlignmentDirectional
+                                                    .bottomStart,
+                                                child: Container(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: 5,
+                                                    vertical: 2,
+                                                  ),
+                                                  margin: EdgeInsets.all(4),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        ChatifyTheme.of(context)
+                                                            .chatForegroundColor
+                                                            .withOpacity(0.3),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                      5,
+                                                    ),
+                                                  ),
+                                                  child: Row(
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Icon(
+                                                        Icons
+                                                            .play_arrow_rounded,
+                                                        size: 16,
+                                                        color: Theme.of(
+                                                          context,
+                                                        ).scaffoldBackgroundColor,
+                                                      ),
+                                                      Text(
+                                                        (image.duration ~/ 1000)
+                                                            .toDurationString,
+                                                        style: TextStyle(
+                                                          color: Theme.of(
+                                                            context,
+                                                          ).scaffoldBackgroundColor,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              )
+                                          ],
                                         ),
                                       ),
                                     ),
-                                    IconButton(
-                                      onPressed: () => setState(() {
-                                        if (isSelected) {
-                                          controller.selected.value = controller
-                                              .selected.value
-                                              .where((e) => e != image)
-                                              .toList();
-                                        } else {
-                                          controller.selected.value = [
-                                            ...controller.selected.value,
-                                            image
-                                          ];
-                                        }
-                                      }),
-                                      icon: isSelected
-                                          ? Container(
-                                              width: 26,
-                                              height: 26,
-                                              decoration: BoxDecoration(
-                                                shape: BoxShape.circle,
-                                                color: theme.primaryColor,
-                                              ),
-                                              alignment: Alignment.center,
-                                              child: ValueListenableBuilder<
-                                                  List<Medium>>(
-                                                valueListenable:
-                                                    controller.selected,
-                                                builder:
-                                                    (context, selected, child) {
-                                                  return Text(
-                                                    (selected.indexOf(image) +
-                                                            1)
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                      color: Theme.of(context)
-                                                          .scaffoldBackgroundColor,
-                                                      height: 1,
-                                                    ),
-                                                    textAlign: TextAlign.center,
-                                                  );
-                                                },
-                                              ),
-                                            )
-                                          : Icon(
-                                              isSelected
-                                                  ? Icons.circle
-                                                  : Icons
-                                                      .radio_button_unchecked,
-                                              size: 26,
+                                  ),
+                                  IconButton(
+                                    onPressed: () => setState(() {
+                                      if (isSelected) {
+                                        widget.controller.selected.value =
+                                            widget.controller.selected.value
+                                                .where((e) => e != image)
+                                                .toList();
+                                      } else {
+                                        widget.controller.selected.value = [
+                                          ...widget.controller.selected.value,
+                                          image
+                                        ];
+                                      }
+                                    }),
+                                    icon: isSelected
+                                        ? Container(
+                                            width: 26,
+                                            height: 26,
+                                            decoration: BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: theme.primaryColor,
                                             ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              )
+                                            alignment: Alignment.center,
+                                            child: ValueListenableBuilder<
+                                                List<Medium>>(
+                                              valueListenable:
+                                                  widget.controller.selected,
+                                              builder:
+                                                  (context, selected, child) {
+                                                return Text(
+                                                  (selected.indexOf(image) + 1)
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                    color: Theme.of(context)
+                                                        .scaffoldBackgroundColor,
+                                                    height: 1,
+                                                  ),
+                                                  textAlign: TextAlign.center,
+                                                );
+                                              },
+                                            ),
+                                          )
+                                        : Container(
+                                            height: 23,
+                                            width: 23,
+                                            decoration: BoxDecoration(
+                                              color: ChatifyTheme.of(context)
+                                                  .chatForegroundColor
+                                                  .withOpacity(0.07),
+                                              border: Border.all(
+                                                color: Theme.of(context)
+                                                    .scaffoldBackgroundColor,
+                                                width: 2,
+                                              ),
+                                              shape: BoxShape.circle,
+                                            ),
+                                          ),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  ),
+                ),
+              ),
             ],
           ),
         ),
         Align(
           alignment: Alignment.bottomCenter,
           child: ValueListenableBuilder<List<Medium>>(
-            valueListenable: controller.selected,
+            valueListenable: widget.controller.selected,
             builder: (context, selected, child) {
               if (selected.isEmpty) return SizedBox.shrink();
-              return SafeArea(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  child: TextButton(
-                    onPressed: Navigator.of(context).pop,
-                    style: TextButton.styleFrom(
-                      backgroundColor: theme.primaryColor,
-                      minimumSize: Size(200, 0),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    child: Text(
-                      'Send photos (${selected.length})',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Theme.of(context).scaffoldBackgroundColor,
-                      ),
-                    ),
-                  ),
-                ),
+              return GalleryInputField(
+                controller: widget.controller,
+                isSubmit: false,
               );
             },
           ),

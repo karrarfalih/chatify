@@ -3,6 +3,10 @@ import 'package:flutter/material.dart';
 
 class Rx<T> extends ValueNotifier<T> {
   Rx(super.value);
+
+  refresh() {
+    notifyListeners();
+  }
 }
 
 extension SingleValueNotifierExt<T> on T {

@@ -20,7 +20,6 @@ class ChatScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = ChatifyTheme.of(context);
-    print(theme.isRecentChatsDark);
     return Scaffold(
       key: ContextProvider.recentChatsKey,
       appBar: AppBar(

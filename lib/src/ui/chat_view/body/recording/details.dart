@@ -1,6 +1,7 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
 class ChatRecordDetails extends StatelessWidget {
@@ -30,10 +31,8 @@ class ChatRecordDetails extends StatelessWidget {
             child: ValueListenableBuilder<int>(
               valueListenable: controller.seconds,
               builder: (contex, seconds, child) {
-                int s = seconds % 60;
-                int m = seconds ~/ 60;
                 return Text(
-                  '$m:${s < 10 ? '0$s' : s}',
+                  seconds.toDurationString,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: ChatifyTheme.of(context).chatForegroundColor,

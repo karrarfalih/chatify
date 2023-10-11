@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/firebase/firestore.dart';
 import 'package:chatify/src/ui/chat_view/chatting_room.dart';
+import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -65,6 +66,7 @@ class Chatify {
       messagesCollectionName: config.messagesCollectionName,
       chatsCollectionName: config.chatsCollectionName,
     );
+    await Cache.init();
     isInititialized = true;
     ChatifyLog.d('Chatify initialized.');
   }
