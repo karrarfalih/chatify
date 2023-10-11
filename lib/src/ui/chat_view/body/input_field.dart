@@ -1,6 +1,6 @@
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
-import 'package:chatify/src/ui/chat_view/body/images/image_bottom_sheet.dart';
+import 'package:chatify/src/ui/chat_view/body/images/bottom_sheet.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +30,6 @@ class ChatInputField extends StatelessWidget {
             if (controller.isEmoji.value) {
               controller.isEmojiIcon.value = false;
               controller.keyboardController.forceEmoji = false;
-
               controller.focus.requestFocus();
               SystemChannels.textInput.invokeMethod('TextInput.show');
             } else {

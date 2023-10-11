@@ -15,10 +15,9 @@ class GalleryController {
   final selected = <Medium>[].obs;
   final canUseCameraThumnail = false.obs;
   final _cameras = <CameraDescription>[];
-  String? lastImage = Cache.instance.getString('camera_last_image');
-  Album? allAlbums;
+  Album? _allAlbums;
 
-  static List<Medium> initialImages = [];
+  static List<Medium> _initialImages = [];
 
   CameraController? camera;
 
@@ -39,28 +38,27 @@ class GalleryController {
     }
     if (photoesStatus.isDenied) return false;
     final List<Album> imageAlbums = await PhotoGallery.listAlbums();
-    if (initialImages.isEmpty) {
+    if (_initialImages.isEmpty) {
       final cachedImages = Cache.instance.getString('initialGalleryImages');
       if (cachedImages != null) {
         final decodedImages = Map.from(jsonDecode(cachedImages));
         for (final cachedImage in (List.from(decodedImages['images']))) {
-          initialImages.add(Medium.fromJson(cachedImage));
+          _initialImages.add(Medium.fromJson(cachedImage));
         }
       }
     }
-    print(initialImages.length);
-    images.value.addAll(initialImages);
+    images.value.addAll(_initialImages);
     if (imageAlbums.any((e) => e.name == 'All')) {
-      allAlbums = imageAlbums.firstWhere((e) => e.name == 'All');
+      _allAlbums = imageAlbums.firstWhere((e) => e.name == 'All');
       final MediaPage imagePage =
-          await allAlbums!.listMedia(take: 30, lightWeight: true);
+          await _allAlbums!.listMedia(take: 30, lightWeight: true);
       images.value.insertAll(
         0,
         imagePage.items
             .where((e) => !images.value.any((old) => e.id == old.id)),
       );
-      initialImages = imagePage.items.take(30).toList();
-      final imagesJson = initialImages.map((e) => imageToJson(e));
+      _initialImages = imagePage.items.take(30).toList();
+      final imagesJson = _initialImages.map((e) => _imageToJson(e));
       Cache.instance.setString(
         'initialGalleryImages',
         jsonEncode({'images': imagesJson.toList()}),
@@ -78,20 +76,19 @@ class GalleryController {
     return true;
   }
 
-  bool isBusy = false;
-  int index = 1;
+  bool _isBusy = false;
 
   loadMoreImages() async {
-    if (isBusy) return;
-    isBusy = true;
-    final MediaPage imagePage = await allAlbums!
+    if (_isBusy) return;
+    _isBusy = true;
+    final MediaPage imagePage = await _allAlbums!
         .listMedia(skip: images.value.length, take: 100, lightWeight: true);
     images.value.addAll(imagePage.items);
     images.refresh();
-    isBusy = false;
+    _isBusy = false;
   }
 
-  Map<String, dynamic> imageToJson(Medium media) {
+  Map<String, dynamic> _imageToJson(Medium media) {
     return {
       'id': media.id,
       'filename': media.filename,
