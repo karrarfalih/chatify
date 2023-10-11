@@ -1,12 +1,12 @@
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/ui/chat_view/body/images/image_bottom_sheet.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:photo_gallery/photo_gallery.dart';
 
 class ChatInputField extends StatelessWidget {
   const ChatInputField({
@@ -155,12 +155,8 @@ class ChatInputField extends StatelessWidget {
                   : Row(
                       children: [
                         CircularButton(
-                          onPressed: () async {
-                            final List<Album> imageAlbums =
-                                await PhotoGallery.listAlbums();
-                            print(imageAlbums.length);
-
-                            // controller.sendImage(chat);
+                          onPressed: () {
+                            showImagesGallery(contex);
                           },
                           size: 60,
                           icon: Animate(

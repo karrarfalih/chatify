@@ -25,6 +25,7 @@ dependencies:
   path_provider: ^2.0.13
   photo_gallery: ^2.1.1
   record: ^4.4.4
+  transparent_image: ^2.0.1
 
 dev_dependencies:
   flutter_lints: ^2.0.0
