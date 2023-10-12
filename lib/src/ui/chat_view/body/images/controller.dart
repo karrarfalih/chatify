@@ -157,7 +157,7 @@ class GalleryController {
   dispos() {
     canUseCameraThumnail.value = false;
     disposeCamera();
-    // images.dispose();
+    images.dispose();
     selected.dispose();
     canUseCameraThumnail.dispose();
   }

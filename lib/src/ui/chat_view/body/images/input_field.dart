@@ -49,6 +49,7 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
                     children: [
                       Expanded(
                         child: ClipRRect(
+                          borderRadius: BorderRadius.circular(30),
                           child: Stack(
                             alignment: Alignment.bottomCenter,
                             children: [

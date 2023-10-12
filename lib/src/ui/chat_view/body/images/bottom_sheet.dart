@@ -22,7 +22,7 @@ showImagesGallery(BuildContext context) async {
       controller: controller,
       scrollController: scrollController,
     ),
-    anchors: [0, 0.7],
+    anchors: [],
     isSafeArea: false,
     decoration: BoxDecoration(
       color: Colors.white,

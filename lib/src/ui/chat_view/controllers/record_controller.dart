@@ -22,20 +22,23 @@ class VoiceRecordingController {
   final isLocked = false.obs;
 
   record() async {
-    if (await _record.hasPermission()) {
-      Directory documents = await getApplicationDocumentsDirectory();
-      await _record.start(
-        path:
-            Platform.isIOS ? '${documents.path}/${Uuid.generate()}.m4a' : null,
-        encoder: AudioEncoder.aacLc,
-      );
+    if (!await _record.hasPermission()) {
+      return;
     }
+    vibrate();
+    Directory documents = await getApplicationDocumentsDirectory();
+    await _record.start(
+      path: Platform.isIOS ? '${documents.path}/${Uuid.generate()}.m4a' : null,
+      encoder: AudioEncoder.aacLc,
+    );
+
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => seconds.value++);
     isRecording.value = true;
     micPos.value = Offset(0, 0);
     micRadius.value = 80.0;
     isLocked.value = false;
     _minAmplitude = 0;
+    seconds.value = 0;
     _micRadiusTimer = Timer.periodic(Duration(milliseconds: 200), (timer) {
       if (!isRecording.value) return;
       _record.getAmplitude().then((value) {
@@ -62,6 +65,9 @@ class VoiceRecordingController {
   setMicPos(Offset offset) {
     if (isLocked.value) return;
     if (offset.distance.round() == micPos.value.distance.round()) return;
+    if (offset.dx < -180) {
+      controller.voiceController.stopRecord();
+    }
     micPos.value = offset;
     if (offset.dy < -90 && offset.dx > -70) {
       _lockThump();
@@ -81,14 +87,22 @@ class VoiceRecordingController {
   }
 
   _lockThump() {
+    vibrate();
     isLocked.value = true;
     micPos.value = Offset.zero;
     _micLockTimer?.cancel();
     micLockPos.value = Offset.zero;
   }
 
+  vibrate() {
+    Vibration.hasVibrator().then((canVibrate) {
+      if (canVibrate == true) Vibration.vibrate(duration: 10, amplitude: 100);
+    });
+  }
+
   stopRecord([bool submit = true]) async {
     if (!isRecording.value) return;
+    vibrate();
     _micRadiusTimer?.cancel();
     _micLockTimer?.cancel();
     isRecording.value = false;

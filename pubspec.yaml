@@ -28,6 +28,7 @@ dependencies:
   photo_gallery: ^2.1.1
   record: ^4.4.4
   shared_preferences: ^2.2.2
+  vibration: ^1.8.3
 
 dev_dependencies:
   flutter_lints: ^2.0.0

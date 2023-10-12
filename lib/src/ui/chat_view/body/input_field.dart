@@ -181,9 +181,6 @@ class ChatInputField extends StatelessWidget {
                           onHorizontalDragUpdate: (d) {
                             controller.voiceController
                                 .setMicPos(d.localPosition);
-                            if (d.localPosition.dx < -250) {
-                              controller.voiceController.stopRecord();
-                            }
                           },
                           onHorizontalDragEnd: (_) =>
                               controller.voiceController.endMicDarg(chat),
