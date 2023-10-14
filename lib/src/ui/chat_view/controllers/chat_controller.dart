@@ -10,6 +10,7 @@ import 'package:chatify/src/utils/load_images_video.dart';
 import 'package:chatify/src/utils/storage_utils.dart';
 import 'package:chatify/src/utils/uuid.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
@@ -115,11 +116,18 @@ class ChatController {
               chat.members.where((e) => e != Chatify.currentUserId).toList(),
         ),
       );
-      pendingMessages.value.remove(pendingMsg);
-      pendingMessages.value = pendingMessages.value.toList();
     }
   }
 
+  vibrate() {
+    if (kDebugMode && Platform.isIOS) {
+      return;
+    }
+    Vibration.hasVibrator().then((canVibrate) {
+      if (canVibrate == true) Vibration.vibrate(duration: 10, amplitude: 100);
+    });
+  }
+  
   void dispose() {
     textController.dispose();
     pendingMessages.dispose();

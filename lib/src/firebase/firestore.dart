@@ -161,12 +161,7 @@ class ChatifyDatasource {
   Query<Message> unSeenMessages(String chatId) {
     return _messages
         .where('chatId', isEqualTo: chatId)
-        .where('unSeenBy', arrayContains: Chatify.currentUserId)
-        .withConverter<Message>(
-          fromFirestore: (snapshot, _) =>
-              Message.fromJson(snapshot.data()!, snapshot.id),
-          toFirestore: (model, _) => model.toJson,
-        );
+        .where('unSeenBy', arrayContains: Chatify.currentUserId);
   }
 
   Stream<int> unSeenMessagesCount(String chatId) =>

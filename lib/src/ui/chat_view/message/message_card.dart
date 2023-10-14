@@ -11,13 +11,12 @@ import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
 import 'package:chatify/src/ui/common/image_preview.dart';
 import 'package:chatify/src/ui/common/kr_builder.dart';
 import 'package:chatify/src/utils/extensions.dart';
+import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
-import 'package:chatify/src/ui/chat_view/message/widgets/swipe.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
 
-class MessageCard extends StatelessWidget {
+class MessageCard extends StatefulWidget {
   final Message message;
   final bool linkedWithBottom;
   final bool linkedWithTop;
@@ -36,227 +35,261 @@ class MessageCard extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<MessageCard> createState() => _MessageCardState();
+}
+
+class _MessageCardState extends State<MessageCard> {
+  final messagePos = 0.0.obs;
+  double _startPos = 0;
+  bool hasVibrated = false;
+
+  @override
+  void dispose() {
+    messagePos.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = ChatifyTheme.of(context);
-    final isMine = message.sender == Chatify.currentUserId;
-    message.type == MessageType.unSupported;
+    final isMine = widget.message.sender == Chatify.currentUserId;
+    widget.message.type == MessageType.unSupported;
     final textColor = isMine ? Colors.white : theme.chatForegroundColor;
     final bkColor = isMine ? theme.primaryColor : theme.chatGreyForegroundColor;
     final width = MediaQuery.of(context).size.width - 100;
-    final myEmoji = message.emojis
+    final myEmoji = widget.message.emojis
         .cast<MessageEmoji?>()
         .firstWhere((e) => e?.uid == Chatify.currentUserId, orElse: () => null);
-    return Animate(
-      effects: [
-        SlideEffect(begin: Offset(0, 0.5)),
-        ScaleEffect(
-          alignment: Alignment.centerRight,
-        ),
-      ],
-      child: Padding(
-        padding: EdgeInsets.only(top: !linkedWithTop ? 10 : 0),
-        child: Directionality(
-          textDirection: isMine ? TextDirection.rtl : TextDirection.ltr,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsetsDirectional.only(
-                    bottom: 2,
-                    end:
-                        message.type.isTextOrUnsupported || message.type.isVoice
-                            ? 8
-                            : 13,
-                    start:
-                        message.type.isTextOrUnsupported || message.type.isVoice
-                            ? 8
-                            : 13,
+    return Padding(
+      padding: EdgeInsets.only(top: !widget.linkedWithTop ? 10 : 0),
+      child: Directionality(
+        textDirection: isMine ? TextDirection.rtl : TextDirection.ltr,
+        child: Padding(
+          padding: EdgeInsetsDirectional.only(
+            bottom: 2,
+            end: widget.message.type.isTextOrUnsupported ||
+                    widget.message.type.isVoice
+                ? 8
+                : 13,
+            start: widget.message.type.isTextOrUnsupported ||
+                    widget.message.type.isVoice
+                ? 8
+                : 13,
+          ),
+          child: ClipRRect(
+            borderRadius: widget.message.type.isTextOrUnsupported ||
+                    widget.message.type.isVoice
+                ? BorderRadius.zero
+                : BorderRadiusDirectional.only(
+                    topStart: Radius.circular(widget.linkedWithTop ? 0 : 12),
+                    bottomStart:
+                        Radius.circular(widget.linkedWithBottom ? 0 : 12),
+                    topEnd: const Radius.circular(12),
+                    bottomEnd: const Radius.circular(12),
                   ),
-                  child: ClipRRect(
-                    borderRadius: message.type.isTextOrUnsupported ||
-                            message.type.isVoice
-                        ? BorderRadius.zero
-                        : BorderRadiusDirectional.only(
-                            topStart: Radius.circular(linkedWithTop ? 0 : 12),
-                            bottomStart:
-                                Radius.circular(linkedWithBottom ? 0 : 12),
-                            topEnd: const Radius.circular(12),
-                            bottomEnd: const Radius.circular(12),
+            child: PullDownButton(
+              routeTheme: PullDownMenuRouteTheme(
+                width: 140,
+                topWidgetWidth: 250,
+                backgroundColor: Colors.grey.shade200,
+              ),
+              topWidget: Padding(
+                padding: const EdgeInsets.only(bottom: 3, top: 3),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(25),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.05),
+                        blurRadius: 15,
+                        spreadRadius: 5,
+                      )
+                    ],
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: ['❤', '😍', '😂', '😢', '👍'].map((e) {
+                      return AnimatedScale(
+                        duration: const Duration(milliseconds: 150),
+                        scale: myEmoji?.emoji == e ? 1.3 : 1,
+                        child: CircularButton(
+                          highlightColor: Colors.transparent,
+                          icon: Text(
+                            e,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              height: 1,
+                            ),
                           ),
-                    child: PullDownButton(
-                      routeTheme: PullDownMenuRouteTheme(
-                        width: 140,
-                        topWidgetWidth: 250,
-                        backgroundColor: Colors.grey.shade200,
-                      ),
-                      topWidget: Padding(
-                        padding: const EdgeInsets.only(bottom: 3, top: 3),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(25),
-                            color: Colors.white,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 15,
-                                spreadRadius: 5,
-                              )
-                            ],
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: ['❤', '😍', '😂', '😢', '👍'].map((e) {
-                              return AnimatedScale(
-                                duration: const Duration(milliseconds: 150),
-                                scale: myEmoji?.emoji == e ? 1.3 : 1,
-                                child: CircularButton(
-                                  highlightColor: Colors.transparent,
-                                  icon: Text(
-                                    e,
-                                    style: const TextStyle(
-                                      fontSize: 22,
-                                      height: 1,
-                                    ),
+                          onPressed: () {
+                            if (myEmoji?.emoji == e) {
+                              Chatify.datasource
+                                  .removeMessageEmojis(widget.message.id);
+                            } else {
+                              Chatify.datasource
+                                  .addMessageEmojis(widget.message.id, e);
+                            }
+                            Navigator.pop(context);
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
+              itemBuilder: (context) => [
+                if (widget.message.type.isTextOrUnsupported && isMine)
+                  PullDownMenuItem(
+                    title: 'Edit',
+                    icon: Iconsax.edit,
+                    onTap: () {
+                      widget.controller.edit(widget.message);
+                    },
+                  ),
+                const PullDownMenuDivider(),
+                PullDownMenuItem(
+                  title: 'Copy',
+                  icon: Iconsax.copy,
+                  onTap: () {
+                    widget.controller.copy(widget.message);
+                  },
+                ),
+                const PullDownMenuDivider(),
+                PullDownMenuItem(
+                  title: 'Reply',
+                  icon: Iconsax.undo,
+                  onTap: () {
+                    widget.controller.reply(widget.message);
+                  },
+                ),
+                const PullDownMenuDivider(),
+                PullDownMenuItem(
+                  title: 'Delete',
+                  icon: Icons.delete,
+                  iconColor: Colors.red,
+                  onTap: () async {
+                    if (await showConfirm(
+                      context: context,
+                      message: 'Delete selcetd message?',
+                      textOK: 'Yes',
+                      textCancel: 'No',
+                      isKeyboardShown:
+                          widget.controller.keyboardController.isKeybaordOpen,
+                    )) {}
+                  },
+                ),
+              ],
+              position: PullDownMenuPosition.automatic,
+              applyOpacity: false,
+              buttonBuilder: (context, showMenu) => GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  if (widget.message.type == MessageType.image) {
+                    Navigator.of(context).push(
+                      ImagePreview.route(
+                          message: widget.message, user: widget.user),
+                    );
+                  } else {
+                    FocusScope.of(context).unfocus();
+                    showMenu();
+                  }
+                },
+                onLongPress: () {
+                  if (widget.message.type == MessageType.image) {
+                    showMenu();
+                  }
+                },
+                child: Directionality(
+                  textDirection: TextDirection.ltr,
+                  child: GestureDetector(
+                    onHorizontalDragStart: (x) {
+                      _startPos = x.globalPosition.dx;
+                      hasVibrated = false;
+                    },
+                    onHorizontalDragUpdate: (x) {
+                      if (-x.globalPosition.dx + _startPos < 0) return;
+                      if (-x.globalPosition.dx + _startPos > 100) return;
+                      messagePos.value = -x.globalPosition.dx + _startPos;
+                      if (messagePos.value > 80 && !hasVibrated) {
+                        hasVibrated = true;
+                        widget.controller.vibrate();
+                      }
+                    },
+                    onHorizontalDragEnd: (x) {
+                      if (messagePos.value > 80) {
+                        messagePos.value = 0;
+                        widget.controller.reply(widget.message);
+                        return;
+                      }
+                      messagePos.value = 0;
+                    },
+                    onHorizontalDragCancel: () {
+                      messagePos.value = 0;
+                    },
+                    child: Directionality(
+                      textDirection:
+                          isMine ? TextDirection.rtl : TextDirection.ltr,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        children: [
+                          Flexible(
+                            child: ValueListenableBuilder<double>(
+                              valueListenable: messagePos,
+                              builder: (context, value, child) => Row(
+                                children: [
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 100),
+                                    width: value,
+                                    child: value > 20
+                                        ? Directionality(
+                                            textDirection: TextDirection.ltr,
+                                            child: Icon(Icons.reply),
+                                          )
+                                        : SizedBox.shrink(),
                                   ),
-                                  onPressed: () {
-                                    if (myEmoji?.emoji == e) {
-                                      Chatify.datasource
-                                          .removeMessageEmojis(message.id);
-                                    } else {
-                                      Chatify.datasource
-                                          .addMessageEmojis(message.id, e);
-                                    }
-                                    Navigator.pop(context);
-                                  },
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-                      itemBuilder: (context) => [
-                        if (message.type.isTextOrUnsupported && isMine)
-                          PullDownMenuItem(
-                            title: 'Edit',
-                            icon: Iconsax.edit,
-                            onTap: () {
-                              controller.edit(message);
-                            },
-                          ),
-                        const PullDownMenuDivider(),
-                        PullDownMenuItem(
-                          title: 'Copy',
-                          icon: Iconsax.copy,
-                          onTap: () {
-                            controller.copy(message);
-                          },
-                        ),
-                        const PullDownMenuDivider(),
-                        PullDownMenuItem(
-                          title: 'Reply',
-                          icon: Iconsax.undo,
-                          onTap: () {
-                            controller.reply(message);
-                          },
-                        ),
-                        const PullDownMenuDivider(),
-                        PullDownMenuItem(
-                          title: 'Delete',
-                          icon: Icons.delete,
-                          iconColor: Colors.red,
-                          onTap: () async {
-                            if (await showConfirm(
-                              context: context,
-                              message: 'Delete selcetd message?',
-                              textOK: 'Yes',
-                              textCancel: 'No',
-                              isKeyboardShown: controller.keyboardController.isKeybaordOpen,
-                            )) {}
-                          },
-                        ),
-                      ],
-                      position: PullDownMenuPosition.automatic,
-                      applyOpacity: false,
-                      buttonBuilder: (context, showMenu) => InkWell(
-                        onTap: () {
-                          if (message.type == MessageType.image) {
-                            Navigator.of(context).push(
-                              ImagePreview.route(message: message, user: user),
-                            );
-                          } else {
-                            FocusScope.of(context).unfocus();
-                            showMenu();
-                          }
-                        },
-                        onLongPress: () {
-                          if (message.type == MessageType.image) {
-                            showMenu();
-                          }
-                        },
-                        mouseCursor: MouseCursor.defer,
-                        child: LayoutBuilder(
-                          builder: (context, s) {
-                            return Directionality(
-                              textDirection: TextDirection.ltr,
-                              child: SwipeTo(
-                                onLeftSwipe: () {
-                                  controller.reply(message);
-                                },
-                                onRightSwipe: () {
-                                  controller.reply(message);
-                                },
-                                child: Directionality(
-                                  textDirection: isMine
-                                      ? TextDirection.rtl
-                                      : TextDirection.ltr,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.max,
-                                    children: [
-                                      Flexible(
-                                        child: ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxWidth: width,
-                                            minWidth: 80,
-                                          ),
-                                          child: message.type.isVoice
-                                              ? MyBubble(
-                                                  bkColor: bkColor,
-                                                  linkedWithBottom:
-                                                      linkedWithBottom,
-                                                  message: message,
-                                                  child: MyVoiceMessage(
-                                                    message: message,
-                                                    controller: controller,
-                                                  ),
-                                                )
-                                              : message.type.isImage
-                                                  ? ImageCard(
-                                                      message: message,
-                                                      width: width,
-                                                    )
-                                                  : TextMessage(
-                                                      widget: this,
-                                                      bkColor: bkColor,
-                                                      textColor: textColor,
-                                                      controller: controller,
-                                                      isMine: isMine,
-                                                    ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                  child!,
+                                ],
                               ),
-                            );
-                          },
-                        ),
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: width,
+                                  minWidth: 80,
+                                ),
+                                child: widget.message.type.isVoice
+                                    ? MyBubble(
+                                        bkColor: bkColor,
+                                        linkedWithBottom:
+                                            widget.linkedWithBottom,
+                                        message: widget.message,
+                                        child: MyVoiceMessage(
+                                          message: widget.message,
+                                          controller: widget.controller,
+                                          user: widget.user,
+                                        ),
+                                      )
+                                    : widget.message.type.isImage
+                                        ? ImageCard(
+                                            message: widget.message,
+                                            width: width,
+                                          )
+                                        : TextMessage(
+                                            widget: widget,
+                                            bkColor: bkColor,
+                                            textColor: textColor,
+                                            controller: widget.controller,
+                                            isMine: isMine,
+                                          ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),

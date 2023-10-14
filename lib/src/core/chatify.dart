@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/firebase/firestore.dart';
 import 'package:chatify/src/ui/chat_view/chatting_room.dart';
+import 'package:chatify/src/ui/common/swipeable_page_route.dart';
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -109,7 +110,7 @@ class Chatify {
 
   static openAllChats(BuildContext context) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      SwipeablePageRoute(
         builder: (context) => ChatScreen(),
       ),
     );
@@ -121,7 +122,7 @@ class Chatify {
   }) async {
     final chat = await datasource.findChatOrCreate([user.id, currentUserId]);
     Navigator.of(context).push(
-      MaterialPageRoute(
+      SwipeablePageRoute(
         builder: (context) => ChatView(chat: chat, user: user),
       ),
     );
@@ -133,7 +134,7 @@ class Chatify {
     required ChatifyUser user,
   }) async {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      SwipeablePageRoute(
         builder: (context) => ChatView(chat: chat, user: user),
       ),
     );

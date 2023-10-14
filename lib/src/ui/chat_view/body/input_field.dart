@@ -176,6 +176,8 @@ class ChatInputField extends StatelessWidget {
                           ),
                         ),
                         GestureDetector(
+                          onTapDown: (details) =>
+                              controller.voiceController.record(),
                           onHorizontalDragStart: (_) =>
                               controller.voiceController.record(),
                           onHorizontalDragUpdate: (d) {

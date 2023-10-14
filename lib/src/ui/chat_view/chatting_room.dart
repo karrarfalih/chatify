@@ -8,6 +8,7 @@ import 'package:chatify/src/ui/chat_view/body/input_box.dart';
 import 'package:chatify/src/ui/chat_view/body/messages.dart';
 import 'package:chatify/src/ui/chat_view/body/recording/thumb.dart';
 import 'package:chatify/src/ui/chat_view/body/recording/lock.dart';
+import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/body/app_bar.dart';
 import 'package:chatify/src/ui/common/keyboard_size.dart';
@@ -95,8 +96,14 @@ class _ChatViewState extends State<ChatView> {
                     EmojisKeyboard(controller: controller)
                   ],
                 ),
-                ChatAppBar(
-                  user: widget.user,
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ChatAppBar(
+                      user: widget.user,
+                    ),
+                    CurrentVoicePlayer(),
+                  ],
                 ),
                 RecordThumb(controller: controller),
                 RecordingLock(controller: controller)

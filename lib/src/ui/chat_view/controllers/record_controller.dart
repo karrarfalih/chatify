@@ -13,32 +13,49 @@ class VoiceRecordingController {
   String? path;
 
   final micRadius = 80.0.obs;
-  final micPos = Offset(0, 0).obs;
-  final micLockPos = Offset(0, 0).obs;
+  final micPos = Offset.zero.obs;
+  final micLockPos = Offset.zero.obs;
 
   Timer? _micRadiusTimer;
   Timer? _micLockTimer;
   double _minAmplitude = -30;
   final isLocked = false.obs;
+  bool isPermissionAsked = false;
+  bool isPermissionGranted = false;
 
   record() async {
-    if (!await _record.hasPermission()) {
-      return;
-    }
-    vibrate();
-    Directory documents = await getApplicationDocumentsDirectory();
-    await _record.start(
-      path: Platform.isIOS ? '${documents.path}/${Uuid.generate()}.m4a' : null,
-      encoder: AudioEncoder.aacLc,
-    );
-
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) => seconds.value++);
+    if (isRecording.value) return;
     isRecording.value = true;
-    micPos.value = Offset(0, 0);
+    micPos.value = Offset.zero;
+    micLockPos.value = Offset.zero;
     micRadius.value = 80.0;
     isLocked.value = false;
     _minAmplitude = 0;
     seconds.value = 0;
+    vibrate();
+    final startDate = DateTime.now();
+    if (!await _record.hasPermission()) {
+      stopRecord(false);
+      if (isPermissionAsked) {
+        ///TODO: show dialog message
+      }
+      isPermissionAsked = true;
+      return;
+    }
+    if (startDate.difference(DateTime.now()).inSeconds.abs() > 1 &&
+        !isPermissionGranted) {
+      stopRecord(false);
+      isPermissionGranted = true;
+      return false;
+    }
+    isPermissionGranted = true;
+    Directory documents = await getApplicationDocumentsDirectory();
+    await _record.start(
+      path: Platform.isIOS ? '${documents.path}/${Uuid.generate()}.aac' : null,
+      encoder: AudioEncoder.aacLc,
+    );
+
+    _timer = Timer.periodic(const Duration(seconds: 1), (_) => seconds.value++);
     _micRadiusTimer = Timer.periodic(Duration(milliseconds: 200), (timer) {
       if (!isRecording.value) return;
       _record.getAmplitude().then((value) {
@@ -95,6 +112,9 @@ class VoiceRecordingController {
   }
 
   vibrate() {
+    if (kDebugMode && Platform.isIOS) {
+      return;
+    }
     Vibration.hasVibrator().then((canVibrate) {
       if (canVibrate == true) Vibration.vibrate(duration: 10, amplitude: 100);
     });
@@ -103,13 +123,14 @@ class VoiceRecordingController {
   stopRecord([bool submit = true]) async {
     if (!isRecording.value) return;
     vibrate();
+    isRecording.value = false;
     _micRadiusTimer?.cancel();
     _micLockTimer?.cancel();
-    isRecording.value = false;
-    micLockPos.value = Offset.zero;
-    if (micPos.value.dx > -150 && seconds.value > 1 && submit) {
+    _timer?.cancel();
+    if (micPos.value.dx > -150 && seconds.value >= 1 && submit) {
+      final id = Uuid.generate();
       final pendingMsg = Message(
-        id: 'id',
+        id: id,
         message: 'voice message',
         chatId: controller.chat.id,
         sender: Chatify.currentUserId,
@@ -121,12 +142,10 @@ class VoiceRecordingController {
         ...controller.pendingMessages.value,
         pendingMsg,
       ];
-      _timer?.cancel();
       path = await _record.stop();
       final file = await File(path!).readAsBytes();
-      final id = Uuid.generate();
       final url =
-          await uploadAttachment(file, 'chats/${controller.chat.id}/$id.m4a');
+          await uploadAttachment(file, 'chats/${controller.chat.id}/$id.aac');
       if (url == null) return;
       await Chatify.datasource.addMessage(
         Message(
@@ -142,14 +161,16 @@ class VoiceRecordingController {
               .toList(),
         ),
       );
-      controller.pendingMessages.value.remove(pendingMsg);
-      controller.pendingMessages.value =
-          controller.pendingMessages.value.toList();
+      // controller.pendingMessages.value.remove(pendingMsg);
+      // controller.pendingMessages.value =
+      //     controller.pendingMessages.value.toList();
     }
   }
 
   void dispose() {
     _timer?.cancel();
+    _micRadiusTimer?.cancel();
+    _micLockTimer?.cancel();
     _record.dispose();
     isRecording.dispose();
     seconds.dispose();

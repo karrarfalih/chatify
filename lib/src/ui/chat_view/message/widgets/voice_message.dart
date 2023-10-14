@@ -2,8 +2,8 @@ import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
+import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
 import 'package:chatify/src/utils/extensions.dart';
-import 'package:chatify/src/packages/voice_player/voice_message_package.dart';
 import 'package:flutter/material.dart';
 
 class MyVoiceMessage extends StatelessWidget {
@@ -11,10 +11,12 @@ class MyVoiceMessage extends StatelessWidget {
     Key? key,
     required this.message,
     required this.controller,
+    required this.user,
   }) : super(key: key);
 
   final Message message;
   final ChatController controller;
+  final ChatifyUser user;
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +27,9 @@ class MyVoiceMessage extends StatelessWidget {
           Chatify.datasource.addMessage(message.copyWith(data: true));
         }
       },
-      sendAt: SendAtWidget(message: message),
+      sendAtWidget: SendAtWidget(message: message),
+      sendAt: message.sendAt ?? DateTime.now(),
+      user: message.sender == Chatify.currentUserId ? 'Me' : user.name,
       duration: message.duration,
       height: 50,
       width: MediaQuery.of(context).size.width,
@@ -63,7 +67,7 @@ class MyVoiceMessageBloc extends StatelessWidget {
         ),
       ),
       child: VoiceMessage(
-        sendAt: Directionality(
+        sendAtWidget: Directionality(
           textDirection: TextDirection.ltr,
           child: Text(
             DateTime.now().format(context, 'h:mm a'),
@@ -85,6 +89,8 @@ class MyVoiceMessageBloc extends StatelessWidget {
         meBgColor: Theme.of(context).primaryColor,
         contactBgColor: Theme.of(context).scaffoldBackgroundColor,
         contactFgColor: Theme.of(context).primaryColor,
+        sendAt: DateTime.now(),
+        user: '',
       ),
     );
   }

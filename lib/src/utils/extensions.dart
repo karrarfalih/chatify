@@ -112,7 +112,7 @@ extension DateTimeFormat on DateTime {
 }
 
 extension Range on double {
-  withRange(double minNumber, double maxNumber) =>
+  double withRange(double minNumber, double maxNumber) =>
       min(max(this, minNumber), maxNumber);
 }
 

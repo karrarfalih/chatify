@@ -4,9 +4,9 @@ import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
+import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
-import 'package:kr_paginate_firestore/paginate_firestore.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
 
 class ChatMessages extends StatelessWidget {

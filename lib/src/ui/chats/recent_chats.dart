@@ -1,10 +1,10 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/chat.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chats/chat_card.dart';
-import 'package:kr_paginate_firestore/paginate_firestore.dart';
 
 class RecentChats extends StatelessWidget {
   const RecentChats({

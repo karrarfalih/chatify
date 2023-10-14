@@ -25,7 +25,7 @@ showImagesGallery(BuildContext context) async {
     anchors: [],
     isSafeArea: false,
     decoration: BoxDecoration(
-      color: Colors.white,
+      color: Theme.of(context).scaffoldBackgroundColor,
       borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
     ),
     bottomSheetBorderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -100,11 +100,13 @@ class _ChatImagesState extends State<_ChatImages> {
                 ),
               ),
               DecoratedSliver(
-                decoration: BoxDecoration(color: Colors.white),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).scaffoldBackgroundColor,
+                ),
                 sliver: SliverContainer(
                   borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                   background: Container(
-                    color: Colors.white,
+                    color: Theme.of(context).scaffoldBackgroundColor,
                   ),
                   margin: EdgeInsets.symmetric(horizontal: 6),
                   sliver: ValueListenableBuilder<List<Medium>>(
@@ -190,10 +192,7 @@ class _ChatImagesState extends State<_ChatImages> {
                                                   ),
                                                   margin: EdgeInsets.all(4),
                                                   decoration: BoxDecoration(
-                                                    color:
-                                                        ChatifyTheme.of(context)
-                                                            .chatForegroundColor
-                                                            .withOpacity(0.3),
+                                                    color: Colors.black26,
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                       5,
@@ -207,17 +206,13 @@ class _ChatImagesState extends State<_ChatImages> {
                                                         Icons
                                                             .play_arrow_rounded,
                                                         size: 16,
-                                                        color: Theme.of(
-                                                          context,
-                                                        ).scaffoldBackgroundColor,
+                                                        color: Colors.white,
                                                       ),
                                                       Text(
                                                         (image.duration ~/ 1000)
                                                             .toDurationString,
                                                         style: TextStyle(
-                                                          color: Theme.of(
-                                                            context,
-                                                          ).scaffoldBackgroundColor,
+                                                          color: Colors.white,
                                                         ),
                                                       ),
                                                     ],
@@ -262,8 +257,7 @@ class _ChatImagesState extends State<_ChatImages> {
                                                   (selected.indexOf(image) + 1)
                                                       .toString(),
                                                   style: TextStyle(
-                                                    color: Theme.of(context)
-                                                        .scaffoldBackgroundColor,
+                                                    color: Colors.white,
                                                     height: 1,
                                                   ),
                                                   textAlign: TextAlign.center,
@@ -279,8 +273,7 @@ class _ChatImagesState extends State<_ChatImages> {
                                                   .chatForegroundColor
                                                   .withOpacity(0.07),
                                               border: Border.all(
-                                                color: Theme.of(context)
-                                                    .scaffoldBackgroundColor,
+                                                color: Colors.white,
                                                 width: 2,
                                               ),
                                               shape: BoxShape.circle,

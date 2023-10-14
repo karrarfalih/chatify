@@ -1,9 +1,10 @@
-import 'package:chatify/chatify.dart';
 import 'package:example/config.dart';
 import 'package:example/firebase_options.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+import 'package:chatify/chatify.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -116,12 +117,16 @@ class _MyAppState extends State<MyApp> {
               text: 'Change Brightness',
               icon: CupertinoIcons.moon,
             ),
-            _MainButton(
-              onPressed: () {
-                Chatify.openAllChats(context);
+            Builder(
+              builder: (context) {
+                return _MainButton(
+                  onPressed: () {
+                    Chatify.openAllChats(context);
+                  },
+                  text: 'Show Recent Chats',
+                  icon: CupertinoIcons.time,
+                );
               },
-              text: 'Show Recent Chats',
-              icon: CupertinoIcons.time,
             ),
             Builder(
               builder: (context) {
