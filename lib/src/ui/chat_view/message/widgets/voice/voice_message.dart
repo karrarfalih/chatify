@@ -1,5 +1,6 @@
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
+import 'package:chatify/src/ui/common/rotated_widget.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import './noises.dart';
@@ -141,31 +142,62 @@ class _VoiceMessageState extends State<VoiceMessage>
               }
               player.togglePlay();
             },
-            child: ValueListenableBuilder<bool>(
-              valueListenable: player.isLoading!,
-              builder: (context, isLoading, child) {
-                return isLoading
-                    ? Container(
-                        padding: const EdgeInsets.all(14),
-                        width: 10,
-                        height: 0,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1,
-                          color: widget.me
-                              ? widget.meBgColor
-                              : widget.contactBgColor,
+            child: ValueListenableBuilder<VoiceStatus>(
+              valueListenable: player.status,
+              builder: (context, status, child) {
+                if (status == VoiceStatus.downloading) {
+                  return GestureDetector(
+                    behavior: HitTestBehavior.deferToChild,
+                    onTap: player.cancel,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        AnimatedRotatingWidget(
+                          duration: Duration(milliseconds: 3000),
+                          child: ValueListenableBuilder<double>(
+                            valueListenable: player.progress,
+                            builder: (context, progress, child) {
+                              return Container(
+                                padding: EdgeInsets.all(4),
+                                child: CircularProgressIndicator(
+                                  value: 0.3,
+                                  strokeWidth: 2.5,
+                                  color: widget.me
+                                      ? widget.meBgColor
+                                      : widget.contactBgColor,
+                                ),
+                              );
+                            },
+                          ),
                         ),
-                      )
-                    : Center(
-                        child: AnimatedIcon(
-                          icon: AnimatedIcons.play_pause,
-                          progress: player.playPauseController!,
-                          color: widget.me
-                              ? widget.mePlayIconColor
-                              : widget.contactPlayIconColor,
-                          size: 22,
-                        ),
-                      );
+                        Icon(Icons.close_rounded),
+                      ],
+                    ),
+                  );
+                }
+                if (status == VoiceStatus.loading) {
+                  return Container(
+                    padding: EdgeInsets.all(4),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color:
+                          widget.me ? widget.meBgColor : widget.contactBgColor,
+                    ),
+                  );
+                }
+                if (status == VoiceStatus.dowload) {
+                  return Center(child: Icon(Icons.download_sharp));
+                }
+                return Center(
+                  child: AnimatedIcon(
+                    icon: AnimatedIcons.play_pause,
+                    progress: player.playPauseController!,
+                    color: widget.me
+                        ? widget.mePlayIconColor
+                        : widget.contactPlayIconColor,
+                    size: 22,
+                  ),
+                );
               },
             ),
           ),
@@ -176,20 +208,9 @@ class _VoiceMessageState extends State<VoiceMessage>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _noise(context),
-          SizedBox(height: .3.w()),
+          SizedBox(height: 1.w()),
           Row(
             children: [
-              if (!widget.played) ...[
-                Container(
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: widget.me ? widget.meFgColor : widget.contactFgColor,
-                  ),
-                  width: 1.w(),
-                  height: 1.w(),
-                )
-              ],
               ValueListenableBuilder<String>(
                 valueListenable: player.remainingTime!,
                 builder: (context, remainingTime, child) {
@@ -203,6 +224,17 @@ class _VoiceMessageState extends State<VoiceMessage>
                   );
                 },
               ),
+              if (!widget.played)
+                Container(
+                  margin: EdgeInsetsDirectional.symmetric(horizontal: 4),
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: widget.me ? widget.meFgColor : widget.contactFgColor,
+                  ),
+                  width: 1.4.w(),
+                  height: 1.4.w(),
+                )
             ],
           ),
         ],
@@ -278,7 +310,6 @@ class _VoiceMessageState extends State<VoiceMessage>
       ),
     );
   }
-
 }
 
 /// document will be added

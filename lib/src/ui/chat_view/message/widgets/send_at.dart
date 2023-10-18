@@ -28,15 +28,18 @@ class SendAtWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (isMine)
-              Image.asset(
-                isSeen ? 'assets/icons/seen.png' : 'assets/icons/sent.png',
-                package: 'chatify',
-                height: 14,
-                color: !isMine && isTextOrVoice
-                    ? theme.chatForegroundColor
-                        .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
-                    : Colors.white
-                        .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(end: 3),
+                child: Image.asset(
+                  isSeen ? 'assets/icons/seen.png' : 'assets/icons/sent.png',
+                  package: 'chatify',
+                  height: 14,
+                  color: !isMine && isTextOrVoice
+                      ? theme.chatForegroundColor
+                          .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
+                      : Colors.white
+                          .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
+                ),
               ),
             Text(
               (message.sendAt ?? DateTime.now()).format(context, 'h:mm a'),

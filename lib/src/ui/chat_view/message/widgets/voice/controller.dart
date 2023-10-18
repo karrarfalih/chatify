@@ -1,9 +1,20 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:chatify/src/ui/chat_view/message/widgets/voice/cache.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
 import 'package:chatify/src/utils/cache.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:just_audio/just_audio.dart';
+
+enum VoiceStatus {
+  dowload,
+  downloading,
+  loading,
+  ready,
+}
 
 class VoicePlayerController {
   final String url;
@@ -35,8 +46,7 @@ class VoicePlayerController {
       instance.isReady = (instance.wasReady ?? false).obs;
     if (instance.remainingTime == null)
       instance.remainingTime =
-          (instance.latsRemainingTime ?? VoiceDuration.getDuration(seconds))
-              .obs;
+          (instance.latsRemainingTime ?? seconds.toDurationString).obs;
     return instance;
   }
 
@@ -46,7 +56,9 @@ class VoicePlayerController {
     required this.isMe,
     required this.user,
     required this.sendAt,
-  });
+  }) {
+    download();
+  }
 
   final player = AudioPlayer();
 
@@ -54,6 +66,10 @@ class VoicePlayerController {
   static final _cache = <String, VoicePlayerController>{};
   static final speed =
       (Cache.instance.getDouble('voice_player_speed') ?? 1).obs;
+
+  final Rx<double> progress = .0.obs;
+  final Rx<VoiceStatus> status = VoiceStatus.ready.obs;
+  File? file;
 
   Rx<String>? remainingTime;
   String? latsRemainingTime;
@@ -70,24 +86,62 @@ class VoicePlayerController {
   int lastPositionInSeconds = 0;
   StreamSubscription<Duration>? _durationListener;
 
+  StreamSubscription? stream;
+  download() async {
+    progress.value = 0;
+    StreamSubscription? stream;
+    final _config = Config('voices', fileService: VoiceFileService());
+    final voiceCache = CacheManager(_config);
+    stream = voiceCache
+        .getFileStream(url, withProgress: true, key: url)
+        .listen((e) async {
+      if (e is DownloadProgress) {
+        status.value = VoiceStatus.downloading;
+        progress.value = e.progress ?? 0;
+      } else if (e is FileInfo) {
+        file = e.file;
+        status.value = VoiceStatus.ready;
+        stream?.cancel();
+      }
+    });
+  }
+
+  cancel() {
+    stream?.cancel();
+    if (file == null) {
+      status.value = VoiceStatus.dowload;
+    } else {
+      status.value = VoiceStatus.ready;
+    }
+  }
+
+  int _numOfTries = 0;
   Future<void> init() async {
+    status.value = VoiceStatus.loading;
     if (isReady!.value || isLoading!.value) return;
     isLoading!.value = true;
-    try {
-      await player.setUrl(url);
-      if (player.speed != speed.value) player.setSpeed(speed.value);
-      maxDurationForSlider = seconds.toDouble();
-      listenToRemainingTime();
-      progressController?.addListener(() {
-        if (progressController?.isCompleted ?? false) {
-          progressController?.reset();
-          isFinished = true;
-        }
-      });
-      isReady!.value = true;
-    } catch (_) {
-      print(_);
+    // try {
+    if (file == null) {
+      if (_numOfTries == 3) return;
+      await download();
+      _numOfTries++;
+      init();
     }
+    await player.setFilePath(file!.path);
+    if (player.speed != speed.value) player.setSpeed(speed.value);
+    maxDurationForSlider = seconds.toDouble();
+    listenToRemainingTime();
+    progressController?.addListener(() {
+      if (progressController?.isCompleted ?? false) {
+        progressController?.reset();
+        isFinished = true;
+      }
+    });
+    isReady!.value = true;
+    // } catch (_) {
+    //   print(_);
+    // }
+    status.value = VoiceStatus.ready;
     isLoading!.value = false;
   }
 
@@ -151,7 +205,7 @@ class VoicePlayerController {
     if (player.playing) togglePlay();
     final duration = isMe ? maxDurationForSlider - d : d;
     progressController?.value = (noiseWidth) * duration / maxDurationForSlider;
-    remainingTime?.value = VoiceDuration.getDuration(duration.toInt());
+    remainingTime?.value = duration.toInt().toDurationString;
     player.seek(Duration(seconds: duration.toInt()));
   }
 
@@ -178,10 +232,10 @@ class VoicePlayerController {
     latsRemainingTime = remainingTime?.value;
     remainingTime?.dispose();
     remainingTime = null;
-    wasReady = isReady!.value;
+    wasReady = isReady?.value;
     isReady?.dispose();
     isReady = null;
-    wasLoading = isLoading!.value;
+    wasLoading = isLoading?.value;
     isLoading?.dispose();
     isLoading = null;
   }

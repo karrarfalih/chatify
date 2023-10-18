@@ -143,9 +143,12 @@ class VoiceRecordingController {
         pendingMsg,
       ];
       path = await _record.stop();
-      final file = await File(path!).readAsBytes();
-      final url =
-          await uploadAttachment(file, 'chats/${controller.chat.id}/$id.aac');
+      final file = File(path!);
+      final uint8List = await File(path!).readAsBytes();
+      final url = await uploadAttachment(
+        uint8List,
+        'chats/${controller.chat.id}/$id.${file.path.split('.').last}',
+      );
       if (url == null) return;
       await Chatify.datasource.addMessage(
         Message(

@@ -120,6 +120,6 @@ extension DurationInt on int {
   String get toDurationString {
     int s = this % 60;
     int m = this ~/ 60;
-    return '$m:${s < 10 ? '0$s' : s}';
+    return '${m < 10 ? '0$m' : m}:${s < 10 ? '0$s' : s}';
   }
 }
