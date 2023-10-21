@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/cache.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
 import 'package:chatify/src/utils/cache.dart';
@@ -17,26 +18,17 @@ enum VoiceStatus {
 }
 
 class VoicePlayerController {
-  final String url;
-  final int seconds;
-  final bool isMe;
   final String user;
-  final DateTime sendAt;
+  final VoiceMessage message;
 
   factory VoicePlayerController({
-    required String url,
-    required int seconds,
-    required bool isMe,
+    required VoiceMessage message,
     required String user,
-    required DateTime sendAt,
   }) {
     final instance = _cache.putIfAbsent(
-      url,
+      message.id,
       () => VoicePlayerController._(
-        url: url,
-        seconds: seconds,
-        isMe: isMe,
-        sendAt: sendAt,
+        message: message,
         user: user,
       ),
     );
@@ -45,20 +37,22 @@ class VoicePlayerController {
     if (instance.isReady == null)
       instance.isReady = (instance.wasReady ?? false).obs;
     if (instance.remainingTime == null)
-      instance.remainingTime =
-          (instance.latsRemainingTime ?? seconds.toDurationString).obs;
+      instance.remainingTime = (instance.latsRemainingTime ??
+              message.duration.inSeconds.toDurationString)
+          .obs;
     return instance;
   }
 
   VoicePlayerController._({
-    required this.url,
-    required this.seconds,
-    required this.isMe,
     required this.user,
-    required this.sendAt,
+    required this.message,
   }) {
     download();
   }
+
+  String get url => message.url;
+  int get seconds => message.duration.inSeconds;
+  bool get isMe => Chatify.currentUserId == message.sender;
 
   final player = AudioPlayer();
 
@@ -80,21 +74,21 @@ class VoicePlayerController {
   Rx<bool>? isLoading;
   bool? wasLoading;
 
-  bool isFinished = false;
   AnimationController? progressController;
   AnimationController? playPauseController;
   int lastPositionInSeconds = 0;
   StreamSubscription<Duration>? _durationListener;
+  VoicePlayerController? _nextPlayer;
 
   StreamSubscription? stream;
   download() async {
+    if (url.isEmpty) return;
     progress.value = 0;
     StreamSubscription? stream;
     final _config = Config('voices', fileService: VoiceFileService());
     final voiceCache = CacheManager(_config);
-    stream = voiceCache
-        .getFileStream(url, withProgress: true, key: url)
-        .listen((e) async {
+    stream =
+        voiceCache.getFileStream(url, withProgress: true).listen((e) async {
       if (e is DownloadProgress) {
         status.value = VoiceStatus.downloading;
         progress.value = e.progress ?? 0;
@@ -117,8 +111,8 @@ class VoicePlayerController {
 
   int _numOfTries = 0;
   Future<void> init() async {
-    status.value = VoiceStatus.loading;
     if (isReady!.value || isLoading!.value) return;
+    status.value = VoiceStatus.loading;
     isLoading!.value = true;
     // try {
     if (file == null) {
@@ -134,7 +128,6 @@ class VoicePlayerController {
     progressController?.addListener(() {
       if (progressController?.isCompleted ?? false) {
         progressController?.reset();
-        isFinished = true;
       }
     });
     isReady!.value = true;
@@ -154,20 +147,42 @@ class VoicePlayerController {
   _startPlaying() async {
     if (currentPlayer.value != this) {
       currentPlayer.value?._preventAutoPause = true;
-      currentPlayer.value?.stopPlaying();
+      currentPlayer.value?.reset();
       currentPlayer.value = this;
+    }
+    if (progressController?.value == 0) {
+      player.seek(Duration.zero);
+    }
+    if (player.speed != speed.value) {
+      player.setSpeed(speed.value);
+    }
+    final animationDuration = Duration(seconds: seconds ~/ speed.value);
+    if (progressController?.duration?.compareTo(animationDuration) != 0) {
+      progressController?.duration = Duration(seconds: seconds ~/ speed.value);
     }
     _preventAutoPause = false;
     playPauseController?.forward();
-    player.play().then((value) {
+    player.play().then((value) async {
       if (_preventAutoPause) return;
       playPauseController?.reverse();
       player.pause();
-      player.seek(Duration.zero);
       progressController?.reset();
       currentPlayer.value = null;
+      if (_nextPlayer != null) {
+        await _nextPlayer!.init();
+        _nextPlayer!.togglePlay();
+      }
     });
     progressController?.forward();
+    if (_nextPlayer == null) {
+      final nextMsg = await Chatify.datasource.getNextVoice(message);
+      if (nextMsg != null) {
+        _nextPlayer = VoicePlayerController(
+          message: nextMsg,
+          user: user,
+        );
+      }
+    }
   }
 
   stopPlaying() async {
@@ -175,30 +190,26 @@ class VoicePlayerController {
     playPauseController?.reverse();
     player.pause();
     progressController?.stop();
-    isFinished = false;
+  }
+
+  reset() {
+    progressController?.reset();
+    stopPlaying();
+    player.seek(Duration.zero);
+    remainingTime?.value = seconds.toDurationString;
   }
 
   void listenToRemainingTime() {
     if (_durationListener != null) return;
     _durationListener = player.createPositionStream().listen((p) {
-      final _newRemaingTime1 = p.toString().split('.')[0];
-      final _newRemaingTime2 =
-          _newRemaingTime1.substring(_newRemaingTime1.length - 5);
-      if (_newRemaingTime2 != remainingTime?.value) {
-        remainingTime?.value = _newRemaingTime2;
-        lastPositionInSeconds = p.inSeconds;
-      }
+      remainingTime?.value = p.inSeconds.toDurationString;
+      lastPositionInSeconds = p.inSeconds;
     });
   }
 
   updateRemainingTime(Duration currentDuration) {
-    final _newRemaingTime1 = currentDuration.toString().split('.')[0];
-    final _newRemaingTime2 =
-        _newRemaingTime1.substring(_newRemaingTime1.length - 5);
-    if (_newRemaingTime2 != remainingTime?.value) {
-      lastPositionInSeconds = currentDuration.inSeconds;
-      latsRemainingTime = remainingTime?.value;
-    }
+    lastPositionInSeconds = currentDuration.inSeconds;
+    latsRemainingTime = remainingTime?.value;
   }
 
   onChangeSlider(double d) async {

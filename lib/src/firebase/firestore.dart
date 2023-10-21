@@ -1,5 +1,7 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/models/messages/mapper.dart';
 import 'package:chatify/src/utils/cache.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/identical_list.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/uuid.dart';
@@ -18,10 +20,10 @@ class ChatifyDatasource {
   CollectionReference<Message> get _messages => FirebaseFirestore.instance
       .collection(messagesCollectionName)
       .withConverter<Message>(
-        fromFirestore: (snapshot, _) =>
-            Message.fromJson(snapshot.data()!, snapshot.id),
+        fromFirestore: (snapshot, _) => getMessageFromJson(snapshot.data()!),
         toFirestore: (message, _) => message.toJson,
       );
+
   CollectionReference<Chat> get _chats => FirebaseFirestore.instance
       .collection(chatsCollectionName)
       .withConverter<Chat>(
@@ -46,6 +48,21 @@ class ChatifyDatasource {
   ) async {
     await _messages.doc(messageId).update(data);
     ChatifyLog.d('updateMessageUsingFieldValue');
+  }
+
+  Future<VoiceMessage?> getNextVoice(Message message) async {
+    final res = await _messages
+        .where('chatId', isEqualTo: message.chatId)
+        .where('sendAt', isGreaterThan: message.sendAt)
+        .where('type', isEqualTo: MessageType.voice.name)
+        .orderBy('sendAt', descending: false)
+        .startAfter([message.sendAt!.stamp])
+        .limit(1)
+        .get();
+    if (res.docs.isNotEmpty) {
+      return res.docs.first.data() as VoiceMessage;
+    }
+    return null;
   }
 
   Future<void> addMessageEmojis(String messageId, String emoji) async {

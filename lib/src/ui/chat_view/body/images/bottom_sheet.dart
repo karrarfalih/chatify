@@ -4,6 +4,7 @@ import 'package:chatify/src/ui/chat_view/body/images/camera_thumnail.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_preview.dart';
 import 'package:chatify/src/ui/chat_view/body/images/input_field.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/bottom_sheet/flexible_bottom_sheet_route.dart';
 import 'package:chatify/src/ui/common/sliver/sliver_container.dart';
 import 'package:chatify/src/ui/common/sliver_group.dart';
@@ -12,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:photo_gallery/photo_gallery.dart';
 
-showImagesGallery(BuildContext context) async {
+showImagesGallery(BuildContext context, ChatController chatController) async {
   final controller = GalleryController();
   await showFlexibleBottomSheet(
     minHeight: 0,
@@ -21,6 +22,7 @@ showImagesGallery(BuildContext context) async {
     builder: (context, scrollController, bottomSheetOffset) => _ChatImages(
       controller: controller,
       scrollController: scrollController,
+      chatController: chatController,
     ),
     anchors: [],
     isSafeArea: false,
@@ -37,10 +39,12 @@ class _ChatImages extends StatefulWidget {
   _ChatImages({
     required this.controller,
     required this.scrollController,
+    required this.chatController,
   });
 
   final GalleryController controller;
   final ScrollController scrollController;
+  final ChatController chatController;
 
   @override
   State<_ChatImages> createState() => _ChatImagesState();
@@ -136,14 +140,12 @@ class _ChatImagesState extends State<_ChatImages> {
                                 children: [
                                   GestureDetector(
                                     onTap: () {
-                                      Navigator.of(context).push(
-                                        MaterialPageRoute(
-                                          builder: (context) => ImagePreview(
-                                            image: image,
-                                            isSelecetd: isSelected,
-                                            controller: widget.controller,
-                                          ),
-                                        ),
+                                      GalleryImagePreview.show(
+                                        image: image,
+                                        isSelecetd: isSelected,
+                                        controller: widget.controller,
+                                        chatController: widget.chatController,
+                                        context: context,
                                       );
                                     },
                                     child: AnimatedScale(
@@ -302,6 +304,7 @@ class _ChatImagesState extends State<_ChatImages> {
               return GalleryInputField(
                 controller: widget.controller,
                 isSubmit: false,
+                chatController: widget.chatController,
               );
             },
           ),

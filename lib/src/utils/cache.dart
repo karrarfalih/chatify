@@ -13,7 +13,10 @@ extension CacheExt<T> on T {
 
 class Cache {
   static late final SharedPreferences instance;
+  static bool _isInit = false;
   static init() async {
+    if (_isInit) return;
     instance = await SharedPreferences.getInstance();
+    _isInit = true;
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
@@ -24,11 +24,11 @@ class CustomImage extends StatelessWidget {
     this.loadingRadius,
     this.shimmerSize,
     this.borderRadius,
-    this.file,
+    this.bytes,
   }) : super(key: key);
 
   final String? url;
-  final File? file;
+  final Uint8List? bytes;
   final String? onEmptyOrNull;
   final double? radius;
   final double? loadingRadius;
@@ -45,7 +45,7 @@ class CustomImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if ((url == null || url!.isEmpty) &&
-        file == null &&
+        bytes == null &&
         (onEmptyOrNull == null || onEmptyOrNull!.isEmpty)) {
       return Padding(
         padding: padding ?? EdgeInsets.zero,
@@ -53,9 +53,9 @@ class CustomImage extends StatelessWidget {
       );
     }
     Widget image;
-    if (file != null) {
-      image = Image.file(
-        file!,
+    if (bytes != null) {
+      image = Image.memory(
+        bytes!,
         fit: fit,
         errorBuilder: (context, error, stackTrace) =>
             Center(child: onError ?? ErrorImage()),

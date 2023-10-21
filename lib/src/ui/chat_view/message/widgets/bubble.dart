@@ -1,5 +1,3 @@
-
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble/bubble.dart';
@@ -20,7 +18,7 @@ class MyBubble extends StatelessWidget {
   final Widget child;
   @override
   Widget build(BuildContext context) {
-    final isMine = message.sender == Chatify.currentUserId;
+    final isMine = message.isMine;
     return Bubble(
       radius: const Radius.circular(12),
       nip: isMine ? BubbleNip.rightBottom : BubbleNip.leftBottom,

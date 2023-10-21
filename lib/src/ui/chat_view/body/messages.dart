@@ -3,7 +3,6 @@ import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
-import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
@@ -58,17 +57,27 @@ class ChatMessages extends StatelessWidget {
                   );
             showTime = d.toString() != prevD.toString();
           }
+          if (controller.pendingMessages.value.any((e) => e.id == msg.id)) {
+            controller.pendingMessages.value.removeWhere((e) => e.id == msg.id);
+            controller.pendingMessages.refresh();
+          }
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (i == docs.length - 1)
                 SizedBox(
+                  key: ValueKey('chat padding bottom'),
                   height: MediaQuery.of(context).padding.top + 70,
                 ),
               if (showTime)
-                ChatDateWidget(
-                  date: date ?? DateTime.now(),
+                Center(
+                  key: ValueKey(msg.sendAt),
+                  child: ChatDateWidget(
+                    date: date ?? DateTime.now(),
+                  ),
                 ),
               MessageCard(
+                key: ValueKey(msg.id),
                 chat: chat,
                 message: msg,
                 user: user,
@@ -81,67 +90,13 @@ class ChatMessages extends StatelessWidget {
                     prevMsg.sender == msg.sender,
               ),
               if (i == 0)
-                ValueListenableBuilder<List<Message>>(
-                  valueListenable: controller.pendingMessages,
-                  builder: (context, value, cild) {
-                    final width = MediaQuery.of(context).size.width;
-                    return Directionality(
-                      textDirection: TextDirection.rtl,
-                      child: Column(
-                        children: [
-                          ...value.map(
-                            (e) => Row(
-                              children: [
-                                if (e.type.isVoice)
-                                  Padding(
-                                    padding: const EdgeInsetsDirectional.only(
-                                      bottom: 4,
-                                      end: 12,
-                                      start: 12,
-                                    ),
-                                    child: MyVoiceMessageBloc(
-                                      linkedWithTop: true,
-                                      linkedWithBottom: i != value.length - 1,
-                                    ),
-                                  ),
-                                if (e.type.isImage)
-                                  Container(
-                                    margin: const EdgeInsetsDirectional.only(
-                                      bottom: 4,
-                                      end: 12,
-                                      start: 12,
-                                    ),
-                                    constraints: BoxConstraints.tightFor(
-                                      width: width - 100,
-                                      height: width - 100,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(
-                                        12,
-                                      ),
-                                      color: ChatifyTheme.of(
-                                        context,
-                                      )
-                                          .recentChatsForegroundColor
-                                          .withOpacity(0.07),
-                                    ),
-                                    child: Center(
-                                      child: LoadingWidget(
-                                        color: Theme.of(
-                                          context,
-                                        ).primaryColor,
-                                        size: 32,
-                                        lineWidth: 5,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
+                PendingMessages(
+                  key: ValueKey('pending messages'),
+                  controller: controller,
+                  chat: chat,
+                  user: user,
+                  linkedWithBottom: false,
+                  linkedWithTop: msg.isMine,
                 )
             ],
           );
@@ -161,14 +116,9 @@ class ChatMessages extends StatelessWidget {
             ],
           ),
         ),
-        header: SliverList(
-          delegate: SliverChildBuilderDelegate(
-            (context, index) {
-              return const SizedBox(
-                height: 5,
-              );
-            },
-            childCount: 1,
+        header: SliverToBoxAdapter(
+          child: SizedBox(
+            height: 5,
           ),
         ),
         itemBuilderType: PaginateBuilderType.listView,
@@ -178,6 +128,70 @@ class ChatMessages extends StatelessWidget {
         reverse: true,
         isLive: true,
       ),
+    );
+  }
+}
+
+class PendingMessages extends StatelessWidget {
+  const PendingMessages({
+    super.key,
+    required this.controller,
+    required this.chat,
+    required this.user,
+    required this.linkedWithTop,
+    required this.linkedWithBottom,
+  });
+
+  final ChatController controller;
+  final Chat chat;
+  final ChatifyUser user;
+  final bool linkedWithTop;
+  final bool linkedWithBottom;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<Message>>(
+      valueListenable: controller.pendingMessages,
+      builder: (context, value, cild) {
+        return Directionality(
+          textDirection: TextDirection.rtl,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...value.map(
+                (e) => Column(
+                  children: [
+                    if (e is VoiceMessage)
+                      Padding(
+                        padding: const EdgeInsetsDirectional.only(
+                          bottom: 4,
+                          end: 12,
+                          start: 12,
+                        ),
+                        child: MyVoiceMessageBloc(
+                          linkedWithTop: true,
+                          linkedWithBottom: false,
+                          message: e,
+                          controller: controller,
+                        ),
+                      ),
+                    if (e is ImageMessage)
+                      MessageCard(
+                        key: ValueKey(e.id),
+                        chat: chat,
+                        message: e,
+                        user: user,
+                        controller: controller,
+                        linkedWithBottom: linkedWithBottom,
+                        linkedWithTop: linkedWithTop,
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

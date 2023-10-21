@@ -133,10 +133,10 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
                             SizedBox(
                               width: 4,
                             ),
-                            Text(
-                              player.sendAt.format(context, 'MMM EEE') +
+                            if(player.message.sendAt != null) Text(
+                              player.message.sendAt!.format(context, 'MMM EEE') +
                                   ' at ' +
-                                  player.sendAt.format(context, 'h:mm a'),
+                                  player.message.sendAt!.format(context, 'h:mm a'),
                               style: TextStyle(
                                 color: Colors.white60,
                                 fontSize: 14,

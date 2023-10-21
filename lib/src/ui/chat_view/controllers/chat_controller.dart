@@ -14,6 +14,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:photo_gallery/photo_gallery.dart';
 import 'package:record/record.dart';
 import 'package:vibration/vibration.dart';
 
@@ -57,23 +58,21 @@ class ChatController {
     showToast('Copied to clipboard', Colors.black45);
   }
 
-  submitMessage(String msg, Chat chat) {
+  submitMessage(String msg) {
     msg = msg.trim();
     if (messageAction.value?.type == MessageActionType.edit) {
-      Chatify.datasource
-          .addMessage(messageAction.value!.message!.copyWith(message: msg));
+      Chatify.datasource.addMessage(
+        (messageAction.value!.message! as TextMessage).copyWith(message: msg),
+      );
     }
     if (msg != '') {
       for (int i = 0; i <= (msg.length ~/ 1000); i++) {
         Chatify.datasource.addMessage(
-          Message(
-            id: Uuid.generate(),
+          TextMessage(
             message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
             chatId: chat.id,
-            sender: Chatify.currentUserId,
             unSeenBy:
                 chat.members.where((e) => e != Chatify.currentUserId).toList(),
-            seenBy: [Chatify.currentUserId],
             replyId: messageAction.value?.message?.id,
             replyUid: messageAction.value?.message?.sender,
           ),
@@ -86,37 +85,40 @@ class ChatController {
     textController.clear();
   }
 
-  sendImage(Chat chat) async {
-    final imgs = await getImages();
+  sendImages(List<Medium> images) async {
+    final imgs = await getImages(images);
     for (final img in imgs) {
-      final pendingMsg = Message(
-        id: 'id',
-        message: 'Image attachment',
-        chatId: chat.id,
-        sender: Chatify.currentUserId,
-        type: MessageType.image,
-        unSeenBy: [],
-      );
-      pendingMessages.value = [
-        ...pendingMessages.value,
-        pendingMsg,
-      ];
-      final id = Uuid.generate();
-      final url = await uploadAttachment(img, 'chats/${chat.id}/$id.jpg');
-      if (url == null) return;
-      await Chatify.datasource.addMessage(
-        Message(
-          id: id,
-          message: 'Image attachment',
-          chatId: chat.id,
-          sender: Chatify.currentUserId,
-          attachment: url,
-          type: MessageType.image,
-          unSeenBy:
-              chat.members.where((e) => e != Chatify.currentUserId).toList(),
-        ),
-      );
+      _sendSingleImage(img);
     }
+  }
+
+  Future<void> _sendSingleImage(ImageAttachment img) async {
+    final id = Uuid.generate();
+    final attachment = uploadAttachment(
+      img.image,
+      'chats/${chat.id}/$id.jpg',
+    );
+    final pendingMsg = ImageMessage(
+      id: id,
+      bytes: img.image,
+      imageUrl: '',
+      thumbnailBytes: [],
+      width: img.width,
+      height: img.height,
+      chatId: chat.id,
+      unSeenBy: chat.members.where((e) => e != Chatify.currentUserId).toList(),
+      attachment: attachment,
+    );
+    pendingMessages.value = [...pendingMessages.value, pendingMsg];
+    final imageUrl = await attachment.url;
+    if (imageUrl == null) {
+      pendingMessages.value.remove(pendingMsg);
+      pendingMessages.refresh();
+      return;
+    }
+    Chatify.datasource.addMessage(
+      pendingMsg.copyWith(imageUrl: imageUrl, thumbnailBytes: img.thumbnail),
+    );
   }
 
   vibrate() {
@@ -127,11 +129,12 @@ class ChatController {
       if (canVibrate == true) Vibration.vibrate(duration: 10, amplitude: 100);
     });
   }
-  
+
   void dispose() {
     textController.dispose();
     pendingMessages.dispose();
     voiceController.dispose();
+    keyboardController.dispose();
     focus.dispose();
   }
 }

@@ -1,74 +1,71 @@
+import 'package:chatify/chatify.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
+import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/ui/common/rotated_widget.dart';
-import 'package:chatify/src/utils/extensions.dart';
+import 'package:chatify/src/utils/storage_utils.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import './noises.dart';
 
-class VoiceMessage extends StatefulWidget {
-  const VoiceMessage({
+class VoiceMessageWidget extends StatefulWidget {
+  const VoiceMessageWidget({
     Key? key,
-    required this.audioSrc,
     required this.user,
-    required this.me,
-    required this.sendAtWidget,
     required this.meBgColor,
-    required this.sendAt,
     this.contactBgColor = const Color(0xffffffff),
     required this.contactFgColor,
     this.mePlayIconColor = Colors.black,
     this.contactPlayIconColor = Colors.black26,
     this.meFgColor = const Color(0xffffffff),
-    this.played = false,
     this.onPlay,
     this.onSeek,
-    required this.height,
+    required this.message,
+    required this.chatController,
     required this.width,
-    required this.duration,
-    this.isLoading = false,
   }) : super(key: key);
 
-  final String audioSrc;
   final Color meBgColor,
       meFgColor,
       contactBgColor,
       contactFgColor,
       mePlayIconColor,
       contactPlayIconColor;
-  final bool played, me;
   final Function()? onPlay;
-  final double height;
-  final double width;
-  final Duration duration;
-  final bool isLoading;
-  final Widget sendAtWidget;
   final Function()? onSeek;
-  final DateTime sendAt;
   final String user;
+  final VoiceMessage message;
+  final ChatController chatController;
+  final double width;
 
   @override
-  _VoiceMessageState createState() => _VoiceMessageState();
+  _VoiceMessageWidgetState createState() => _VoiceMessageWidgetState();
 }
 
-class _VoiceMessageState extends State<VoiceMessage>
+class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
     with TickerProviderStateMixin {
   late final VoicePlayerController player;
   late final double maxNoiseHeight, noiseWidth;
   double maxDurationForSlider = .0000001;
+  late final VoiceMessage message;
+  late final bool isMe;
+  late final UploadAttachment? attachment;
 
   @override
   void initState() {
+    width = widget.width;
+    maxNoiseHeight = 6.w();
+    noiseWidth = 25.w();
+    message = widget.message;
+    isMe = message.isMine;
+    attachment = message.uploadAttachment;
     player = VoicePlayerController(
-      url: widget.audioSrc,
-      seconds: widget.duration.inSeconds,
-      isMe: widget.me,
-      sendAt: widget.sendAt,
+      message: message,
       user: widget.user,
     );
-    width = widget.width;
-    height = widget.height;
-    maxNoiseHeight = 6.w();
-    noiseWidth = ((player.seconds / 30).withRange(0.2, 1) * 40).w() + 10.w();
+
     player.playPauseController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
@@ -89,12 +86,6 @@ class _VoiceMessageState extends State<VoiceMessage>
           .then((value) => player.progressController!.reset());
     }
     super.initState();
-  }
-
-  @override
-  void dispose() {
-    player.disposeControllers();
-    super.dispose();
   }
 
   @override
@@ -119,7 +110,10 @@ class _VoiceMessageState extends State<VoiceMessage>
                   const SizedBox(width: 8),
                 ],
               ),
-              widget.sendAtWidget,
+              SendAtWidget(
+                message: message,
+                isSending: message.uploadAttachment != null,
+              ),
             ],
           ),
         ),
@@ -131,12 +125,15 @@ class _VoiceMessageState extends State<VoiceMessage>
         child: Container(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: widget.me ? widget.meFgColor : widget.contactFgColor,
+            color: isMe ? widget.meFgColor : widget.contactFgColor,
           ),
           width: 40,
           height: 40,
           child: InkWell(
             onTap: () async {
+              if (attachment != null) {
+                attachment!.cancel();
+              }
               if (!player.isReady!.value) {
                 await player.init();
               }
@@ -145,6 +142,55 @@ class _VoiceMessageState extends State<VoiceMessage>
             child: ValueListenableBuilder<VoiceStatus>(
               valueListenable: player.status,
               builder: (context, status, child) {
+                if (attachment != null) {
+                  return GestureDetector(
+                    onTap: () {
+                      attachment!.cancel();
+                      widget.chatController.pendingMessages.value
+                          .remove(message);
+                      widget.chatController.pendingMessages.refresh();
+                    },
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        AnimatedRotatingWidget(
+                          duration: Duration(milliseconds: 3000),
+                          child: KrStreamBuilder<TaskSnapshot>(
+                            stream: attachment!.task.snapshotEvents,
+                            onLoading: Container(
+                              padding: EdgeInsets.all(4),
+                              width: 40,
+                              height: 40,
+                              child: CircularProgressIndicator(
+                                value: 1,
+                                strokeWidth: 2.5,
+                                color: isMe
+                                    ? widget.meBgColor
+                                    : widget.contactBgColor,
+                              ),
+                            ),
+                            builder: (snapshot) {
+                              return Container(
+                                padding: EdgeInsets.all(4),
+                                width: 40,
+                                height: 40,
+                                child: CircularProgressIndicator(
+                                  value: snapshot.bytesTransferred /
+                                      snapshot.totalBytes,
+                                  strokeWidth: 2.5,
+                                  color: isMe
+                                      ? widget.meBgColor
+                                      : widget.contactBgColor,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                        Icon(Icons.close_rounded),
+                      ],
+                    ),
+                  );
+                }
                 if (status == VoiceStatus.downloading) {
                   return GestureDetector(
                     behavior: HitTestBehavior.deferToChild,
@@ -159,10 +205,12 @@ class _VoiceMessageState extends State<VoiceMessage>
                             builder: (context, progress, child) {
                               return Container(
                                 padding: EdgeInsets.all(4),
+                                width: 40,
+                                height: 40,
                                 child: CircularProgressIndicator(
-                                  value: 0.3,
+                                  value: progress,
                                   strokeWidth: 2.5,
-                                  color: widget.me
+                                  color: isMe
                                       ? widget.meBgColor
                                       : widget.contactBgColor,
                                 ),
@@ -176,13 +224,20 @@ class _VoiceMessageState extends State<VoiceMessage>
                   );
                 }
                 if (status == VoiceStatus.loading) {
-                  return Container(
-                    padding: EdgeInsets.all(4),
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color:
-                          widget.me ? widget.meBgColor : widget.contactBgColor,
-                    ),
+                  return Stack(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(4),
+                        width: 40,
+                        height: 40,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color:
+                              isMe ? widget.meBgColor : widget.contactBgColor,
+                        ),
+                      ),
+                      Center(child: Icon(Icons.close_rounded)),
+                    ],
                   );
                 }
                 if (status == VoiceStatus.dowload) {
@@ -192,7 +247,7 @@ class _VoiceMessageState extends State<VoiceMessage>
                   child: AnimatedIcon(
                     icon: AnimatedIcons.play_pause,
                     progress: player.playPauseController!,
-                    color: widget.me
+                    color: isMe
                         ? widget.mePlayIconColor
                         : widget.contactPlayIconColor,
                     size: 22,
@@ -218,19 +273,18 @@ class _VoiceMessageState extends State<VoiceMessage>
                     remainingTime,
                     style: TextStyle(
                       fontSize: 10,
-                      color:
-                          widget.me ? widget.meFgColor : widget.contactFgColor,
+                      color: isMe ? widget.meFgColor : widget.contactFgColor,
                     ),
                   );
                 },
               ),
-              if (!widget.played)
+              if (!message.isPlayed)
                 Container(
                   margin: EdgeInsetsDirectional.symmetric(horizontal: 4),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: widget.me ? widget.meFgColor : widget.contactFgColor,
+                    color: isMe ? widget.meFgColor : widget.contactFgColor,
                   ),
                   width: 1.4.w(),
                   height: 1.4.w(),
@@ -258,15 +312,11 @@ class _VoiceMessageState extends State<VoiceMessage>
         child: Stack(
           clipBehavior: Clip.hardEdge,
           children: [
-            widget.me
-                ? Noises(
-                    count: count,
-                    isMe: true,
-                  )
-                : Noises(
-                    count: count,
-                    isMe: false,
-                  ),
+            Noises(
+              count: count,
+              isMe: isMe,
+              samples: message.samples,
+            ),
             ValueListenableBuilder<bool>(
               valueListenable: player.isReady!,
               builder: (context, isReady, child) {
@@ -285,24 +335,21 @@ class _VoiceMessageState extends State<VoiceMessage>
                     child: Container(
                       width: noiseWidth,
                       height: 6.w(),
-                      color: widget.me
+                      color: isMe
                           ? widget.meBgColor.withOpacity(.4)
                           : widget.contactBgColor.withOpacity(
-                              !widget.played ? 0 : .35,
+                              !message.isPlayed ? 0 : .35,
                             ),
                     ),
                   );
-                else if (widget.played)
+                else
                   return Container(
                     width: noiseWidth,
                     height: 6.w(),
-                    color: widget.me
+                    color: message.isPlayed
                         ? widget.meBgColor.withOpacity(.4)
-                        : widget.contactBgColor.withOpacity(
-                            !widget.played ? 0 : .35,
-                          ),
+                        : widget.contactBgColor.withOpacity(0),
                   );
-                return SizedBox.shrink();
               },
             ),
           ],

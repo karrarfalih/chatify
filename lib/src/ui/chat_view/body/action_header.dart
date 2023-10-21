@@ -1,4 +1,3 @@
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
@@ -20,7 +19,7 @@ class MessageActionHeader extends StatelessWidget {
     return ValueListenableBuilder<MessageActionArgs?>(
       valueListenable: controller.messageAction,
       builder: (contex, value, child) {
-        final isMine = value?.message?.sender == Chatify.currentUserId;
+        final isMine = value?.message?.isMine ?? false;
         final name = isMine ? 'Me' : user.name;
         final message = value?.message;
         final icon =

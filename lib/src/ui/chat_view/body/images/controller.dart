@@ -77,12 +77,16 @@ class GalleryController {
   }
 
   bool _isBusy = false;
+  bool _finished = false;
 
   loadMoreImages() async {
-    if (_isBusy) return;
+    if (_isBusy || _finished) return;
     _isBusy = true;
     final MediaPage imagePage = await _allAlbums!
         .listMedia(skip: images.value.length, take: 100, lightWeight: true);
+    if (imagePage.items.isEmpty) {
+      _finished = true;
+    }
     images.value.addAll(imagePage.items);
     images.refresh();
     _isBusy = false;

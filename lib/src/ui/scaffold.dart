@@ -6,7 +6,6 @@ import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:iconsax/iconsax.dart';
 import 'chats/recent_chats.dart';
 
@@ -20,8 +19,6 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    CacheManager(Config('voices')).emptyCache();
-
     final theme = ChatifyTheme.of(context);
     return Scaffold(
       key: ContextProvider.recentChatsKey,

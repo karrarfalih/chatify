@@ -131,7 +131,6 @@ class ChatInputField extends StatelessWidget {
                       onPressed: () {
                         controller.submitMessage(
                           controller.textController.text,
-                          chat,
                         );
                       },
                       size: 60,
@@ -155,7 +154,7 @@ class ChatInputField extends StatelessWidget {
                       children: [
                         CircularButton(
                           onPressed: () {
-                            showImagesGallery(contex);
+                            showImagesGallery(contex, controller);
                           },
                           size: 60,
                           icon: Animate(

@@ -2,24 +2,34 @@ import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 
 class SendAtWidget extends StatelessWidget {
   const SendAtWidget({
     Key? key,
     required this.message,
+    this.isSending = false,
   }) : super(key: key);
 
   final Message message;
+  final bool isSending;
 
   @override
   Widget build(BuildContext context) {
-    final isMine = message.sender == Chatify.currentUserId;
+    final isMine = message.isMine;
     final isSeen =
         message.seenBy.where((e) => e != Chatify.currentUserId).isNotEmpty;
     final isTextOrVoice =
         message.type.isTextOrUnsupported || message.type.isVoice;
     final isVoice = message.type == MessageType.voice;
     final theme = ChatifyTheme.of(context);
+    final iconColor = !isMine && isTextOrVoice
+        ? theme.chatForegroundColor.withOpacity(
+            isTextOrVoice || isVoice ? 0.7 : 1,
+          )
+        : Colors.white.withOpacity(
+            isTextOrVoice || isVoice ? 0.7 : 1,
+          );
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
@@ -30,15 +40,23 @@ class SendAtWidget extends StatelessWidget {
             if (isMine)
               Padding(
                 padding: const EdgeInsetsDirectional.only(end: 3),
-                child: Image.asset(
-                  isSeen ? 'assets/icons/seen.png' : 'assets/icons/sent.png',
-                  package: 'chatify',
+                child: SizedBox(
+                  width: 14,
                   height: 14,
-                  color: !isMine && isTextOrVoice
-                      ? theme.chatForegroundColor
-                          .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
-                      : Colors.white
-                          .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
+                  child: isSending
+                      ? Icon(
+                          Iconsax.clock,
+                          size: 12,
+                          color: iconColor,
+                        )
+                      : Image.asset(
+                          isSeen
+                              ? 'assets/icons/seen.png'
+                              : 'assets/icons/sent.png',
+                          package: 'chatify',
+                          height: 14,
+                          color: iconColor,
+                        ),
                 ),
               ),
             Text(

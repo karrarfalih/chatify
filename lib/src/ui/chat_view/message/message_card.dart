@@ -5,10 +5,9 @@ import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
-import 'package:chatify/src/ui/chat_view/message/widgets/image.dart';
+import 'package:chatify/src/ui/chat_view/message/widgets/image/image.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
-import 'package:chatify/src/ui/common/image_preview.dart';
 import 'package:chatify/src/ui/common/kr_builder.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -52,7 +51,7 @@ class _MessageCardState extends State<MessageCard> {
   @override
   Widget build(BuildContext context) {
     final theme = ChatifyTheme.of(context);
-    final isMine = widget.message.sender == Chatify.currentUserId;
+    final isMine = widget.message.isMine;
     widget.message.type == MessageType.unSupported;
     final textColor = isMine ? Colors.white : theme.chatForegroundColor;
     final bkColor = isMine ? theme.primaryColor : theme.chatGreyForegroundColor;
@@ -176,7 +175,9 @@ class _MessageCardState extends State<MessageCard> {
                       textCancel: 'No',
                       isKeyboardShown:
                           widget.controller.keyboardController.isKeybaordOpen,
-                    )) {}
+                    )) {
+                      Chatify.datasource.deleteMessageForAll(widget.message.id);
+                    }
                   },
                 ),
               ],
@@ -185,15 +186,8 @@ class _MessageCardState extends State<MessageCard> {
               buttonBuilder: (context, showMenu) => GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
-                  if (widget.message.type == MessageType.image) {
-                    Navigator.of(context).push(
-                      ImagePreview.route(
-                          message: widget.message, user: widget.user),
-                    );
-                  } else {
-                    FocusScope.of(context).unfocus();
-                    showMenu();
-                  }
+                  FocusScope.of(context).unfocus();
+                  showMenu();
                 },
                 onLongPress: () {
                   if (widget.message.type == MessageType.image) {
@@ -256,22 +250,25 @@ class _MessageCardState extends State<MessageCard> {
                                   maxWidth: width,
                                   minWidth: 80,
                                 ),
-                                child: widget.message.type.isVoice
+                                child: widget.message is VoiceMessage
                                     ? MyBubble(
                                         bkColor: bkColor,
                                         linkedWithBottom:
                                             widget.linkedWithBottom,
                                         message: widget.message,
                                         child: MyVoiceMessage(
-                                          message: widget.message,
+                                          message:
+                                              widget.message as VoiceMessage,
                                           controller: widget.controller,
                                           user: widget.user,
                                         ),
                                       )
-                                    : widget.message.type.isImage
+                                    : widget.message is ImageMessage
                                         ? ImageCard(
-                                            message: widget.message,
-                                            width: width,
+                                            message:
+                                                widget.message as ImageMessage,
+                                            chatController: widget.controller,
+                                            user: widget.user,
                                           )
                                         : TextMessage(
                                             widget: widget,

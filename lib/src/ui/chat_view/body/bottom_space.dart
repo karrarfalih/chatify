@@ -1,7 +1,7 @@
-
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/keyboard_size.dart';
+import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,24 +18,31 @@ class ChatBottomSpace extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isEmoji,
       builder: (context, isEmoji, child) {
-        return Consumer<ScreenHeight>(
-          builder: (context, keyboard, child) {
-            controller.keyboardController
-                .onKeyboardHeightChange(keyboard.keyboardHeight);
-            return Container(
-              color: ChatifyTheme.of(context).isChatDark
-                  ? Colors.black.withOpacity(0.4)
-                  : Colors.white.withOpacity(0.4),
-              child: SafeArea(
-                top: false,
-                bottom: !isEmoji,
-                child: Container(
-                  height: isEmoji ? 0 : keyboard.keyboardHeight,
+        return KrStreamBuilder(
+          stream: controller.keyboardController.stream ?? Stream.empty(),
+          onEmpty: SizedBox.shrink(),
+          onLoading: SizedBox.shrink(),
+          builder: (context) {
+            return Consumer<ScreenHeight>(
+              builder: (context, keyboard, child) {
+                controller.keyboardController
+                    .onKeyboardHeightChange(keyboard.keyboardHeight);
+                return Container(
                   color: ChatifyTheme.of(context).isChatDark
                       ? Colors.black.withOpacity(0.4)
                       : Colors.white.withOpacity(0.4),
-                ),
-              ),
+                  child: SafeArea(
+                    top: false,
+                    bottom: !isEmoji,
+                    child: Container(
+                      height: isEmoji ? 0 : keyboard.keyboardHeight,
+                      color: ChatifyTheme.of(context).isChatDark
+                          ? Colors.black.withOpacity(0.4)
+                          : Colors.white.withOpacity(0.4),
+                    ),
+                  ),
+                );
+              },
             );
           },
         );

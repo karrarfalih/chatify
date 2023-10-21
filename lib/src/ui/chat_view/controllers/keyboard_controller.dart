@@ -1,38 +1,47 @@
+import 'dart:async';
+
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/utils/cache.dart';
 import 'package:flutter/material.dart';
+import 'package:rxdart/rxdart.dart';
 
 class KeyboardController {
   final ChatController controller;
 
-  KeyboardController(this.controller);
-
-  double keyboardHeight = 250;
-  double currentKeyboardHieght = 250;
-  bool isKeybaordOpen = false;
-
-  double _maxKeyBoardHeight = 0;
-  bool forceEmoji = false;
-
-  bool _isCalculationFinished = false;
-  _calculateMaximumKeyboardHeight(double height) {
-    if (_isCalculationFinished) return;
-    Future.delayed(Duration(seconds: 5)).then((value) {
-      _isCalculationFinished = true;
-      keyboardHeight = _maxKeyBoardHeight;
+  KeyboardController(this.controller) {
+    stream = keyboardHeightSubject
+        .debounceTime(Duration(milliseconds: 300))
+        .where((e) => e != 0)
+        .distinct(
+          (previous, next) => next == previous || next < 10,
+        );
+    _keyboardSubscription = stream?.listen((e) {
+      _keyboardHeight = e;
+      Cache.instance.setDouble('keyboardHeight', e);
     });
-    if (height > _maxKeyBoardHeight) {
-      _maxKeyBoardHeight = height;
-    }
   }
 
+  StreamSubscription<double>? _keyboardSubscription;
+  double get keyboardHeight {
+    return _keyboardHeight;
+  }
+
+  Stream<double>? stream;
+
+  double _keyboardHeight = Cache.instance.getDouble('keyboardHeight') ?? 250;
+
+  bool isKeybaordOpen = false;
+
+  bool forceEmoji = false;
+
+  BehaviorSubject<double> keyboardHeightSubject =
+      BehaviorSubject<double>.seeded(
+    Cache.instance.getDouble('keyboardHeight') ?? 250,
+  );
+
   onKeyboardHeightChange(double height) {
-    currentKeyboardHieght = height;
-    if (height > keyboardHeight) {
-      keyboardHeight = height;
-    }
-    if (height == keyboardHeight &&
-        controller.isEmoji.value &&
-        !forceEmoji) {
+    keyboardHeightSubject.add(height);
+    if (height == keyboardHeight && controller.isEmoji.value && !forceEmoji) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.isEmoji.value = false;
         controller.isEmojiIcon.value = false;
@@ -44,6 +53,10 @@ class KeyboardController {
         forceEmoji = false;
       });
     }
-    _calculateMaximumKeyboardHeight(height);
+  }
+
+  dispose() {
+    _keyboardSubscription?.cancel();
+    keyboardHeightSubject.close();
   }
 }

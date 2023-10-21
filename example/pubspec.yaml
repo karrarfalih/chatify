@@ -13,6 +13,7 @@ dependencies:
   chatify:
     path: ../
   firebase_core: ^2.15.0
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:

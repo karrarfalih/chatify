@@ -1,9 +1,7 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
-import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
-import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
 class MyVoiceMessage extends StatelessWidget {
@@ -14,32 +12,28 @@ class MyVoiceMessage extends StatelessWidget {
     required this.user,
   }) : super(key: key);
 
-  final Message message;
+  final VoiceMessage message;
   final ChatController controller;
   final ChatifyUser user;
 
   @override
   Widget build(BuildContext context) {
-    return VoiceMessage(
+    return VoiceMessageWidget(
+      key: ValueKey(message.id),
       onSeek: () => controller.preventEmoji = true,
       onPlay: () {
-        if (message.data != true) {
-          Chatify.datasource.addMessage(message.copyWith(data: true));
+        if (!message.isPlayed) {
+          Chatify.datasource.addMessage(message.copyWith(isPlayed: true));
         }
       },
-      sendAtWidget: SendAtWidget(message: message),
-      sendAt: message.sendAt ?? DateTime.now(),
-      user: message.sender == Chatify.currentUserId ? 'Me' : user.name,
-      duration: message.duration,
-      height: 50,
-      width: MediaQuery.of(context).size.width,
-      audioSrc: message.attachment ?? '',
-      played: message.data == true,
-      me: message.sender == Chatify.currentUserId,
+      user: message.isMine ? 'Me' : user.name,
       meBgColor: ChatifyTheme.of(context).primaryColor,
       contactPlayIconColor: Colors.white,
       contactBgColor: ChatifyTheme.of(context).chatGreyForegroundColor,
       contactFgColor: ChatifyTheme.of(context).primaryColor,
+      message: message,
+      chatController: controller,
+      width: MediaQuery.of(context).size.width,
     );
   }
 }
@@ -49,13 +43,18 @@ class MyVoiceMessageBloc extends StatelessWidget {
     Key? key,
     required this.linkedWithTop,
     required this.linkedWithBottom,
+    required this.message,
+    required this.controller,
   }) : super(key: key);
 
   final bool linkedWithTop;
   final bool linkedWithBottom;
+  final VoiceMessage message;
+  final ChatController controller;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
         color: ChatifyTheme.of(context).primaryColor,
@@ -66,31 +65,14 @@ class MyVoiceMessageBloc extends StatelessWidget {
           bottomEnd: const Radius.circular(12),
         ),
       ),
-      child: VoiceMessage(
-        sendAtWidget: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Text(
-            DateTime.now().format(context, 'h:mm a'),
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.white.withOpacity(0.7),
-              height: 1,
-            ),
-            textDirection: TextDirection.ltr,
-          ),
-        ),
-        isLoading: true,
-        duration: Duration.zero,
-        height: 50,
-        width: MediaQuery.of(context).size.width,
-        audioSrc: '',
-        played: true,
-        me: true,
-        meBgColor: Theme.of(context).primaryColor,
-        contactBgColor: Theme.of(context).scaffoldBackgroundColor,
-        contactFgColor: Theme.of(context).primaryColor,
-        sendAt: DateTime.now(),
+      child: VoiceMessageWidget(
+        meBgColor: theme.primaryColor,
+        contactBgColor: theme.scaffoldBackgroundColor,
+        contactFgColor: theme.primaryColor,
         user: '',
+        message: message,
+        chatController: controller,
+        width: MediaQuery.of(context).size.width,
       ),
     );
   }

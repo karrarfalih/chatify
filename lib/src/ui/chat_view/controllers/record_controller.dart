@@ -22,6 +22,7 @@ class VoiceRecordingController {
   final isLocked = false.obs;
   bool isPermissionAsked = false;
   bool isPermissionGranted = false;
+  List<double> samples = [];
 
   record() async {
     if (isRecording.value) return;
@@ -32,6 +33,7 @@ class VoiceRecordingController {
     isLocked.value = false;
     _minAmplitude = 0;
     seconds.value = 0;
+    samples.clear;
     vibrate();
     final startDate = DateTime.now();
     if (!await _record.hasPermission()) {
@@ -65,6 +67,7 @@ class VoiceRecordingController {
         if (value.current < _minAmplitude) {
           _minAmplitude = value.current;
         }
+        samples.add(value.current);
         micRadius.value = (Random().nextInt(10)) +
             60.0 +
             (30 * (_minAmplitude / value.current).withRange(1, 5));
@@ -129,44 +132,37 @@ class VoiceRecordingController {
     _timer?.cancel();
     if (micPos.value.dx > -150 && seconds.value >= 1 && submit) {
       final id = Uuid.generate();
-      final pendingMsg = Message(
-        id: id,
-        message: 'voice message',
-        chatId: controller.chat.id,
-        sender: Chatify.currentUserId,
-        type: MessageType.voice,
-        duration: Duration(seconds: seconds.value),
-        unSeenBy: [],
-      );
-      controller.pendingMessages.value = [
-        ...controller.pendingMessages.value,
-        pendingMsg,
-      ];
       path = await _record.stop();
       final file = File(path!);
       final uint8List = await File(path!).readAsBytes();
-      final url = await uploadAttachment(
+      final attachment = uploadAttachment(
         uint8List,
         'chats/${controller.chat.id}/$id.${file.path.split('.').last}',
       );
-      if (url == null) return;
-      await Chatify.datasource.addMessage(
-        Message(
-          id: id,
-          message: 'voice message',
-          chatId: controller.chat.id,
-          sender: Chatify.currentUserId,
-          attachment: url,
-          type: MessageType.voice,
-          duration: Duration(seconds: seconds.value),
-          unSeenBy: controller.chat.members
-              .where((e) => e != Chatify.currentUserId)
-              .toList(),
-        ),
+      final pendingMsg = VoiceMessage(
+        id: id,
+        chatId: controller.chat.id,
+        url: '',
+        duration: Duration(seconds: seconds.value),
+        unSeenBy: controller.chat.members
+            .where((e) => e != Chatify.currentUserId)
+            .toList(),
+        uploadAttachment: attachment,
+        samples: samples,
       );
-      // controller.pendingMessages.value.remove(pendingMsg);
-      // controller.pendingMessages.value =
-      //     controller.pendingMessages.value.toList();
+      controller.pendingMessages.value = [
+        ...controller.pendingMessages.value,
+        pendingMsg
+      ];
+      final url = await attachment.url;
+      if (url == null) {
+        controller.pendingMessages.value.remove(pendingMsg);
+        controller.pendingMessages.refresh();
+        return;
+      }
+      Chatify.datasource.addMessage(
+        pendingMsg.copyWith(url: url),
+      );
     }
   }
 

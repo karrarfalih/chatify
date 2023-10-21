@@ -1,5 +1,5 @@
 import 'package:chatify/src/enums.dart';
-import 'package:chatify/src/models/message.dart';
+import 'package:chatify/src/models/messages/message.dart';
 import 'package:chatify/src/models/user.dart';
 
 class ChatifyConfig {

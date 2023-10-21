@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -12,9 +13,11 @@ class GalleryInputField extends StatefulWidget {
     super.key,
     required this.controller,
     this.isSubmit = true,
+    required this.chatController,
   });
 
   final GalleryController controller;
+  final ChatController chatController;
   final bool isSubmit;
 
   @override
@@ -139,7 +142,12 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
                           ),
                         ),
                         onPressed: () {
-                          if (!isSubmit.value) {}
+                          if (!isSubmit.value) {
+                            widget.chatController.sendImages(
+                              widget.controller.selected.value,
+                            );
+                            Navigator.of(context).pop();
+                          }
                         },
                         child: ValueListenableBuilder<bool>(
                           valueListenable: isSubmit,
