@@ -5,6 +5,7 @@ import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_preview.dart';
 import 'package:chatify/src/ui/chat_view/body/images/input_field.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/common/animated_flip_counter.dart';
 import 'package:chatify/src/ui/common/bottom_sheet/flexible_bottom_sheet_route.dart';
 import 'package:chatify/src/ui/common/sliver/sliver_container.dart';
 import 'package:chatify/src/ui/common/sliver_group.dart';
@@ -93,11 +94,25 @@ class _ChatImagesState extends State<_ChatImages> {
                         bottom: 14,
                         top: 16,
                       ),
-                      child: Text(
-                        selected.isEmpty
-                            ? 'Select Media'
-                            : '${selected.length} photo selected',
-                        style: TextStyle(fontSize: 16),
+                      child: Row(
+                        children: [
+                          if (selected.isEmpty)
+                            Text(
+                              'Select Media',
+                              style: TextStyle(fontSize: 16),
+                            )
+                          else ...[
+                            AnimatedFlipCounter(
+                              value: selected.length,
+                              duration: Duration(milliseconds: 300),
+                              textStyle: TextStyle(fontSize: 16),
+                            ),
+                            Text(
+                              ' photo selected',
+                              style: TextStyle(fontSize: 16),
+                            )
+                          ]
+                        ],
                       ),
                     );
                   },
@@ -148,80 +163,88 @@ class _ChatImagesState extends State<_ChatImages> {
                                         context: context,
                                       );
                                     },
-                                    child: AnimatedScale(
-                                      duration: Duration(milliseconds: 170),
-                                      scale: isSelected ? 0.8 : 1,
-                                      child: Container(
-                                        height: double.maxFinite,
-                                        width: double.maxFinite,
-                                        color: Theme.of(context)
-                                            .scaffoldBackgroundColor,
-                                        child: Stack(
-                                          children: [
-                                            Container(
-                                              width: double.maxFinite,
-                                              height: double.maxFinite,
-                                              color: theme.chatForegroundColor
-                                                  .withOpacity(0.07),
-                                              child: Icon(
-                                                Iconsax.gallery,
+                                    child: Container(
+                                      color: theme.chatForegroundColor
+                                          .withOpacity(0.07),
+                                      child: AnimatedScale(
+                                        duration: Duration(milliseconds: 170),
+                                        scale: isSelected ? 0.8 : 1,
+                                        child: Container(
+                                          height: double.maxFinite,
+                                          width: double.maxFinite,
+                                          color: Theme.of(context)
+                                              .scaffoldBackgroundColor,
+                                          child: Stack(
+                                            children: [
+                                              Container(
+                                                width: double.maxFinite,
+                                                height: double.maxFinite,
                                                 color: theme.chatForegroundColor
-                                                    .withOpacity(0.4),
-                                              ),
-                                            ),
-                                            AspectRatio(
-                                              aspectRatio: 1,
-                                              child: FadeInImage(
-                                                fit: BoxFit.cover,
-                                                placeholder: MemoryImage(
-                                                  kTransparentImage,
-                                                ),
-                                                image: ThumbnailProvider(
-                                                  mediumId: image.id,
-                                                  highQuality: true,
+                                                    .withOpacity(0.07),
+                                                child: Icon(
+                                                  Iconsax.gallery,
+                                                  color: theme
+                                                      .chatForegroundColor
+                                                      .withOpacity(0.4),
                                                 ),
                                               ),
-                                            ),
-                                            if (image.mediumType ==
-                                                MediumType.video)
-                                              Align(
-                                                alignment: AlignmentDirectional
-                                                    .bottomStart,
-                                                child: Container(
-                                                  padding: EdgeInsets.symmetric(
-                                                    horizontal: 5,
-                                                    vertical: 2,
+                                              AspectRatio(
+                                                aspectRatio: 1,
+                                                child: FadeInImage(
+                                                  fit: BoxFit.cover,
+                                                  placeholder: MemoryImage(
+                                                    kTransparentImage,
                                                   ),
-                                                  margin: EdgeInsets.all(4),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.black26,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                      5,
+                                                  image: ThumbnailProvider(
+                                                    mediumId: image.id,
+                                                    highQuality: true,
+                                                  ),
+                                                ),
+                                              ),
+                                              if (image.mediumType ==
+                                                  MediumType.video)
+                                                Align(
+                                                  alignment:
+                                                      AlignmentDirectional
+                                                          .bottomStart,
+                                                  child: Container(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                      horizontal: 5,
+                                                      vertical: 2,
                                                     ),
-                                                  ),
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Icon(
-                                                        Icons
-                                                            .play_arrow_rounded,
-                                                        size: 16,
-                                                        color: Colors.white,
+                                                    margin: EdgeInsets.all(4),
+                                                    decoration: BoxDecoration(
+                                                      color: Colors.black26,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                        5,
                                                       ),
-                                                      Text(
-                                                        (image.duration ~/ 1000)
-                                                            .toDurationString,
-                                                        style: TextStyle(
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisSize:
+                                                          MainAxisSize.min,
+                                                      children: [
+                                                        Icon(
+                                                          Icons
+                                                              .play_arrow_rounded,
+                                                          size: 16,
                                                           color: Colors.white,
                                                         ),
-                                                      ),
-                                                    ],
+                                                        Text(
+                                                          (image.duration ~/
+                                                                  1000)
+                                                              .toDurationString,
+                                                          style: TextStyle(
+                                                            color: Colors.white,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
-                                                ),
-                                              )
-                                          ],
+                                                )
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),

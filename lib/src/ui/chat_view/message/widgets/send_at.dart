@@ -33,7 +33,7 @@ class SendAtWidget extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
-        padding: const EdgeInsetsDirectional.only(end: 6),
+        padding: EdgeInsets.only(left: isMine ? 8 : 0, right: isMine ? 0 : 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -62,12 +62,12 @@ class SendAtWidget extends StatelessWidget {
             Text(
               (message.sendAt ?? DateTime.now()).format(context, 'h:mm a'),
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 color: !isMine && isTextOrVoice
                     ? theme.chatForegroundColor
-                        .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
+                        .withOpacity(isTextOrVoice || isVoice ? 0.5 : 1)
                     : Colors.white
-                        .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
+                        .withOpacity(isTextOrVoice || isVoice ? 0.5 : 1),
                 height: 1,
               ),
               textDirection: TextDirection.ltr,

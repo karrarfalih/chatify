@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
+import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
@@ -14,6 +14,8 @@ import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
+
+final key = GlobalKey();
 
 class MessageCard extends StatefulWidget {
   final Message message;
@@ -41,11 +43,32 @@ class _MessageCardState extends State<MessageCard> {
   final messagePos = 0.0.obs;
   double _startPos = 0;
   bool hasVibrated = false;
+  late bool isSelected;
 
   @override
   void dispose() {
     messagePos.dispose();
     super.dispose();
+  }
+
+  toggleSelect() {
+    if (isSelected) {
+      widget.controller.selecetdMessages
+        ..value.remove(widget.message.id)
+        ..refresh();
+    } else {
+      widget.controller.selecetdMessages
+        ..value[widget.message.id] = widget.message
+        ..refresh();
+    }
+  }
+
+  startSwipe() {
+    widget.controller.isSelecting.value = true;
+    widget.controller.initialSelecetdMessages =
+        Map.from(widget.controller.selecetdMessages.value);
+    toggleSelect();
+    widget.controller.vibrate();
   }
 
   @override
@@ -59,33 +82,73 @@ class _MessageCardState extends State<MessageCard> {
     final myEmoji = widget.message.emojis
         .cast<MessageEmoji?>()
         .firstWhere((e) => e?.uid == Chatify.currentUserId, orElse: () => null);
-    return Padding(
-      padding: EdgeInsets.only(top: !widget.linkedWithTop ? 10 : 0),
-      child: Directionality(
-        textDirection: isMine ? TextDirection.rtl : TextDirection.ltr,
-        child: Padding(
-          padding: EdgeInsetsDirectional.only(
-            bottom: 2,
-            end: widget.message.type.isTextOrUnsupported ||
-                    widget.message.type.isVoice
-                ? 8
-                : 13,
-            start: widget.message.type.isTextOrUnsupported ||
-                    widget.message.type.isVoice
-                ? 8
-                : 13,
-          ),
-          child: ClipRRect(
-            borderRadius: widget.message.type.isTextOrUnsupported ||
-                    widget.message.type.isVoice
-                ? BorderRadius.zero
-                : BorderRadiusDirectional.only(
-                    topStart: Radius.circular(widget.linkedWithTop ? 0 : 12),
-                    bottomStart:
-                        Radius.circular(widget.linkedWithBottom ? 0 : 12),
-                    topEnd: const Radius.circular(12),
-                    bottomEnd: const Radius.circular(12),
+    return ValueListenableBuilder<Map<String, Message>>(
+      valueListenable: widget.controller.selecetdMessages,
+      builder: (context, value, child) {
+        isSelected = value.containsKey(widget.message.id);
+        return GestureDetector(
+          onTap: () {
+            if (widget.controller.selecetdMessages.value.isNotEmpty) {
+              toggleSelect();
+            }
+          },
+          onLongPress: startSwipe,
+          onLongPressEnd: (details) =>
+              widget.controller.isSelecting.value = false,
+          child: Container(
+            color: isSelected
+                ? theme.primaryColor.withOpacity(0.1)
+                : Colors.transparent,
+            child: Row(
+              children: [
+                AnimatedContainer(
+                  duration: const Duration(milliseconds: 100),
+                  width: value.isNotEmpty ? 40 : 0,
+                  height: 20,
+                  child: Center(
+                    child: Stack(
+                      children: [
+                        Positioned(
+                          left: 0,
+                          child: SizedBox(
+                            width: 50,
+                            child: Center(
+                              child: Icon(
+                                isSelected
+                                    ? Icons.check_circle
+                                    : Icons.circle_outlined,
+                                color: theme.primaryColor,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                ),
+                child!,
+              ],
+            ),
+          ),
+        );
+      },
+      child: Expanded(
+        child: Directionality(
+          textDirection: isMine ? TextDirection.rtl : TextDirection.ltr,
+          child: Container(
+            padding: EdgeInsetsDirectional.only(
+              top: !widget.linkedWithTop ? 10 : 0,
+              bottom: 2,
+              end: widget.message.type.isTextOrUnsupported ||
+                      widget.message.type.isVoice
+                  ? 4
+                  : 13,
+              start: widget.message.type.isTextOrUnsupported ||
+                      widget.message.type.isVoice
+                  ? 4
+                  : 13,
+            ),
             child: PullDownButton(
               routeTheme: PullDownMenuRouteTheme(
                 width: 140,
@@ -170,7 +233,7 @@ class _MessageCardState extends State<MessageCard> {
                   onTap: () async {
                     if (await showConfirm(
                       context: context,
-                      message: 'Delete selcetd message?',
+                      message: 'Delete selected message?',
                       textOK: 'Yes',
                       textCancel: 'No',
                       isKeyboardShown:
@@ -184,106 +247,130 @@ class _MessageCardState extends State<MessageCard> {
               position: PullDownMenuPosition.automatic,
               applyOpacity: false,
               buttonBuilder: (context, showMenu) => GestureDetector(
-                behavior: HitTestBehavior.opaque,
+                behavior: HitTestBehavior.translucent,
                 onTap: () {
+                  if (widget.controller.selecetdMessages.value.isNotEmpty) {
+                    toggleSelect();
+                    return;
+                  }
                   FocusScope.of(context).unfocus();
                   showMenu();
                 },
-                onLongPress: () {
-                  if (widget.message.type == MessageType.image) {
-                    showMenu();
+                onLongPress: startSwipe,
+                onLongPressEnd: (details) =>
+                    widget.controller.isSelecting.value = false,
+                onHorizontalDragStart: (x) {
+                  _startPos = x.globalPosition.dx;
+                  hasVibrated = false;
+                },
+                onHorizontalDragUpdate: (x) {
+                  if (-x.globalPosition.dx + _startPos < 0) return;
+                  if (-x.globalPosition.dx + _startPos > 100) return;
+                  messagePos.value = -x.globalPosition.dx + _startPos;
+                  if (messagePos.value > 80 && !hasVibrated) {
+                    hasVibrated = true;
+                    widget.controller.vibrate();
                   }
                 },
-                child: Directionality(
-                  textDirection: TextDirection.ltr,
-                  child: GestureDetector(
-                    onHorizontalDragStart: (x) {
-                      _startPos = x.globalPosition.dx;
-                      hasVibrated = false;
-                    },
-                    onHorizontalDragUpdate: (x) {
-                      if (-x.globalPosition.dx + _startPos < 0) return;
-                      if (-x.globalPosition.dx + _startPos > 100) return;
-                      messagePos.value = -x.globalPosition.dx + _startPos;
-                      if (messagePos.value > 80 && !hasVibrated) {
-                        hasVibrated = true;
-                        widget.controller.vibrate();
-                      }
-                    },
-                    onHorizontalDragEnd: (x) {
-                      if (messagePos.value > 80) {
-                        messagePos.value = 0;
-                        widget.controller.reply(widget.message);
-                        return;
-                      }
-                      messagePos.value = 0;
-                    },
-                    onHorizontalDragCancel: () {
-                      messagePos.value = 0;
-                    },
-                    child: Directionality(
-                      textDirection:
-                          isMine ? TextDirection.rtl : TextDirection.ltr,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Flexible(
-                            child: ValueListenableBuilder<double>(
-                              valueListenable: messagePos,
-                              builder: (context, value, child) => Row(
-                                children: [
-                                  AnimatedContainer(
-                                    duration: Duration(milliseconds: 100),
-                                    width: value,
-                                    child: value > 20
-                                        ? Directionality(
-                                            textDirection: TextDirection.ltr,
-                                            child: Icon(Icons.reply),
-                                          )
-                                        : SizedBox.shrink(),
-                                  ),
-                                  child!,
-                                ],
-                              ),
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth: width,
-                                  minWidth: 80,
-                                ),
-                                child: widget.message is VoiceMessage
-                                    ? MyBubble(
-                                        bkColor: bkColor,
-                                        linkedWithBottom:
-                                            widget.linkedWithBottom,
-                                        message: widget.message,
-                                        child: MyVoiceMessage(
-                                          message:
-                                              widget.message as VoiceMessage,
-                                          controller: widget.controller,
-                                          user: widget.user,
-                                        ),
+                onHorizontalDragEnd: (x) {
+                  if (messagePos.value > 80) {
+                    messagePos.value = 0;
+                    widget.controller.reply(widget.message);
+                    return;
+                  }
+                  messagePos.value = 0;
+                },
+                onHorizontalDragCancel: () {
+                  messagePos.value = 0;
+                },
+                child: Row(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Flexible(
+                      child: ValueListenableBuilder<double>(
+                        valueListenable: messagePos,
+                        builder: (context, value, child) => Row(
+                          children: [
+                            if (isMine)
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 100),
+                                width: value,
+                                child: value > 20
+                                    ? Directionality(
+                                        textDirection: TextDirection.ltr,
+                                        child: Icon(Icons.reply),
                                       )
-                                    : widget.message is ImageMessage
-                                        ? ImageCard(
-                                            message:
-                                                widget.message as ImageMessage,
-                                            chatController: widget.controller,
-                                            user: widget.user,
-                                          )
-                                        : TextMessage(
-                                            widget: widget,
-                                            bkColor: bkColor,
-                                            textColor: textColor,
-                                            controller: widget.controller,
-                                            isMine: isMine,
-                                          ),
+                                    : SizedBox.shrink(),
                               ),
+                            child!,
+                            if (!isMine) ...[
+                              Spacer(),
+                              if (value != 0)
+                                AnimatedContainer(
+                                  duration: Duration(milliseconds: 100),
+                                  width: value.withRange(0, 100),
+                                  child: Directionality(
+                                    textDirection: TextDirection.ltr,
+                                    child: Icon(Icons.reply),
+                                  ),
+                                ),
+                            ],
+                          ],
+                        ),
+                        child: Dismissible(
+                          key: ValueKey('dismissible-${widget.message.id}'),
+                          direction: isMine
+                              ? DismissDirection.none
+                              : DismissDirection.endToStart,
+                          onUpdate: (details) {
+                            if (details.progress > 0.1 && !hasVibrated) {
+                              hasVibrated = true;
+                              widget.controller.vibrate();
+                            }
+                            messagePos.value = details.progress * 70;
+                          },
+                          dismissThresholds: {
+                            DismissDirection.endToStart: 0.1,
+                          },
+                          confirmDismiss: (direction) {
+                            widget.controller.reply(widget.message);
+                            return Future.value(false);
+                          },
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              maxWidth: width,
+                              minWidth: 80,
                             ),
+                            child: widget.message is VoiceMessage
+                                ? MyBubble(
+                                    bkColor: bkColor,
+                                    linkedWithBottom: widget.linkedWithBottom,
+                                    linkedWithTop: widget.linkedWithTop,
+                                    message: widget.message,
+                                    child: MyVoiceMessage(
+                                      message: widget.message as VoiceMessage,
+                                      controller: widget.controller,
+                                      user: widget.user,
+                                    ),
+                                  )
+                                : widget.message is ImageMessage
+                                    ? ImageCard(
+                                        message: widget.message as ImageMessage,
+                                        chatController: widget.controller,
+                                        user: widget.user,
+                                      )
+                                    : TextMessage(
+                                        widget: widget,
+                                        bkColor: bkColor,
+                                        textColor: textColor,
+                                        controller: widget.controller,
+                                        isMine: isMine,
+                                      ),
                           ),
-                        ],
+                        ),
                       ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -294,7 +381,7 @@ class _MessageCardState extends State<MessageCard> {
   }
 }
 
-class TextMessage extends StatelessWidget {
+class TextMessage extends StatefulWidget {
   const TextMessage({
     super.key,
     required this.widget,
@@ -311,32 +398,41 @@ class TextMessage extends StatelessWidget {
   final ChatController controller;
 
   @override
+  State<TextMessage> createState() => _TextMessageState();
+}
+
+class _TextMessageState extends State<TextMessage> {
+  Message? repliedMsg;
+
+  @override
   Widget build(BuildContext context) {
     return Stack(
       alignment: AlignmentDirectional.bottomEnd,
       children: [
         Padding(
-          padding:
-              EdgeInsets.only(bottom: widget.message.emojis.isEmpty ? 0 : 14),
+          padding: EdgeInsets.only(
+            bottom: widget.widget.message.emojis.isEmpty ? 0 : 14,
+          ),
           child: MyBubble(
-            message: widget.message,
-            bkColor: bkColor,
-            linkedWithBottom: widget.linkedWithBottom,
+            message: widget.widget.message,
+            bkColor: widget.bkColor,
+            linkedWithBottom: widget.widget.linkedWithBottom,
+            linkedWithTop: widget.widget.linkedWithTop,
             child: Padding(
               padding: EdgeInsets.only(
-                right: Platform.isIOS ? 15 : 15,
-                left: Platform.isIOS ? 15 : 15,
-                top: Platform.isIOS ? 8 : 8,
-                bottom: Platform.isIOS ? 8 : 8,
+                right: widget.isMine ? 8 : 16,
+                left: widget.isMine ? 16 : 8,
+                top: 8,
+                bottom: 8,
               ),
-              child: Directionality(
-                textDirection: Directionality.of(context),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (widget.message.replyId != null)
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 5),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.widget.message.replyId != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: SizedBox(
+                        height: 37,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -344,7 +440,7 @@ class TextMessage extends StatelessWidget {
                               height: 27,
                               width: 2,
                               decoration: BoxDecoration(
-                                color: isMine
+                                color: widget.isMine
                                     ? Colors.white70
                                     : ChatifyTheme.of(context).primaryColor,
                                 borderRadius: BorderRadius.circular(4),
@@ -358,47 +454,79 @@ class TextMessage extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    widget.message.replyUid ==
+                                    widget.widget.message.replyUid ==
                                             Chatify.currentUserId
                                         ? 'Me'
-                                        : widget.user.name,
+                                        : widget.widget.user.name,
                                     style: TextStyle(
-                                      color: textColor.withOpacity(0.8),
+                                      color: widget.textColor.withOpacity(0.8),
                                       fontSize: 14,
                                     ),
                                   ),
-                                  KrFutureBuilder<Message?>(
-                                    future: Chatify.datasource
-                                        .readMessage(widget.message.replyId!),
-                                    onEmpty: Text(
-                                      'An error occured!',
-                                      style: TextStyle(
-                                        color: textColor.withOpacity(0.8),
-                                        fontSize: 12,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    onError: (_) => Text(
-                                      'An error occured!',
-                                      style: TextStyle(
-                                        color: textColor.withOpacity(0.8),
-                                        fontSize: 12,
-                                      ),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                    builder: (message) {
-                                      return Text(
-                                        message?.message ?? '',
-                                        style: TextStyle(
-                                          color: textColor.withOpacity(0.8),
-                                          fontSize: 12,
-                                        ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      );
-                                    },
+                                  Expanded(
+                                    child: repliedMsg != null
+                                        ? Text(
+                                            repliedMsg?.message ?? '',
+                                            style: TextStyle(
+                                              color: widget.textColor
+                                                  .withOpacity(0.8),
+                                              fontSize: 12,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          )
+                                        : KrFutureBuilder<Message?>(
+                                            future:
+                                                Chatify.datasource.readMessage(
+                                              widget.widget.message.replyId!,
+                                            ),
+                                            onEmpty: Text(
+                                              'An error occured!',
+                                              style: TextStyle(
+                                                color: widget.textColor
+                                                    .withOpacity(0.8),
+                                                fontSize: 12,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            onError: (_) => Text(
+                                              'An error occured!',
+                                              style: TextStyle(
+                                                color: widget.textColor
+                                                    .withOpacity(0.8),
+                                                fontSize: 12,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                            onLoading: SizedBox(
+                                              width: 20,
+                                              child: Center(
+                                                child: LoadingWidget(
+                                                  size: 10,
+                                                  lineWidth: 1,
+                                                  color: widget.isMine
+                                                      ? Colors.white
+                                                      : ChatifyTheme.of(context)
+                                                          .primaryColor,
+                                                ),
+                                              ),
+                                            ),
+                                            builder: (message) {
+                                              repliedMsg = message;
+                                              return Text(
+                                                message?.message ?? '',
+                                                style: TextStyle(
+                                                  color: widget.textColor
+                                                      .withOpacity(0.8),
+                                                  fontSize: 12,
+                                                ),
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              );
+                                            },
+                                          ),
                                   ),
                                 ],
                               ),
@@ -406,49 +534,49 @@ class TextMessage extends StatelessWidget {
                           ],
                         ),
                       ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.message.message.length < 35)
-                          Padding(
-                            padding: const EdgeInsetsDirectional.only(),
-                            child: SendAtWidget(message: widget.message),
-                          ),
-                        Flexible(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 2),
-                            child: Wrap(
-                              children: widget.message.message.urls
-                                  .map(
-                                    (e) => Text(
-                                      e,
-                                      style: TextStyle(
-                                        decoration: e.isURL
-                                            ? TextDecoration.underline
-                                            : null,
-                                        color: textColor,
-                                      ),
+                    ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (widget.widget.message.message.length < 35)
+                        Padding(
+                          padding: const EdgeInsetsDirectional.only(),
+                          child: SendAtWidget(message: widget.widget.message),
+                        ),
+                      Flexible(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 2),
+                          child: Wrap(
+                            children: widget.widget.message.message.urls
+                                .map(
+                                  (e) => Text(
+                                    e,
+                                    style: TextStyle(
+                                      decoration: e.isURL
+                                          ? TextDecoration.underline
+                                          : null,
+                                      color: widget.textColor,
                                     ),
-                                  )
-                                  .toList(),
-                            ),
+                                  ),
+                                )
+                                .toList(),
                           ),
                         ),
-                      ],
-                    ),
-                    if (widget.message.message.length >= 35)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(),
-                        child: SendAtWidget(message: widget.message),
                       ),
-                  ],
-                ),
+                    ],
+                  ),
+                  if (widget.widget.message.message.length >= 35)
+                    Padding(
+                      padding: const EdgeInsetsDirectional.only(),
+                      child: SendAtWidget(message: widget.widget.message),
+                    ),
+                ],
               ),
             ),
           ),
         ),
-        if (widget.message.emojis.isNotEmpty)
+        if (widget.widget.message.emojis.isNotEmpty)
           Container(
             margin: const EdgeInsetsDirectional.only(end: 10),
             padding: const EdgeInsets.all(1),
@@ -459,12 +587,12 @@ class TextMessage extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6),
               decoration: BoxDecoration(
-                color: bkColor.withOpacity(isMine ? 0.2 : 1),
+                color: widget.bkColor.withOpacity(widget.isMine ? 0.2 : 1),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
-                children: widget.message.emojis
+                children: widget.widget.message.emojis
                     .map(
                       (e) => Text(
                         e.emoji,

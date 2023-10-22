@@ -45,69 +45,73 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   Widget build(BuildContext context) {
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: ChatifyTheme.of(context).isChatDark
-          ? SystemUiOverlayStyle.light.copyWith(
-              systemNavigationBarDividerColor: Colors.black,
-              systemNavigationBarColor: Colors.black,
-              systemNavigationBarIconBrightness: Brightness.light,
-            )
-          : SystemUiOverlayStyle.dark.copyWith(
-              systemNavigationBarDividerColor: Colors.white,
-              systemNavigationBarColor: Colors.white,
-              systemNavigationBarIconBrightness: Brightness.dark,
-            ),
-      child: KeyboardSizeProvider(
-        child: Scaffold(
-          key: ContextProvider.chatKey,
-          resizeToAvoidBottomInset: false,
-          body: Container(
-            decoration: ChatifyTheme.of(context).backgroundImage == null
-                ? null
-                : BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(
-                        ChatifyTheme.of(context).backgroundImage!,
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: ChatifyTheme.of(context).isChatDark
+            ? SystemUiOverlayStyle.light.copyWith(
+                systemNavigationBarDividerColor: Colors.black,
+                systemNavigationBarColor: Colors.black,
+                systemNavigationBarIconBrightness: Brightness.light,
+              )
+            : SystemUiOverlayStyle.dark.copyWith(
+                systemNavigationBarDividerColor: Colors.white,
+                systemNavigationBarColor: Colors.white,
+                systemNavigationBarIconBrightness: Brightness.dark,
+              ),
+        child: KeyboardSizeProvider(
+          child: Scaffold(
+            key: ContextProvider.chatKey,
+            resizeToAvoidBottomInset: false,
+            body: Container(
+              decoration: ChatifyTheme.of(context).backgroundImage == null
+                  ? null
+                  : BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage(
+                          ChatifyTheme.of(context).backgroundImage!,
+                        ),
+                        fit: BoxFit.cover,
                       ),
-                      fit: BoxFit.cover,
                     ),
-                  ),
-            child: Stack(
-              alignment: AlignmentDirectional.topCenter,
-              children: [
-                Column(
-                  children: [
-                    Expanded(
-                      child: ChatMessages(
-                        chat: widget.chat,
-                        user: widget.user,
+              child: Stack(
+                alignment: AlignmentDirectional.topCenter,
+                children: [
+                  Column(
+                    children: [
+                      Expanded(
+                        child: ChatMessages(
+                          chat: widget.chat,
+                          user: widget.user,
+                          controller: controller,
+                        ),
+                      ),
+                      MessageActionHeader(
                         controller: controller,
+                        user: widget.user,
                       ),
-                    ),
-                    MessageActionHeader(
-                      controller: controller,
-                      user: widget.user,
-                    ),
-                    ChatInputBox(
-                      controller: controller,
-                      chat: widget.chat,
-                    ),
-                    ChatBottomSpace(controller: controller),
-                    EmojisKeyboard(controller: controller)
-                  ],
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ChatAppBar(
-                      user: widget.user,
-                    ),
-                    CurrentVoicePlayer(),
-                  ],
-                ),
-                RecordThumb(controller: controller),
-                RecordingLock(controller: controller)
-              ],
+                      ChatInputBox(
+                        controller: controller,
+                        chat: widget.chat,
+                      ),
+                      ChatBottomSpace(controller: controller),
+                      EmojisKeyboard(controller: controller)
+                    ],
+                  ),
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ChatAppBar(
+                        user: widget.user,
+                        chatController: controller,
+                      ),
+                      CurrentVoicePlayer(),
+                    ],
+                  ),
+                  RecordThumb(controller: controller),
+                  RecordingLock(controller: controller)
+                ],
+              ),
             ),
           ),
         ),

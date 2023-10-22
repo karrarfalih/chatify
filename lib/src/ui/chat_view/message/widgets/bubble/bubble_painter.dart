@@ -1,52 +1,152 @@
 part of 'bubble.dart';
 
-/// A painter for the Bubble.
-class BubblePainter extends CustomPainter {
-  BubblePainter({
+class _BubblePainter extends CustomPainter {
+  _BubblePainter({
     required this.clipper,
     required Color color,
-    required Color borderColor,
-    required double borderWidth,
-    required this.borderUp,
-    required this.elevation,
-    required this.shadowColor,
-  })   : _fillPaint = Paint()
+  }) : _fillPaint = Paint()
           ..color = color
-          ..style = PaintingStyle.fill,
-        _strokePaint = borderWidth == 0 || borderColor == Colors.transparent
-            ? null
-            : (Paint()
-              ..color = borderColor
-              ..strokeWidth = borderWidth
-              ..strokeCap = StrokeCap.round
-              ..strokeJoin = StrokeJoin.round
-              ..style = PaintingStyle.stroke);
+          ..style = PaintingStyle.fill;
 
   final CustomClipper<Path> clipper;
-  final bool borderUp;
-  final double elevation;
-  final Color shadowColor;
 
   final Paint _fillPaint;
-  final Paint? _strokePaint;
 
   @override
   void paint(Canvas canvas, Size size) {
     final clip = clipper.getClip(size);
 
-    if (elevation != 0.0) {
-      canvas.drawShadow(clip, shadowColor, elevation, false);
-    }
-
-    if (borderUp) canvas.drawPath(clip, _fillPaint);
-
-    if (_strokePaint != null) {
-      canvas.drawPath(clip, _strokePaint!);
-    }
-
-    if (!borderUp) canvas.drawPath(clip, _fillPaint);
+    canvas.drawPath(clip, _fillPaint);
   }
 
   @override
-  bool shouldRepaint(covariant BubblePainter oldDelegate) => false;
+  bool shouldRepaint(covariant _BubblePainter oldDelegate) => false;
+}
+
+class _BubbleClipper extends CustomClipper<Path> {
+  _BubbleClipper({
+    required this.borderRadius,
+    required this.radius,
+    required this.showNip,
+    required this.nip,
+  }) : super() {
+    if (nip == BubbleNip.no) return;
+    _leftOffset = nip == BubbleNip.left ? 10 : 0;
+    _rightOffset = nip == BubbleNip.right ? 10 : 0;
+  }
+
+  final double radius;
+  final BorderRadius borderRadius;
+  final bool showNip;
+  final BubbleNip nip;
+
+  double _leftOffset = 0;
+  double _rightOffset = 0;
+
+  EdgeInsets get edgeInsets {
+    return EdgeInsets.only(
+      left: _leftOffset,
+      right: _rightOffset,
+    );
+  }
+
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+
+    path.addRRect(
+      RRect.fromLTRBAndCorners(
+        _leftOffset,
+        0,
+        size.width - _rightOffset,
+        size.height,
+        bottomLeft: nip == BubbleNip.left && showNip
+            ? Radius.zero
+            : borderRadius.bottomLeft,
+        bottomRight: nip == BubbleNip.right && showNip
+            ? Radius.zero
+            : borderRadius.bottomRight,
+        topLeft: borderRadius.topLeft,
+        topRight: borderRadius.topRight,
+      ),
+    );
+
+    if (showNip) {
+      switch (nip) {
+        case BubbleNip.left:
+          final path2 = Path()
+            ..moveTo(2, size.height)
+            ..lineTo(
+              _leftOffset,
+              size.height,
+            )
+            ..lineTo(
+              _leftOffset,
+              size.height - radius,
+            );
+
+          path2
+            ..conicTo(
+              12,
+              size.height - 12,
+              2,
+              size.height - 2,
+              1,
+            )
+            ..conicTo(
+              0,
+              size.height - 1,
+              2,
+              size.height,
+              1,
+            );
+
+          path2.close();
+          path = Path.combine(PathOperation.union, path, path2);
+          break;
+
+        case BubbleNip.right:
+          final path2 = Path()
+            ..moveTo(
+              size.width - 2,
+              size.height,
+            )
+            ..lineTo(
+              size.width - _rightOffset,
+              size.height,
+            )
+            ..lineTo(
+              size.width - _rightOffset,
+              size.height - radius,
+            );
+
+          path2
+            ..conicTo(
+              size.width - 12,
+              size.height - 12,
+              size.width - 2,
+              size.height - 2,
+              1,
+            )
+            ..conicTo(
+              size.width,
+              size.height - 1,
+              size.width - 2,
+              size.height,
+              1,
+            );
+
+          path2.close();
+          path = Path.combine(PathOperation.union, path, path2);
+          break;
+
+        default:
+      }
+    }
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(_BubbleClipper oldClipper) => false;
 }

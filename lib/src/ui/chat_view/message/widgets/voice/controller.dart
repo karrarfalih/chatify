@@ -114,26 +114,28 @@ class VoicePlayerController {
     if (isReady!.value || isLoading!.value) return;
     status.value = VoiceStatus.loading;
     isLoading!.value = true;
-    // try {
-    if (file == null) {
-      if (_numOfTries == 3) return;
-      await download();
-      _numOfTries++;
-      init();
-    }
-    await player.setFilePath(file!.path);
-    if (player.speed != speed.value) player.setSpeed(speed.value);
-    maxDurationForSlider = seconds.toDouble();
-    listenToRemainingTime();
-    progressController?.addListener(() {
-      if (progressController?.isCompleted ?? false) {
-        progressController?.reset();
+    try {
+      if (file == null) {
+        if (_numOfTries == 3) return;
+        await download();
+        _numOfTries++;
+        init();
       }
-    });
-    isReady!.value = true;
-    // } catch (_) {
-    //   print(_);
-    // }
+      await player.setFilePath(file!.path);
+      if (player.speed != speed.value) player.setSpeed(speed.value);
+      maxDurationForSlider = seconds.toDouble();
+      listenToRemainingTime();
+      progressController?.addListener(() {
+        if (progressController?.isCompleted ?? false) {
+          progressController?.reset();
+        }
+      });
+      isReady!.value = true;
+    } catch (_) {
+      status.value = VoiceStatus.ready;
+      isLoading!.value = false;
+      return;
+    }
     status.value = VoiceStatus.ready;
     isLoading!.value = false;
   }
@@ -145,6 +147,9 @@ class VoicePlayerController {
   bool _preventAutoPause = false;
 
   _startPlaying() async {
+    if (!message.isPlayed && !isMe) {
+      Chatify.datasource.addMessage(message.copyWith(isPlayed: true));
+    }
     if (currentPlayer.value != this) {
       currentPlayer.value?._preventAutoPause = true;
       currentPlayer.value?.reset();

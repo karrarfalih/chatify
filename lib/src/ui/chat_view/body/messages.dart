@@ -7,8 +7,9 @@ import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
+import 'package:flutter/rendering.dart';
 
-class ChatMessages extends StatelessWidget {
+class ChatMessages extends StatefulWidget {
   const ChatMessages({
     super.key,
     required this.chat,
@@ -21,112 +22,199 @@ class ChatMessages extends StatelessWidget {
   final ChatController controller;
 
   @override
+  State<ChatMessages> createState() => _ChatMessagesState();
+}
+
+class _ChatMessagesState extends State<ChatMessages> {
+  Map<String, Message> get initialSelecetdMessages =>
+      widget.controller.initialSelecetdMessages;
+
+  set initialSelecetdMessages(Map<String, Message> value) =>
+      widget.controller.initialSelecetdMessages = value;
+
+  Map<int, Message> addedMessages = {};
+  Offset offset = Offset.zero;
+  bool isRemove = false;
+
+  _detectTapedItem(PointerEvent event) {
+    if (!widget.controller.isSelecting.value) return;
+    final RenderBox box =
+        key.currentContext!.findAncestorRenderObjectOfType<RenderBox>()!;
+    final result = BoxHitTestResult();
+    Offset local = box.globalToLocal(event.position);
+    if (box.hitTest(result, position: local)) {
+      for (final hit in result.path) {
+        final target = hit.target;
+        if (target is SelectedMessage) {
+          final initialList =
+              Map.from(widget.controller.selecetdMessages.value);
+          final selectedMessages = widget.controller.selecetdMessages.value;
+          bool isScrollUp = offset.dy > local.dy;
+          addedMessages.putIfAbsent(target.index, () => target.message);
+          addedMessages.removeWhere(
+            (key, value) =>
+                isScrollUp ? key > target.index : key < target.index,
+          );
+          if (isRemove) {
+            selectedMessages.addAll(initialSelecetdMessages);
+            selectedMessages.removeWhere(
+              (key, value) => addedMessages.containsValue(value),
+            );
+          } else {
+            selectedMessages.clear();
+            selectedMessages.addAll(
+              addedMessages.map((key, value) => MapEntry(value.id, value)),
+            );
+            selectedMessages.addAll(initialSelecetdMessages);
+          }
+          if (initialList.length != selectedMessages.length) {
+            widget.controller.selecetdMessages.refresh();
+          }
+        }
+      }
+    }
+  }
+
+  _detectStart(PointerEvent event) {
+    addedMessages.clear();
+    final RenderBox box =
+        key.currentContext!.findAncestorRenderObjectOfType<RenderBox>()!;
+    offset = box.globalToLocal(event.position);
+    final result = BoxHitTestResult();
+    if (box.hitTest(result, position: offset)) {
+      for (final hit in result.path) {
+        final target = hit.target;
+        if (target is SelectedMessage) {
+          isRemove = initialSelecetdMessages.containsKey(target.message.id);
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
       onNotification: (x) {
-        controller.preventEmoji = true;
+        widget.controller.preventEmoji = true;
         return false;
       },
-      child: KrPaginateFirestore(
-        key: const ValueKey('chat'),
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (context, docs, i) {
-          Message msg = docs.elementAt(i).data() as Message;
-          if (msg.unSeenBy.contains(Chatify.currentUserId)) {
-            Chatify.datasource.markAsSeen(msg.id);
-          }
-          Message? prevMsg;
-          Message? nextMsg;
-          if (docs.length != i + 1) {
-            prevMsg = docs.elementAt(i + 1).data() as Message;
-          }
-          if (i != 0) {
-            nextMsg = docs.elementAt(i - 1).data() as Message;
-          }
-          DateTime? date = msg.sendAt;
-          DateTime? prevDate = prevMsg?.sendAt;
-          bool showTime = false;
-          if (date != null) {
-            DateTime d = DateTime(date.year, date.month, date.day);
-            DateTime prevD = prevDate == null
-                ? DateTime(19000)
-                : DateTime(
-                    prevDate.year,
-                    prevDate.month,
-                    prevDate.day,
-                  );
-            showTime = d.toString() != prevD.toString();
-          }
-          if (controller.pendingMessages.value.any((e) => e.id == msg.id)) {
-            controller.pendingMessages.value.removeWhere((e) => e.id == msg.id);
-            controller.pendingMessages.refresh();
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (i == docs.length - 1)
-                SizedBox(
-                  key: ValueKey('chat padding bottom'),
-                  height: MediaQuery.of(context).padding.top + 70,
-                ),
-              if (showTime)
-                Center(
-                  key: ValueKey(msg.sendAt),
-                  child: ChatDateWidget(
-                    date: date ?? DateTime.now(),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: widget.controller.isSelecting,
+        builder: (context, isSelecting, child) {
+          return Listener(
+            onPointerMove: _detectTapedItem,
+            onPointerDown: _detectStart,
+            child: KrPaginateFirestore(
+              key: key,
+              physics: isSelecting
+                  ? const NeverScrollableScrollPhysics()
+                  : const BouncingScrollPhysics(),
+              itemBuilder: (context, docs, i) {
+                Message msg = docs.elementAt(i).data() as Message;
+                if (msg.unSeenBy.contains(Chatify.currentUserId)) {
+                  Chatify.datasource.markAsSeen(msg.id);
+                }
+                Message? prevMsg;
+                Message? nextMsg;
+                if (docs.length != i + 1) {
+                  prevMsg = docs.elementAt(i + 1).data() as Message;
+                }
+                if (i != 0) {
+                  nextMsg = docs.elementAt(i - 1).data() as Message;
+                }
+                DateTime? date = msg.sendAt;
+                DateTime? prevDate = prevMsg?.sendAt;
+                bool showTime = false;
+                if (date != null) {
+                  DateTime d = DateTime(date.year, date.month, date.day);
+                  DateTime prevD = prevDate == null
+                      ? DateTime(19000)
+                      : DateTime(
+                          prevDate.year,
+                          prevDate.month,
+                          prevDate.day,
+                        );
+                  showTime = d.toString() != prevD.toString();
+                }
+                if (widget.controller.pendingMessages.value
+                    .any((e) => e.id == msg.id)) {
+                  widget.controller.pendingMessages.value
+                      .removeWhere((e) => e.id == msg.id);
+                  widget.controller.pendingMessages.refresh();
+                }
+                return SelectableMessage(
+                  index: i,
+                  message: msg,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (i == docs.length - 1)
+                        SizedBox(
+                          key: ValueKey('chat padding bottom'),
+                          height: MediaQuery.of(context).padding.top + 70,
+                        ),
+                      if (showTime)
+                        Center(
+                          key: ValueKey(msg.sendAt),
+                          child: ChatDateWidget(
+                            date: date ?? DateTime.now(),
+                          ),
+                        ),
+                      MessageCard(
+                        key: ValueKey(msg.id),
+                        chat: widget.chat,
+                        message: msg,
+                        user: widget.user,
+                        controller: widget.controller,
+                        linkedWithBottom: (nextMsg != null &&
+                            nextMsg.sender == msg.sender &&
+                            nextMsg.sendAt?.day == msg.sendAt?.day),
+                        linkedWithTop: !showTime &&
+                            prevMsg != null &&
+                            prevMsg.sender == msg.sender,
+                      ),
+                      if (i == 0)
+                        PendingMessages(
+                          key: ValueKey('pending messages'),
+                          controller: widget.controller,
+                          chat: widget.chat,
+                          user: widget.user,
+                          linkedWithBottom: false,
+                          linkedWithTop: msg.isMine,
+                        )
+                    ],
                   ),
+                );
+              },
+              query: Chatify.datasource.messagesQuery(widget.chat.id),
+              onEmpty: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Say Hi',
+                      style: TextStyle(
+                        color: ChatifyTheme.of(context).chatForegroundColor,
+                      ),
+                    ),
+                  ],
                 ),
-              MessageCard(
-                key: ValueKey(msg.id),
-                chat: chat,
-                message: msg,
-                user: user,
-                controller: controller,
-                linkedWithBottom: (nextMsg != null &&
-                    nextMsg.sender == msg.sender &&
-                    nextMsg.sendAt?.day == msg.sendAt?.day),
-                linkedWithTop: !showTime &&
-                    prevMsg != null &&
-                    prevMsg.sender == msg.sender,
               ),
-              if (i == 0)
-                PendingMessages(
-                  key: ValueKey('pending messages'),
-                  controller: controller,
-                  chat: chat,
-                  user: user,
-                  linkedWithBottom: false,
-                  linkedWithTop: msg.isMine,
-                )
-            ],
+              header: SliverToBoxAdapter(
+                child: SizedBox(
+                  height: 5,
+                ),
+              ),
+              itemBuilderType: PaginateBuilderType.listView,
+              initialLoader: ListView(
+                children: [],
+              ),
+              reverse: true,
+              isLive: true,
+            ),
           );
         },
-        query: Chatify.datasource.messagesQuery(chat.id),
-        onEmpty: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                'Say Hi',
-                style: TextStyle(
-                  color: ChatifyTheme.of(context).chatForegroundColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-        header: SliverToBoxAdapter(
-          child: SizedBox(
-            height: 5,
-          ),
-        ),
-        itemBuilderType: PaginateBuilderType.listView,
-        initialLoader: ListView(
-          children: [],
-        ),
-        reverse: true,
-        isLive: true,
       ),
     );
   }
@@ -194,4 +282,33 @@ class PendingMessages extends StatelessWidget {
       },
     );
   }
+}
+
+class SelectableMessage extends SingleChildRenderObjectWidget {
+  final int index;
+  final Message message;
+
+  SelectableMessage({
+    required Widget child,
+    required this.index,
+    required this.message,
+    Key? key,
+  }) : super(child: child, key: key);
+
+  @override
+  SelectedMessage createRenderObject(BuildContext context) {
+    return SelectedMessage(index, message);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, SelectedMessage renderObject) {
+    renderObject..index = index;
+  }
+}
+
+class SelectedMessage extends RenderProxyBox {
+  int index;
+  Message message;
+
+  SelectedMessage(this.index, this.message);
 }

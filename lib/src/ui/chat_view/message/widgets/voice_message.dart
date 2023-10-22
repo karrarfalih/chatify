@@ -21,11 +21,6 @@ class MyVoiceMessage extends StatelessWidget {
     return VoiceMessageWidget(
       key: ValueKey(message.id),
       onSeek: () => controller.preventEmoji = true,
-      onPlay: () {
-        if (!message.isPlayed) {
-          Chatify.datasource.addMessage(message.copyWith(isPlayed: true));
-        }
-      },
       user: message.isMine ? 'Me' : user.name,
       meBgColor: ChatifyTheme.of(context).primaryColor,
       contactPlayIconColor: Colors.white,

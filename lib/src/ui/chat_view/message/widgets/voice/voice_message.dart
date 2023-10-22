@@ -20,7 +20,6 @@ class VoiceMessageWidget extends StatefulWidget {
     this.mePlayIconColor = Colors.black,
     this.contactPlayIconColor = Colors.black26,
     this.meFgColor = const Color(0xffffffff),
-    this.onPlay,
     this.onSeek,
     required this.message,
     required this.chatController,
@@ -33,7 +32,6 @@ class VoiceMessageWidget extends StatefulWidget {
       contactFgColor,
       mePlayIconColor,
       contactPlayIconColor;
-  final Function()? onPlay;
   final Function()? onSeek;
   final String user;
   final VoiceMessage message;
@@ -278,8 +276,9 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                   );
                 },
               ),
-              if (!message.isPlayed)
-                Container(
+              Visibility(
+                visible: !message.isPlayed,
+                child: Container(
                   margin: EdgeInsetsDirectional.symmetric(horizontal: 4),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
@@ -288,7 +287,8 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                   ),
                   width: 1.4.w(),
                   height: 1.4.w(),
-                )
+                ),
+              )
             ],
           ),
         ],
@@ -336,20 +336,20 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                       width: noiseWidth,
                       height: 6.w(),
                       color: isMe
-                          ? widget.meBgColor.withOpacity(.4)
-                          : widget.contactBgColor.withOpacity(
-                              !message.isPlayed ? 0 : .35,
-                            ),
+                          ? widget.meBgColor.withOpacity(.6)
+                          : widget.contactBgColor.withOpacity(.6),
                     ),
                   );
-                else
+                else if (message.isPlayed) {
                   return Container(
                     width: noiseWidth,
                     height: 6.w(),
-                    color: message.isPlayed
-                        ? widget.meBgColor.withOpacity(.4)
-                        : widget.contactBgColor.withOpacity(0),
+                    color: isMe
+                        ? widget.meBgColor.withOpacity(.6)
+                        : widget.contactBgColor.withOpacity(.6),
                   );
+                } else
+                  return SizedBox.shrink();
               },
             ),
           ],

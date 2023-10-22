@@ -3,7 +3,7 @@ import 'package:example/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:chatify/chatify.dart';
 
 Future<void> main() async {
@@ -20,7 +20,8 @@ _initChat() async {
   );
 }
 
-ChatifyUser _currentUser = sara;
+ChatifyUser _currentUser =
+    users.firstWhere((element) => element.id == 'karrar');
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -31,6 +32,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   Brightness _brightness = Brightness.light;
+  bool isLTR = true;
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +48,16 @@ class _MyAppState extends State<MyApp> {
         primaryColor: primary,
         useMaterial3: true,
       ),
+      localizationsDelegates: [
+        GlobalCupertinoLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ],
+      supportedLocales: [
+        Locale("en", "US"),
+        Locale("ar", "IQ"), // OR Locale('ar', 'AE') OR Other RTL locales
+      ],
+      locale: Locale(isLTR ? 'en' : 'ar'),
       home: Scaffold(
         appBar: AppBar(
           title: const Text('Chatify Demo'),
@@ -83,67 +95,79 @@ class _MyAppState extends State<MyApp> {
             ),
           ],
         ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: [
-            SizedBox(height: 20),
-            Text('Select Current User'),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                _UserButton(
-                  user: sara,
-                  onChanged: () => setState(() {}),
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Text('Select Current User'),
+              SizedBox(height: 10),
+              SizedBox(
+                width: double.maxFinite,
+                child: Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: users
+                      .map(
+                        (e) => _UserButton(
+                          user: e,
+                          onChanged: () => setState(() {}),
+                        ),
+                      )
+                      .toList(),
                 ),
-                SizedBox(
-                  width: 20,
-                ),
-                _UserButton(
-                  user: karrar,
-                  onChanged: () => setState(() {}),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            _MainButton(
-              onPressed: () {
-                setState(() {
-                  _brightness = _brightness == Brightness.dark
-                      ? Brightness.light
-                      : Brightness.dark;
-                });
-              },
-              text: 'Change Brightness',
-              icon: CupertinoIcons.moon,
-            ),
-            Builder(
-              builder: (context) {
-                return _MainButton(
-                  onPressed: () {
-                    Chatify.openAllChats(context);
-                  },
-                  text: 'Show Recent Chats',
-                  icon: CupertinoIcons.time,
-                );
-              },
-            ),
-            Builder(
-              builder: (context) {
-                final targetedUser = _currentUser == sara ? karrar : sara;
-                return _MainButton(
-                  onPressed: () {
-                    Chatify.openChatByUser(
-                      context,
-                      user: targetedUser,
-                    );
-                  },
-                  text: 'Start Chat with ${targetedUser.name}',
-                  icon: CupertinoIcons.paperplane,
-                );
-              },
-            ),
-          ],
+              ),
+              SizedBox(height: 20),
+              _MainButton(
+                onPressed: () {
+                  setState(() {
+                    _brightness = _brightness == Brightness.dark
+                        ? Brightness.light
+                        : Brightness.dark;
+                  });
+                },
+                text: 'Change Brightness',
+                icon: CupertinoIcons.moon,
+              ),
+              _MainButton(
+                onPressed: () {
+                  setState(() {
+                    isLTR = !isLTR;
+                  });
+                },
+                text: 'Change Direction',
+                icon: Icons.language_outlined,
+              ),
+              // Builder(
+              //   builder: (context) {
+              //     return _MainButton(
+              //       onPressed: () {
+              //         Chatify.openAllChats(context);
+              //       },
+              //       text: 'Show Recent Chats',
+              //       icon: CupertinoIcons.time,
+              //     );
+              //   },
+              // ),
+              // Builder(
+              //   builder: (context) {
+              //     final targetedUser = _currentUser == sara ? karrar : sara;
+              //     return _MainButton(
+              //       onPressed: () {
+              //         Chatify.openChatByUser(
+              //           context,
+              //           user: targetedUser,
+              //         );
+              //       },
+              //       text: 'Start Chat with ${targetedUser.name}',
+              //       icon: CupertinoIcons.paperplane,
+              //     );
+              //   },
+              // ),
+            ],
+          ),
         ),
       ),
     );
@@ -212,14 +236,15 @@ class _UserButton extends StatelessWidget {
             : Theme.of(context).colorScheme.brightness == Brightness.dark
                 ? Colors.white
                 : Colors.black,
-        padding: EdgeInsets.only(
-          left: 6,
-          right: 20,
+        padding: EdgeInsetsDirectional.only(
+          start: 6,
+          end: 20,
           top: 6,
           bottom: 6,
         ),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(50),

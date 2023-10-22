@@ -20,33 +20,61 @@ class ChatBottomSpace extends StatelessWidget {
       builder: (context, isEmoji, child) {
         return KrStreamBuilder(
           stream: controller.keyboardController.stream ?? Stream.empty(),
-          onEmpty: SizedBox.shrink(),
-          onLoading: SizedBox.shrink(),
+          onEmpty: _BottomSpaceWidget(
+            key: ValueKey('_BottomSpaceWidget'),
+            isEmoji: isEmoji,
+            keyboardHeight: 0,
+          ),
+          onLoading: _BottomSpaceWidget(
+            key: ValueKey('_BottomSpaceWidget'),
+            isEmoji: isEmoji,
+            keyboardHeight: 0,
+          ),
           builder: (context) {
             return Consumer<ScreenHeight>(
               builder: (context, keyboard, child) {
                 controller.keyboardController
                     .onKeyboardHeightChange(keyboard.keyboardHeight);
-                return Container(
-                  color: ChatifyTheme.of(context).isChatDark
-                      ? Colors.black.withOpacity(0.4)
-                      : Colors.white.withOpacity(0.4),
-                  child: SafeArea(
-                    top: false,
-                    bottom: !isEmoji,
-                    child: Container(
-                      height: isEmoji ? 0 : keyboard.keyboardHeight,
-                      color: ChatifyTheme.of(context).isChatDark
-                          ? Colors.black.withOpacity(0.4)
-                          : Colors.white.withOpacity(0.4),
-                    ),
-                  ),
+                return _BottomSpaceWidget(
+                  key: ValueKey('_BottomSpaceWidget'),
+                  isEmoji: isEmoji,
+                  keyboardHeight: keyboard.keyboardHeight,
                 );
               },
             );
           },
         );
       },
+    );
+  }
+}
+
+class _BottomSpaceWidget extends StatelessWidget {
+  const _BottomSpaceWidget({
+    super.key,
+    required this.isEmoji,
+    required this.keyboardHeight,
+  });
+
+  final bool isEmoji;
+  final double keyboardHeight;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: ChatifyTheme.of(context).isChatDark
+          ? Colors.black.withOpacity(0.4)
+          : Colors.white.withOpacity(0.4),
+      child: SafeArea(
+        top: false,
+        bottom: !isEmoji,
+        child: Container(
+          height: isEmoji ? 0 : keyboardHeight,
+          color: ChatifyTheme.of(context).isChatDark
+              ? Colors.black.withOpacity(0.4)
+              : Colors.white.withOpacity(0.4),
+        ),
+      ),
     );
   }
 }

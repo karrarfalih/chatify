@@ -1,5 +1,4 @@
 import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble/bubble.dart';
 import 'package:flutter/material.dart';
 
@@ -10,24 +9,29 @@ class MyBubble extends StatelessWidget {
     required this.bkColor,
     required this.linkedWithBottom,
     required this.child,
+    required this.linkedWithTop,
   });
 
   final Message message;
   final Color bkColor;
   final bool linkedWithBottom;
+  final bool linkedWithTop;
   final Widget child;
+  
   @override
   Widget build(BuildContext context) {
     final isMine = message.isMine;
     return Bubble(
-      radius: const Radius.circular(12),
-      nip: isMine ? BubbleNip.rightBottom : BubbleNip.leftBottom,
-      nipWidth: 5,
+      radius: 20,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(isMine || !linkedWithTop ? 20 : 10),
+        topRight: Radius.circular(!isMine || !linkedWithTop ? 20 : 10),
+        bottomLeft: Radius.circular(isMine || !linkedWithBottom ? 20 : 10),
+        bottomRight: Radius.circular(!isMine || !linkedWithBottom ? 20 : 10),
+      ),
+      nip: isMine ? BubbleNip.right : BubbleNip.left,
       color: bkColor,
-      elevation: 0,
-      shadowColor: ChatifyTheme.of(context).primaryColor,
       showNip: !linkedWithBottom,
-      padding: const BubbleEdges.all(0),
       child: child,
     );
   }

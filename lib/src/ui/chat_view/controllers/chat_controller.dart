@@ -32,7 +32,10 @@ class ChatController {
 
   final FocusNode focus = FocusNode();
   final isTyping = false.obs;
+  final isSelecting = false.obs;
   final pendingMessages = <Message>[].obs;
+  final selecetdMessages = <String, Message>{}.obs;
+  Map<String, Message> initialSelecetdMessages = {};
   final messageAction = Rx<MessageActionArgs?>(null);
   final isEmoji = false.obs;
   final isEmojiIcon = false.obs;
@@ -60,12 +63,12 @@ class ChatController {
 
   submitMessage(String msg) {
     msg = msg.trim();
+    if (msg.isEmpty) return;
     if (messageAction.value?.type == MessageActionType.edit) {
       Chatify.datasource.addMessage(
         (messageAction.value!.message! as TextMessage).copyWith(message: msg),
       );
-    }
-    if (msg != '') {
+    } else {
       for (int i = 0; i <= (msg.length ~/ 1000); i++) {
         Chatify.datasource.addMessage(
           TextMessage(
@@ -135,6 +138,7 @@ class ChatController {
     pendingMessages.dispose();
     voiceController.dispose();
     keyboardController.dispose();
+    isSelecting.dispose();
     focus.dispose();
   }
 }

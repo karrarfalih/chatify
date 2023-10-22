@@ -41,6 +41,7 @@ class KeyboardController {
 
   onKeyboardHeightChange(double height) {
     keyboardHeightSubject.add(height);
+    isKeybaordOpen = height > 10;
     if (height == keyboardHeight && controller.isEmoji.value && !forceEmoji) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         controller.isEmoji.value = false;

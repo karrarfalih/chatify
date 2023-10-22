@@ -1,4 +1,5 @@
 import 'dart:math' as math;
+import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -7,7 +8,7 @@ List<double> adjustSampleCount(
   int requiredSampleCount,
   double max,
 ) {
-  final samples = input.map((e) => (e + 45).abs()).toList();
+  final samples = input;
 
   final int inputSampleCount = samples.length;
 
@@ -37,11 +38,13 @@ List<double> adjustSampleCount(
   return normalize(result, max);
 }
 
-List<double> normalize(List<double> input, double max) {
+List<double> normalize(List<double> input, double upperValue) {
   final List<double> result = [];
-  double max = input.reduce(math.max);
+  final min = input.reduce(math.min);
+  final smaples = input.map((e) => e - min).toList();
+  final max = smaples.reduce(math.max);
   for (int i = 0; i < input.length; i++) {
-    result.add((input[i] / max) * max);
+    result.add((smaples[i] / max) * upperValue);
   }
   return result;
 }
@@ -84,7 +87,7 @@ class _SingleNoise extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1000),
-        color: isMe ? Colors.white : Colors.grey,
+        color: isMe ? Colors.white : ChatifyTheme.of(context).primaryColor,
       ),
     );
   }

@@ -25,7 +25,14 @@ class EmojisKeyboard extends StatelessWidget {
         child: EmojiPicker(
           key: ValueKey('emojis'),
           textEditingController: controller.textController,
-          onBackspacePressed: () {},
+          onBackspacePressed: () {
+            if (controller.textController.text.isEmpty) {
+              controller.isTyping.value = false;
+            }
+          },
+          onEmojiSelected: (category, emoji) {
+            controller.isTyping.value = true;
+          },
           config: Config(
             columns: MediaQuery.of(context).size.width ~/ 45,
             emojiSizeMax: 24 *
