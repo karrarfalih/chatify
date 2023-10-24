@@ -23,6 +23,9 @@ part 'record_controller.dart';
 class ChatController {
   final Chat chat;
   ChatController(this.chat) {
+    pendingMessages = Rx<List<Message>>(
+      _PendingMessagesCache[chat.id] ?? [],
+    );
     keyboardController = KeyboardController(this);
     voiceController = VoiceRecordingController(this);
     textController.addListener(() {
@@ -35,13 +38,15 @@ class ChatController {
     });
   }
 
+  static final _PendingMessagesCache = <String, List<Message>>{};
+
   late final KeyboardController keyboardController;
   late final VoiceRecordingController voiceController;
 
   final FocusNode focus = FocusNode();
   final isTyping = false.obs;
   final isSelecting = false.obs;
-  final pendingMessages = <Message>[].obs;
+  late final Rx<List<Message>> pendingMessages;
   final selecetdMessages = <String, Message>{}.obs;
   Map<String, Message> initialSelecetdMessages = {};
   final messageAction = Rx<MessageActionArgs?>(null);
@@ -86,6 +91,7 @@ class ChatController {
                 chat.members.where((e) => e != Chatify.currentUserId).toList(),
             replyId: messageAction.value?.message?.id,
             replyUid: messageAction.value?.message?.sender,
+            canReadBy: chat.members,
           ),
         );
       }
@@ -118,6 +124,7 @@ class ChatController {
       chatId: chat.id,
       unSeenBy: chat.members.where((e) => e != Chatify.currentUserId).toList(),
       attachment: attachment,
+      canReadBy: chat.members,
     );
     pendingMessages.value = [...pendingMessages.value, pendingMsg];
     final imageUrl = await attachment.url;
@@ -147,6 +154,11 @@ class ChatController {
     keyboardController.dispose();
     isSelecting.dispose();
     focus.dispose();
+    if (pendingMessages.value.isNotEmpty) {
+      _PendingMessagesCache[chat.id] = pendingMessages.value;
+    } else {
+      _PendingMessagesCache.remove(chat.id);
+    }
   }
 }
 

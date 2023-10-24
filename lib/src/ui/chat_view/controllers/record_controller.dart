@@ -165,6 +165,7 @@ class VoiceRecordingController {
             .toList(),
         uploadAttachment: attachment,
         samples: samples,
+        canReadBy: controller.chat.members,
       );
       controller.pendingMessages.value = [
         ...controller.pendingMessages.value,

@@ -6,7 +6,6 @@ import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
 import 'package:chatify/src/ui/common/image.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/ui/common/timer_refresher.dart';
 import 'package:flutter/cupertino.dart';
@@ -99,22 +98,33 @@ class ChatAppBar extends StatelessWidget {
                               Spacer(),
                               IconButton(
                                 onPressed: () async {
-                                  if (await showConfirm(
+                                  final deleteForAll = await showConfirmDialog(
                                     context: context,
-                                    message: 'Delete selected message?',
-                                    textOK: 'Yes',
-                                    textCancel: 'No',
+                                    message:
+                                        'Are you sure you want to delete these messages?',
+                                    title:
+                                        'Delete ${selecetdMessages.values.length} messages',
+                                    textOK: 'Delete',
+                                    textCancel: 'Cacnel',
+                                    showDeleteForAll: true,
                                     isKeyboardShown: chatController
                                         .keyboardController.isKeybaordOpen,
-                                  )) {
-                                    for (final msg in selecetdMessages.values) {
-                                      Chatify.datasource
-                                          .deleteMessageForAll(msg.id);
+                                  );
+                                  if (deleteForAll == null) return;
+                                  for (final msg in selecetdMessages.values) {
+                                    if (deleteForAll == true) {
+                                      Chatify.datasource.deleteMessageForMe(
+                                        msg.id,
+                                      );
+                                    } else {
+                                      Chatify.datasource.deleteMessageForMe(
+                                        msg.id,
+                                      );
                                     }
-                                    chatController.selecetdMessages
-                                      ..value.clear()
-                                      ..refresh();
                                   }
+                                  chatController.selecetdMessages
+                                    ..value.clear()
+                                    ..refresh();
                                 },
                                 icon: Icon(
                                   Iconsax.trash,
@@ -258,19 +268,27 @@ class ChatAppBar extends StatelessWidget {
                           ),
                         ),
                         onTap: () async {
-                          // if (await confirm(
-                          //   Get.context!,
-                          //   title: Text('Confirm'.tr),
-                          //   content: Text(
-                          //     'All messages will be deleted. Are you sure?'
-                          //         .tr,
-                          //   ),
-                          //   textOK: Text('Yes'.tr),
-                          //   textCancel: Text('No'.tr),
-                          // )) {
-                          //   await widget.chat.delete();
-                          //   Get.back();
-                          // }
+                          final deleteForAll = await showConfirmDialog(
+                            context: context,
+                            message:
+                                'Are you sure you want to delete this chat?',
+                            title: 'Delete chat',
+                            textOK: 'Delete',
+                            textCancel: 'Cacnel',
+                            showDeleteForAll: true,
+                            isKeyboardShown: chatController
+                                .keyboardController.isKeybaordOpen,
+                          );
+                          if (deleteForAll == null) return;
+                          if (deleteForAll == true) {
+                            Chatify.datasource
+                                .deleteChatForAll(chatController.chat.id);
+                            Navigator.pop(context);
+                          } else if (deleteForAll == false) {
+                            Chatify.datasource
+                                .deleteChatForMe(chatController.chat.id);
+                            Navigator.pop(context);
+                          }
                         },
                       ),
                     ],

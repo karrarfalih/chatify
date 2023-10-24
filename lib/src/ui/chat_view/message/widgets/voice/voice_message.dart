@@ -50,6 +50,8 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
   late final VoiceMessage message;
   late final bool isMe;
   late final UploadAttachment? attachment;
+  late final AnimationController playPauseController;
+  late final AnimationController progressController;
 
   @override
   void initState() {
@@ -64,12 +66,12 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
       user: widget.user,
     );
 
-    player.playPauseController = AnimationController(
+    playPauseController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
       value: player.player.playing ? 1 : 0,
     );
-    player.progressController = AnimationController(
+    progressController = AnimationController(
       vsync: this,
       lowerBound: 0,
       upperBound: noiseWidth,
@@ -83,15 +85,15 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
           .forward()
           .then((value) => player.progressController!.reset());
     }
+    player.playPauseController = playPauseController;
+    player.progressController = progressController;
     super.initState();
   }
 
   @override
   void dispose() {
-    player.playPauseController?.dispose();
-    player.playPauseController = null;
-    player.progressController?.dispose();
-    player.progressController = null;
+    playPauseController.dispose();
+    progressController.dispose();
     super.dispose();
   }
 

@@ -228,7 +228,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                   ),
                 );
               },
-              query: Chatify.datasource.messagesQuery(widget.chat.id),
+              query: Chatify.datasource.messagesQuery(widget.chat),
               onEmpty: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(

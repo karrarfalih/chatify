@@ -6,7 +6,6 @@ import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:chatify/src/ui/common/image.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 
 class ChatRoomCard extends StatelessWidget {
@@ -66,6 +65,34 @@ class ChatRoomCard extends StatelessWidget {
                                       user?.name ?? 'Deleted User',
                                       style: const TextStyle(height: 1),
                                     ),
+                                    const Spacer(),
+                                    KrStreamBuilder<Message?>(
+                                      stream: Chatify.datasource
+                                          .lastMessageStream(chat),
+                                      onLoading: const SizedBox.shrink(),
+                                      builder: (message) {
+                                        if (!message!.isMine)
+                                          return SizedBox.shrink();
+                                        return Image.asset(
+                                          message.seenBy
+                                                  .where(
+                                                    (e) =>
+                                                        e !=
+                                                        Chatify.currentUserId,
+                                                  )
+                                                  .isNotEmpty
+                                              ? 'assets/icons/seen.png'
+                                              : 'assets/icons/sent.png',
+                                          package: 'chatify',
+                                          height: 17,
+                                          color: Chatify.theme.primaryColor
+                                              .withOpacity(.5),
+                                        );
+                                      },
+                                    ),
+                                    const SizedBox(
+                                      width: 5,
+                                    ),
                                     Text(
                                       chat.updatedAt?.format(
                                             context,
@@ -76,7 +103,7 @@ class ChatRoomCard extends StatelessWidget {
                                                         .inHours <
                                                     24
                                                 ? 'h:mm a'
-                                                : 'd MMMM',
+                                                : 'd MMM',
                                           ) ??
                                           '',
                                       style: TextStyle(
@@ -94,7 +121,7 @@ class ChatRoomCard extends StatelessWidget {
                                 children: [
                                   KrStreamBuilder<Message?>(
                                     stream: Chatify.datasource
-                                        .lastMessageStream(chat.id),
+                                        .lastMessageStream(chat),
                                     onLoading: const Padding(
                                       padding: EdgeInsets.only(top: 3),
                                       child: ShimmerBloc(

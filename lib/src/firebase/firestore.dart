@@ -56,6 +56,7 @@ class ChatifyDatasource {
         .where('chatId', isEqualTo: message.chatId)
         .where('sendAt', isGreaterThan: message.sendAt)
         .where('type', isEqualTo: MessageType.voice.name)
+        .where('canReadBy', arrayContains: Chatify.currentUserId)
         .orderBy('sendAt', descending: false)
         .startAfter([message.sendAt!.stamp])
         .limit(1)
@@ -96,7 +97,7 @@ class ChatifyDatasource {
 
   Future<void> deleteMessageForMe(String id) async {
     await _messages.doc(id).update({
-      'deletedBy': FieldValue.arrayUnion([Chatify.currentUserId])
+      'canReadBy': FieldValue.arrayRemove([Chatify.currentUserId])
     });
     ChatifyLog.d('deleteMessageForMe');
   }
@@ -133,10 +134,6 @@ class ChatifyDatasource {
     ChatifyLog.d('addChat');
   }
 
-  Future<Chat?> readChat(String id) async {
-    return MemoryCache.get<Chat>(id) ?? (await _chats.doc(id).get()).data();
-  }
-
   Future<Chat> findChatOrCreate(List<String> members) async {
     bool isExist = MemoryCache.cache.entries.any(
       (e) =>
@@ -160,13 +157,32 @@ class ChatifyDatasource {
     return chat;
   }
 
-  Future<void> deletechat(String id) async {
+  Future<void> deleteChatForMe(String id) async {
+    await instance.runTransaction((transaction) async {
+      final chat = await transaction.get(_chats.doc(id));
+      final readAfter = chat.data()!.readAfter;
+      transaction.update(_chats.doc(id), {
+        'readAfter': {
+          ...readAfter,
+          Chatify.currentUserId: FieldValue.serverTimestamp()
+        }
+      });
+    });
+  }
+
+  Future<void> deleteChatForAll(String id) async {
     await _chats.doc(id).delete();
   }
 
-  Query<Message> messagesQuery(String chatId) {
+  Query<Message> messagesQuery(Chat chat) {
     return _messages
-        .where('chatId', isEqualTo: chatId)
+        .where('chatId', isEqualTo: chat.id)
+        .where('canReadBy', arrayContains: Chatify.currentUserId)
+        .where(
+          'sendAt',
+          isGreaterThan:
+              (chat.readAfter[Chatify.currentUserId] ?? DateTime(1990)).stamp,
+        )
         .orderBy('sendAt', descending: true);
   }
 
@@ -189,17 +205,17 @@ class ChatifyDatasource {
     return _messages
         .where('unSeenBy', arrayContains: Chatify.currentUserId)
         .snapshots()
-        .map((event) => event.size);
+        .map((e) => e.docs.map((e) => e.data().chatId).toSet().length);
   }
 
-  Future<Message?> lastMessage(String roomId) async {
-    var data = await messagesQuery(roomId).limit(1).get();
+  Future<Message?> lastMessage(Chat chat) async {
+    var data = await messagesQuery(chat).limit(1).get();
     if (data.docs.isNotEmpty) return data.docs.first.data();
     return null;
   }
 
-  Stream<Message?> lastMessageStream(String roomId) {
-    return messagesQuery(roomId).limit(1).snapshots().map((event) {
+  Stream<Message?> lastMessageStream(Chat chat) {
+    return messagesQuery(chat).limit(1).snapshots().map((event) {
       if (event.docs.isNotEmpty) return event.docs.first.data();
       return null;
     });
@@ -263,7 +279,7 @@ class ChatifyDatasource {
         value['isActive'] = isOnline;
         value['lastSeen'] =
             isOnline ? null : DateTime.now().millisecondsSinceEpoch;
-        if(!isOnline) value['chats'] = null;
+        if (!isOnline) value['chats'] = null;
         return Transaction.success(value);
       }
       return Transaction.abort();

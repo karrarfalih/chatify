@@ -231,15 +231,20 @@ class _MessageCardState extends State<MessageCard> {
                   icon: Icons.delete,
                   iconColor: Colors.red,
                   onTap: () async {
-                    if (await showConfirm(
+                    final deleteForAll = await showConfirmDialog(
                       context: context,
-                      message: 'Delete selected message?',
-                      textOK: 'Yes',
-                      textCancel: 'No',
+                      message: 'Are you sure you want to delete this message?',
+                      textOK: 'Delete',
+                      textCancel: 'Cancel',
+                      showDeleteForAll: true,
                       isKeyboardShown:
                           widget.controller.keyboardController.isKeybaordOpen,
-                    )) {
+                    );
+                    print(deleteForAll);
+                    if (deleteForAll == true) {
                       Chatify.datasource.deleteMessageForAll(widget.message.id);
+                    } else if (deleteForAll == false) {
+                      Chatify.datasource.deleteMessageForMe(widget.message.id);
                     }
                   },
                 ),

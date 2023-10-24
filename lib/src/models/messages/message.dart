@@ -16,7 +16,7 @@ abstract class Message {
   final String sender;
   final List<String> seenBy;
   final List<String> unSeenBy;
-  final List<String> deletedBy;
+  final List<String> canReadBy;
   final List<String> deliveredTo;
   final List<MessageEmoji> emojis;
   final bool isEdited;
@@ -30,7 +30,7 @@ abstract class Message {
     this.sendAt,
     List<String>? seenBy,
     required this.unSeenBy,
-    this.deletedBy = const [],
+    required this.canReadBy,
     this.deliveredTo = const [],
     this.emojis = const [],
     this.replyId,
@@ -47,7 +47,7 @@ abstract class Message {
         sendAt = (data['sendAt'] ?? Timestamp.now()).toDate(),
         seenBy = List.from(data['seenBy'] ?? []),
         unSeenBy = List.from(data['unSeenBy'] ?? []),
-        deletedBy = List.from(data['deletedBy'] ?? []),
+        canReadBy = List.from(data['canReadBy'] ?? []),
         deliveredTo = List.from(data['deliveredTo'] ?? []),
         emojis = data['emojis'] is List
             ? List.from(data['emojis'])
@@ -70,7 +70,7 @@ abstract class Message {
             : Timestamp.fromDate(sendAt!),
         'seenBy': seenBy.toSet().toList(),
         'unSeenBy': unSeenBy.toSet().toList(),
-        'deletedBy': deletedBy.toSet().toList(),
+        'canReadBy': canReadBy.toSet().toList(),
         'emojis': emojis.map((e) => e.toJson).toList(),
         'chatId': chatId,
         'isEdited': isEdited,

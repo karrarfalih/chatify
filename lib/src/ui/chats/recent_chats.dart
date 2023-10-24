@@ -17,6 +17,7 @@ class RecentChats extends StatelessWidget {
       itemBuilder: (context, docs, i) {
         Chat room = docs.elementAt(i).data() as Chat;
         return ChatRoomCard(
+          key: ValueKey(room),
           chat: room,
         );
       },
