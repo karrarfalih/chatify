@@ -9,7 +9,7 @@ class VoiceRecordingController {
 
   Timer? _timer;
   final seconds = 0.obs;
-  late AudioRecorder _record;
+  late Record _record;
   String? path;
 
   final micRadius = 80.0.obs;
@@ -26,12 +26,7 @@ class VoiceRecordingController {
 
   record() async {
     if (isRecording.value) return;
-    _record = AudioRecorder();
-    final inputs = await _record.listInputDevices();
-    if (inputs.isEmpty) {
-      showToast('No microphone found');
-      return;
-    }
+    _record = Record();
     Chatify.datasource
         .updateChatStaus(ChatStatus.recording, controller.chat.id);
     isRecording.value = true;
@@ -63,13 +58,8 @@ class VoiceRecordingController {
     Directory dir = Directory('${documents.path}/recorded_voices');
     await dir.create(recursive: true);
     await _record.start(
-      RecordConfig(
-        // encoder: AudioEncoder.aacLc,
-        noiseSuppress: true,
-        autoGain: true,
-        echoCancel: true,
-      ),
-      path: '${documents.path}/recorded_voices/${Uuid.generate()}.aac',
+      path: Platform.isIOS ? '${documents.path}/${Uuid.generate()}.aac' : null,
+      encoder: AudioEncoder.aacLc,
     );
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => seconds.value++);
@@ -141,47 +131,50 @@ class VoiceRecordingController {
   stopRecord([bool submit = true]) async {
     if (!isRecording.value) return;
     vibrate();
-    Chatify.datasource.updateChatStaus(ChatStatus.none, controller.chat.id);
-    isRecording.value = false;
-    _micRadiusTimer?.cancel();
-    _micLockTimer?.cancel();
-    _timer?.cancel();
-    if (micPos.value.dx > -150 && seconds.value >= 1 && submit) {
-      final id = Uuid.generate();
-      path = await _record.stop();
-      final file = File(path!);
-      final uint8List = await File(path!).readAsBytes();
-      final attachment = uploadAttachment(
-        uint8List,
-        'chats/${controller.chat.id}/$id.${file.path.split('.').last}',
-      );
-      final pendingMsg = VoiceMessage(
-        id: id,
-        chatId: controller.chat.id,
-        url: '',
-        duration: Duration(seconds: seconds.value),
-        unSeenBy: controller.chat.members
-            .where((e) => e != Chatify.currentUserId)
-            .toList(),
-        uploadAttachment: attachment,
-        samples: samples,
-        canReadBy: controller.chat.members,
-      );
-      controller.pendingMessages.value = [
-        ...controller.pendingMessages.value,
-        pendingMsg
-      ];
-      final url = await attachment.url;
-      if (url == null) {
-        controller.pendingMessages.value.remove(pendingMsg);
-        controller.pendingMessages.refresh();
-        return;
+    try {
+      isRecording.value = false;
+      _micRadiusTimer?.cancel();
+      _micLockTimer?.cancel();
+      _timer?.cancel();
+      if (micPos.value.dx > -150 && seconds.value >= 1 && submit) {
+        final id = Uuid.generate();
+        path = await _record.stop();
+        final file = File(path!);
+        final uint8List = await File(path!).readAsBytes();
+        final attachment = uploadAttachment(
+          uint8List,
+          'chats/${controller.chat.id}/$id.${file.path.split('.').last}',
+        );
+        final pendingMsg = VoiceMessage(
+          id: id,
+          chatId: controller.chat.id,
+          url: '',
+          duration: Duration(seconds: seconds.value),
+          unSeenBy: controller.chat.members
+              .where((e) => e != Chatify.currentUserId)
+              .toList(),
+          uploadAttachment: attachment,
+          samples: samples,
+          canReadBy: controller.chat.members,
+        );
+        controller.pendingMessages.value = [
+          ...controller.pendingMessages.value,
+          pendingMsg
+        ];
+        final url = await attachment.url;
+        if (url == null) {
+          controller.pendingMessages.value.remove(pendingMsg);
+          controller.pendingMessages.refresh();
+          return;
+        }
+        Chatify.datasource.addMessage(
+          pendingMsg.copyWith(url: url),
+        );
       }
-      Chatify.datasource.addMessage(
-        pendingMsg.copyWith(url: url),
-      );
+    } finally {
+      Chatify.datasource.updateChatStaus(ChatStatus.none, controller.chat.id);
+      _record.dispose();
     }
-    _record.dispose();
   }
 
   void dispose() {

@@ -19,7 +19,7 @@ enum VoiceStatus {
 
 class VoicePlayerController {
   final String user;
-  final VoiceMessage message;
+  VoiceMessage message;
 
   factory VoicePlayerController({
     required VoiceMessage message,
@@ -32,14 +32,13 @@ class VoicePlayerController {
         user: user,
       ),
     );
-    if (instance.isLoading == null)
-      instance.isLoading = (instance.wasLoading ?? false).obs;
     if (instance.isReady == null)
       instance.isReady = (instance.wasReady ?? false).obs;
     if (instance.remainingTime == null)
       instance.remainingTime = (instance.latsRemainingTime ??
               message.duration.inSeconds.toDurationString)
           .obs;
+    instance.message = message;
     return instance;
   }
 
@@ -71,7 +70,6 @@ class VoicePlayerController {
   double maxDurationForSlider = .0000001;
   Rx<bool>? isReady;
   bool? wasReady;
-  Rx<bool>? isLoading;
   bool? wasLoading;
 
   AnimationController? progressController;
@@ -80,24 +78,34 @@ class VoicePlayerController {
   StreamSubscription<Duration>? _durationListener;
   VoicePlayerController? _nextPlayer;
 
+  final isDownloaded = Completer<bool>();
+
   StreamSubscription? stream;
   download() async {
+    print(url);
     if (url.isEmpty) return;
     progress.value = 0;
     StreamSubscription? stream;
     final _config = Config('voices', fileService: VoiceFileService());
     final voiceCache = CacheManager(_config);
-    stream =
-        voiceCache.getFileStream(url, withProgress: true).listen((e) async {
-      if (e is DownloadProgress) {
-        status.value = VoiceStatus.downloading;
-        progress.value = e.progress ?? 0;
-      } else if (e is FileInfo) {
-        file = e.file;
-        status.value = VoiceStatus.ready;
+    stream = voiceCache.getFileStream(url, withProgress: true).listen(
+      (e) async {
+        if (e is DownloadProgress) {
+          status.value = VoiceStatus.downloading;
+          progress.value = e.progress ?? 0;
+        } else if (e is FileInfo) {
+          file = e.file;
+          status.value = VoiceStatus.ready;
+          stream?.cancel();
+          isDownloaded.complete(true);
+        }
+      },
+      onError: (e) {
+        status.value = VoiceStatus.dowload;
         stream?.cancel();
-      }
-    });
+        isDownloaded.complete(false);
+      },
+    );
   }
 
   cancel() {
@@ -109,17 +117,21 @@ class VoicePlayerController {
     }
   }
 
-  int _numOfTries = 0;
+  bool isBusy = false;
   Future<void> init() async {
-    if (isReady!.value || isLoading!.value) return;
+    print(isReady!.value);
+    print(isBusy);
+    if (isReady!.value || isBusy) return;
     status.value = VoiceStatus.loading;
-    isLoading!.value = true;
+    isBusy = true;
     try {
       if (file == null) {
-        if (_numOfTries == 3) return;
         await download();
-        _numOfTries++;
-        init();
+        final downlaoded = await isDownloaded.future;
+        if (!downlaoded) {
+          isBusy = false;
+          return;
+        }
       }
       await player.setFilePath(file!.path);
       if (player.speed != speed.value) player.setSpeed(speed.value);
@@ -132,12 +144,12 @@ class VoicePlayerController {
       });
       isReady!.value = true;
     } catch (_) {
-      status.value = VoiceStatus.ready;
-      isLoading!.value = false;
+      status.value = VoiceStatus.dowload;
+      isBusy = false;
       return;
     }
     status.value = VoiceStatus.ready;
-    isLoading!.value = false;
+    isBusy = false;
   }
 
   void togglePlay() async {
@@ -251,8 +263,5 @@ class VoicePlayerController {
     wasReady = isReady?.value;
     isReady?.dispose();
     isReady = null;
-    wasLoading = isLoading?.value;
-    isLoading?.dispose();
-    isLoading = null;
   }
 }

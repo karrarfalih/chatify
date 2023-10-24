@@ -52,6 +52,7 @@ class ChatifyDatasource {
   }
 
   Future<VoiceMessage?> getNextVoice(Message message) async {
+    if(message.sendAt == null) return null;
     final res = await _messages
         .where('chatId', isEqualTo: message.chatId)
         .where('sendAt', isGreaterThan: message.sendAt)
