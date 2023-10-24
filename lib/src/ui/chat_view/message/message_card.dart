@@ -23,6 +23,7 @@ class MessageCard extends StatefulWidget {
   final Chat chat;
   final ChatifyUser user;
   final ChatController controller;
+  final bool isSending;
 
   const MessageCard({
     Key? key,
@@ -32,6 +33,7 @@ class MessageCard extends StatefulWidget {
     required this.chat,
     required this.user,
     required this.controller,
+    this.isSending = false,
   }) : super(key: key);
 
   @override
@@ -167,53 +169,57 @@ class _MessageCardState extends State<MessageCard> {
                 topWidgetWidth: 250,
                 backgroundColor: Colors.grey.shade200,
               ),
-              topWidget: Padding(
-                padding: const EdgeInsets.only(bottom: 3, top: 3),
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: Colors.white,
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 15,
-                        spreadRadius: 5,
-                      )
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: ['❤', '😍', '😂', '😢', '👍'].map((e) {
-                      return AnimatedScale(
-                        duration: const Duration(milliseconds: 150),
-                        scale: myEmoji?.emoji == e ? 1.3 : 1,
-                        child: CircularButton(
-                          highlightColor: Colors.transparent,
-                          icon: Text(
-                            e,
-                            style: const TextStyle(
-                              fontSize: 22,
-                              height: 1,
-                            ),
-                          ),
-                          onPressed: () {
-                            if (myEmoji?.emoji == e) {
-                              Chatify.datasource
-                                  .removeMessageEmojis(widget.message.id);
-                            } else {
-                              Chatify.datasource
-                                  .addMessageEmojis(widget.message.id, e);
-                            }
-                            Navigator.pop(context);
-                          },
+              topWidget: widget.isSending
+                  ? null
+                  : Padding(
+                      padding: const EdgeInsets.only(bottom: 3, top: 3),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(25),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.05),
+                              blurRadius: 15,
+                              spreadRadius: 5,
+                            )
+                          ],
                         ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: ['❤', '😍', '😂', '😢', '👍'].map((e) {
+                            return AnimatedScale(
+                              duration: const Duration(milliseconds: 150),
+                              scale: myEmoji?.emoji == e ? 1.3 : 1,
+                              child: CircularButton(
+                                highlightColor: Colors.transparent,
+                                icon: Text(
+                                  e,
+                                  style: const TextStyle(
+                                    fontSize: 22,
+                                    height: 1,
+                                  ),
+                                ),
+                                onPressed: () {
+                                  if (myEmoji?.emoji == e) {
+                                    Chatify.datasource
+                                        .removeMessageEmojis(widget.message.id);
+                                  } else {
+                                    Chatify.datasource
+                                        .addMessageEmojis(widget.message.id, e);
+                                  }
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
               itemBuilder: (context) => [
-                if (widget.message.type.isTextOrUnsupported && isMine)
+                if (widget.message is TextMessage &&
+                    isMine &&
+                    !widget.isSending)
                   PullDownMenuItem(
                     title: 'Edit',
                     icon: Iconsax.edit,
@@ -221,45 +227,67 @@ class _MessageCardState extends State<MessageCard> {
                       widget.controller.edit(widget.message);
                     },
                   ),
-                const PullDownMenuDivider(),
-                PullDownMenuItem(
-                  title: 'Copy',
-                  icon: Iconsax.copy,
-                  onTap: () {
-                    widget.controller.copy(widget.message);
-                  },
-                ),
-                const PullDownMenuDivider(),
-                PullDownMenuItem(
-                  title: 'Reply',
-                  icon: Iconsax.undo,
-                  onTap: () {
-                    widget.controller.reply(widget.message);
-                  },
-                ),
-                const PullDownMenuDivider(),
-                PullDownMenuItem(
-                  title: 'Delete',
-                  icon: Icons.delete,
-                  iconColor: Colors.red,
-                  onTap: () async {
-                    final deleteForAll = await showConfirmDialog(
-                      context: context,
-                      message: 'Are you sure you want to delete this message?',
-                      textOK: 'Delete',
-                      textCancel: 'Cancel',
-                      showDeleteForAll: true,
-                      isKeyboardShown:
-                          widget.controller.keyboardController.isKeybaordOpen,
-                    );
-                    print(deleteForAll);
-                    if (deleteForAll == true) {
+                if (widget.message is TextMessage) ...[
+                  const PullDownMenuDivider(),
+                  PullDownMenuItem(
+                    title: 'Copy',
+                    icon: Iconsax.copy,
+                    onTap: () {
+                      widget.controller.copy(widget.message);
+                    },
+                  ),
+                ],
+                if (!widget.isSending) ...[
+                  const PullDownMenuDivider(),
+                  PullDownMenuItem(
+                    title: 'Reply',
+                    icon: Iconsax.undo,
+                    onTap: () {
+                      widget.controller.reply(widget.message);
+                    },
+                  ),
+                ],
+                if (!widget.isSending) ...[
+                  const PullDownMenuDivider(),
+                  PullDownMenuItem(
+                    title: 'Delete',
+                    icon: Iconsax.trash,
+                    iconColor: Colors.red,
+                    itemTheme: PullDownMenuItemTheme(
+                      textStyle: TextStyle(color: Colors.red),
+                    ),
+                    onTap: () async {
+                      final deleteForAll = await showConfirmDialog(
+                        context: context,
+                        message:
+                            'Are you sure you want to delete this message?',
+                        textOK: 'Delete',
+                        textCancel: 'Cancel',
+                        showDeleteForAll: true,
+                        isKeyboardShown:
+                            widget.controller.keyboardController.isKeybaordOpen,
+                      );
+                      if (deleteForAll == true) {
+                        Chatify.datasource
+                            .deleteMessageForAll(widget.message.id);
+                      } else if (deleteForAll == false) {
+                        Chatify.datasource
+                            .deleteMessageForMe(widget.message.id);
+                      }
+                    },
+                  ),
+                ] else if (widget.message is TextMessage) ...[
+                  const PullDownMenuDivider(),
+                  PullDownMenuItem(
+                    title: 'Cancel',
+                    icon: Iconsax.trash,
+                    iconColor: Colors.red,
+                    onTap: () async {
                       Chatify.datasource.deleteMessageForAll(widget.message.id);
-                    } else if (deleteForAll == false) {
-                      Chatify.datasource.deleteMessageForMe(widget.message.id);
-                    }
-                  },
-                ),
+                      widget.controller.pending.remove(widget.message);
+                    },
+                  ),
+                ]
               ],
               position: PullDownMenuPosition.automatic,
               applyOpacity: false,
@@ -376,12 +404,13 @@ class _MessageCardState extends State<MessageCard> {
                                         chatController: widget.controller,
                                         user: widget.user,
                                       )
-                                    : TextMessage(
+                                    : TextMessageCard(
                                         widget: widget,
                                         bkColor: bkColor,
                                         textColor: textColor,
                                         controller: widget.controller,
                                         isMine: isMine,
+                                        isSending: widget.isSending,
                                       ),
                           ),
                         ),
@@ -398,14 +427,15 @@ class _MessageCardState extends State<MessageCard> {
   }
 }
 
-class TextMessage extends StatefulWidget {
-  const TextMessage({
+class TextMessageCard extends StatefulWidget {
+  const TextMessageCard({
     super.key,
     required this.widget,
     required this.bkColor,
     required this.textColor,
     required this.controller,
     required this.isMine,
+    required this.isSending,
   });
 
   final Color bkColor;
@@ -413,12 +443,13 @@ class TextMessage extends StatefulWidget {
   final bool isMine;
   final MessageCard widget;
   final ChatController controller;
+  final bool isSending;
 
   @override
-  State<TextMessage> createState() => _TextMessageState();
+  State<TextMessageCard> createState() => _TextMessageCardState();
 }
 
-class _TextMessageState extends State<TextMessage> {
+class _TextMessageCardState extends State<TextMessageCard> {
   Message? repliedMsg;
 
   @override
@@ -584,11 +615,17 @@ class _TextMessageState extends State<TextMessage> {
                           ),
                         ),
                         if (mergeWithSendAt)
-                          SendAtWidget(message: widget.widget.message),
+                          SendAtWidget(
+                            message: widget.widget.message,
+                            isSending: widget.isSending,
+                          ),
                       ],
                     ),
                     if (!mergeWithSendAt)
-                      SendAtWidget(message: widget.widget.message),
+                      SendAtWidget(
+                        message: widget.widget.message,
+                        isSending: widget.isSending,
+                      ),
                   ],
                 ),
               ),

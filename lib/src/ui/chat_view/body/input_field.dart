@@ -1,12 +1,16 @@
+import 'dart:io';
+
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/bottom_sheet.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class ChatInputField extends StatelessWidget {
   const ChatInputField({
@@ -141,7 +145,23 @@ class ChatInputField extends StatelessWidget {
                   : Row(
                       children: [
                         CircularButton(
-                          onPressed: () {
+                          onPressed: () async {
+                            if (Platform.isAndroid) {
+                              final androidInfo =
+                                  await DeviceInfoPlugin().androidInfo;
+                              if (androidInfo.version.sdkInt <= 32) {
+                                /// use [Permissions.storage.status]
+                                var status = await Permission.storage.status;
+                                if (status.isDenied) {
+                                  await Permission.storage.request();
+                                }
+                              } else {
+                                var status = await Permission.photos.status;
+                                if (status.isDenied) {
+                                  await Permission.storage.request();
+                                }
+                              }
+                            }
                             showImagesGallery(contex, controller);
                           },
                           size: 60,

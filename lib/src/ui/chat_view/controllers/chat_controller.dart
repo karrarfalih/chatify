@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
-
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
 import 'package:chatify/src/ui/common/toast.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/load_images_video.dart';
@@ -22,10 +22,7 @@ part 'record_controller.dart';
 
 class ChatController {
   final Chat chat;
-  ChatController(this.chat) {
-    pendingMessages = Rx<List<Message>>(
-      _PendingMessagesCache[chat.id] ?? [],
-    );
+  ChatController(this.chat) : pending = PendingMessagesHandler(chat: chat) {
     keyboardController = KeyboardController(this);
     voiceController = VoiceRecordingController(this);
     textController.addListener(() {
@@ -38,15 +35,13 @@ class ChatController {
     });
   }
 
-  static final _PendingMessagesCache = <String, List<Message>>{};
-
   late final KeyboardController keyboardController;
   late final VoiceRecordingController voiceController;
+  final PendingMessagesHandler pending;
 
   final FocusNode focus = FocusNode();
   final isTyping = false.obs;
   final isSelecting = false.obs;
-  late final Rx<List<Message>> pendingMessages;
   final selecetdMessages = <String, Message>{}.obs;
   Map<String, Message> initialSelecetdMessages = {};
   final messageAction = Rx<MessageActionArgs?>(null);
@@ -83,17 +78,17 @@ class ChatController {
       );
     } else {
       for (int i = 0; i <= (msg.length ~/ 1000); i++) {
-        Chatify.datasource.addMessage(
-          TextMessage(
-            message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
-            chatId: chat.id,
-            unSeenBy:
-                chat.members.where((e) => e != Chatify.currentUserId).toList(),
-            replyId: messageAction.value?.message?.id,
-            replyUid: messageAction.value?.message?.sender,
-            canReadBy: chat.members,
-          ),
+        final message = TextMessage(
+          message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
+          chatId: chat.id,
+          unSeenBy:
+              chat.members.where((e) => e != Chatify.currentUserId).toList(),
+          replyId: messageAction.value?.message?.id,
+          replyUid: messageAction.value?.message?.sender,
+          canReadBy: chat.members,
         );
+        Chatify.datasource.addMessage(message);
+        pending.add(message);
       }
       Chatify.datasource.addChat(chat);
     }
@@ -126,11 +121,10 @@ class ChatController {
       attachment: attachment,
       canReadBy: chat.members,
     );
-    pendingMessages.value = [...pendingMessages.value, pendingMsg];
+    pending.add(pendingMsg);
     final imageUrl = await attachment.url;
     if (imageUrl == null) {
-      pendingMessages.value.remove(pendingMsg);
-      pendingMessages.refresh();
+      pending.remove(pendingMsg);
       return;
     }
     Chatify.datasource.addMessage(
@@ -149,16 +143,11 @@ class ChatController {
 
   void dispose() {
     textController.dispose();
-    pendingMessages.dispose();
+    pending.dispose();
     voiceController.dispose();
     keyboardController.dispose();
     isSelecting.dispose();
     focus.dispose();
-    if (pendingMessages.value.isNotEmpty) {
-      _PendingMessagesCache[chat.id] = pendingMessages.value;
-    } else {
-      _PendingMessagesCache.remove(chat.id);
-    }
   }
 }
 

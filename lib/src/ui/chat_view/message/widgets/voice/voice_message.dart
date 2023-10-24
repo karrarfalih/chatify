@@ -167,9 +167,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                   return GestureDetector(
                     onTap: () {
                       attachment!.cancel();
-                      widget.chatController.pendingMessages.value
-                          .remove(message);
-                      widget.chatController.pendingMessages.refresh();
+                      widget.chatController.pending.remove(message);
                     },
                     child: Stack(
                       alignment: Alignment.center,

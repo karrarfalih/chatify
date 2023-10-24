@@ -13,6 +13,7 @@ abstract class Message {
   final String? replyId;
   final String? replyUid;
   final DateTime? sendAt;
+  final DateTime pendingTime;
   final String sender;
   final List<String> seenBy;
   final List<String> unSeenBy;
@@ -38,7 +39,8 @@ abstract class Message {
     required this.type,
   })  : id = id ?? Uuid.generate(),
         sender = sender ?? Chatify.currentUserId,
-        seenBy = seenBy ?? [Chatify.currentUserId];
+        seenBy = seenBy ?? [Chatify.currentUserId],
+        pendingTime = DateTime.now();
 
   bool get isMine => sender == Chatify.currentUserId;
 
@@ -59,6 +61,7 @@ abstract class Message {
         chatId = data['chatId'],
         replyId = data['replyId'],
         replyUid = data['replyUid'],
+        pendingTime = DateTime.now(),
         type = getMessageTypeFromString(data['type']);
 
   @mustCallSuper
@@ -92,7 +95,7 @@ extension MessageTypeExt on MessageType {
 
 extension MessageText on Message {
   String get message {
-    switch(runtimeType){
+    switch (runtimeType) {
       case TextMessage:
         return (this as TextMessage).message;
       case ImageMessage:

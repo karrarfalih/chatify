@@ -139,11 +139,9 @@ class _ChatMessagesState extends State<ChatMessages> {
                         );
                   showTime = d.toString() != prevD.toString();
                 }
-                if (widget.controller.pendingMessages.value
+                if (widget.controller.pending.messages.value
                     .any((e) => e.id == msg.id)) {
-                  widget.controller.pendingMessages.value
-                      .removeWhere((e) => e.id == msg.id);
-                  widget.controller.pendingMessages.refresh();
+                  widget.controller.pending.removeById(msg.id);
                 }
                 return SelectableMessage(
                   key: ValueKey('selectable message $i ${msg.id}'),
@@ -419,7 +417,7 @@ class PendingMessages extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<List<Message>>(
-      valueListenable: controller.pendingMessages,
+      valueListenable: controller.pending.messages,
       builder: (context, value, cild) {
         return Directionality(
           textDirection: TextDirection.rtl,
@@ -452,6 +450,18 @@ class PendingMessages extends StatelessWidget {
                         controller: controller,
                         linkedWithBottom: linkedWithBottom,
                         linkedWithTop: linkedWithTop,
+                        isSending: true,
+                      ),
+                    if (e is TextMessage)
+                      MessageCard(
+                        key: ValueKey(e.id),
+                        chat: chat,
+                        message: e,
+                        user: user,
+                        controller: controller,
+                        linkedWithBottom: linkedWithBottom,
+                        linkedWithTop: linkedWithTop,
+                        isSending: true,
                       ),
                   ],
                 ),

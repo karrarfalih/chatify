@@ -1,6 +1,6 @@
 name: chatify
 description: Chat package for flutter
-version: 0.1.5
+version: 0.1.6
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -10,6 +10,7 @@ environment:
 dependencies:
   camera: ^0.10.5+5
   cloud_firestore: ^4.4.3
+  device_info_plus: ^9.1.0
   emoji_picker_flutter: ^1.6.2
   firebase_database: ^10.2.6
   firebase_storage: ^11.0.14

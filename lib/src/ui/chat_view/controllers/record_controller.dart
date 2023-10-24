@@ -157,14 +157,10 @@ class VoiceRecordingController {
           samples: samples,
           canReadBy: controller.chat.members,
         );
-        controller.pendingMessages.value = [
-          ...controller.pendingMessages.value,
-          pendingMsg
-        ];
+        controller.pending.add(pendingMsg);
         final url = await attachment.url;
         if (url == null) {
-          controller.pendingMessages.value.remove(pendingMsg);
-          controller.pendingMessages.refresh();
+          controller.pending.remove(pendingMsg);
           return;
         }
         Chatify.datasource.addMessage(

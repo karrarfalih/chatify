@@ -2,7 +2,6 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image/controller.dart';
 import 'package:chatify/src/ui/common/image.dart';
@@ -112,9 +111,9 @@ class ImageCard extends StatelessWidget {
                         GestureDetector(
                           onTap: () {
                             message.attachment!.cancel();
-                            chatController.pendingMessages.value
-                                .remove(message);
-                            chatController.pendingMessages.refresh();
+                            chatController.pending.remove(
+                              message,
+                            );
                           },
                           child: Stack(
                             alignment: Alignment.center,
