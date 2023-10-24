@@ -13,7 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
 
-class ChatAppBar extends StatelessWidget {
+class ChatAppBar extends StatefulWidget {
   const ChatAppBar({
     super.key,
     required this.user,
@@ -24,13 +24,20 @@ class ChatAppBar extends StatelessWidget {
   final ChatController chatController;
 
   @override
+  State<ChatAppBar> createState() => _ChatAppBarState();
+}
+
+class _ChatAppBarState extends State<ChatAppBar> {
+  UserLastSeen? lastSeen;
+
+  @override
   Widget build(BuildContext context) {
     final theme = Chatify.theme;
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
         child: ValueListenableBuilder<Map<String, Message>>(
-          valueListenable: chatController.selecetdMessages,
+          valueListenable: widget.chatController.selecetdMessages,
           builder: (context, selecetdMessages, child) {
             return Container(
               padding: const EdgeInsets.only(bottom: 10, top: 16),
@@ -54,88 +61,86 @@ class ChatAppBar extends StatelessWidget {
                     : SafeArea(
                         key: ValueKey('chat_appbar_selected_messages'),
                         bottom: false,
-                        child: SizedBox(
-                          height: 45,
-                          child: Row(
-                            children: [
-                              InkWell(
-                                highlightColor: Colors.transparent,
-                                onTap: () {
-                                  chatController.selecetdMessages
-                                    ..value.clear()
-                                    ..refresh();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsetsDirectional.only(
-                                    start: 16,
-                                    end: 16,
-                                    top: 16,
-                                    bottom: 16,
-                                  ),
-                                  child: Icon(
-                                    Icons.close,
-                                    color: theme.isChatDark
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            InkWell(
+                              highlightColor: Colors.transparent,
+                              onTap: () {
+                                widget.chatController.selecetdMessages
+                                  ..value.clear()
+                                  ..refresh();
+                              },
+                              child: Container(
+                                padding: const EdgeInsetsDirectional.only(
+                                  start: 16,
+                                  end: 16,
+                                  top: 16,
+                                  bottom: 16,
+                                ),
+                                child: Icon(
+                                  Icons.close,
+                                  color: theme.isChatDark
+                                      ? Colors.white
+                                      : Colors.black,
                                 ),
                               ),
-                              AnimatedFlipCounter(
-                                value: selecetdMessages.length,
-                                duration: Duration(milliseconds: 200),
-                                textStyle: TextStyle(
-                                  color: theme.chatForegroundColor,
-                                  fontSize: 16,
-                                ),
+                            ),
+                            AnimatedFlipCounter(
+                              value: selecetdMessages.length,
+                              duration: Duration(milliseconds: 200),
+                              textStyle: TextStyle(
+                                color: theme.chatForegroundColor,
+                                fontSize: 16,
                               ),
-                              Text(
-                                ' selected',
-                                style: TextStyle(
-                                  color: theme.chatForegroundColor,
-                                  fontSize: 16,
-                                ),
+                            ),
+                            Text(
+                              ' selected',
+                              style: TextStyle(
+                                color: theme.chatForegroundColor,
+                                fontSize: 16,
                               ),
-                              Spacer(),
-                              IconButton(
-                                onPressed: () async {
-                                  final deleteForAll = await showConfirmDialog(
-                                    context: context,
-                                    message:
-                                        'Are you sure you want to delete these messages?',
-                                    title:
-                                        'Delete ${selecetdMessages.values.length} messages',
-                                    textOK: 'Delete',
-                                    textCancel: 'Cacnel',
-                                    showDeleteForAll: true,
-                                    isKeyboardShown: chatController
-                                        .keyboardController.isKeybaordOpen,
-                                  );
-                                  if (deleteForAll == null) return;
-                                  for (final msg in selecetdMessages.values) {
-                                    if (deleteForAll == true) {
-                                      Chatify.datasource.deleteMessageForMe(
-                                        msg.id,
-                                      );
-                                    } else {
-                                      Chatify.datasource.deleteMessageForMe(
-                                        msg.id,
-                                      );
-                                    }
+                            ),
+                            Spacer(),
+                            IconButton(
+                              onPressed: () async {
+                                final deleteForAll = await showConfirmDialog(
+                                  context: context,
+                                  message:
+                                      'Are you sure you want to delete these messages?',
+                                  title:
+                                      'Delete ${selecetdMessages.values.length} messages',
+                                  textOK: 'Delete',
+                                  textCancel: 'Cacnel',
+                                  showDeleteForAll: true,
+                                  isKeyboardShown: widget.chatController
+                                      .keyboardController.isKeybaordOpen,
+                                );
+                                if (deleteForAll == null) return;
+                                for (final msg in selecetdMessages.values) {
+                                  if (deleteForAll == true) {
+                                    Chatify.datasource.deleteMessageForMe(
+                                      msg.id,
+                                    );
+                                  } else {
+                                    Chatify.datasource.deleteMessageForMe(
+                                      msg.id,
+                                    );
                                   }
-                                  chatController.selecetdMessages
-                                    ..value.clear()
-                                    ..refresh();
-                                },
-                                icon: Icon(
-                                  Iconsax.trash,
-                                  color: theme.chatForegroundColor,
-                                ),
+                                }
+                                widget.chatController.selecetdMessages
+                                  ..value.clear()
+                                  ..refresh();
+                              },
+                              icon: Icon(
+                                Iconsax.trash,
+                                color: theme.chatForegroundColor,
                               ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                            ],
-                          ),
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                          ],
                         ),
                       ),
               ),
@@ -145,7 +150,7 @@ class ChatAppBar extends StatelessWidget {
             key: ValueKey('chat_appbar_no_selected_messages'),
             bottom: false,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: 45),
+              constraints: BoxConstraints(maxHeight: 55),
               child: Row(
                 children: [
                   InkWell(
@@ -168,13 +173,14 @@ class ChatAppBar extends StatelessWidget {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () => Chatify.config.onUserClick?.call(user),
+                      onTap: () =>
+                          Chatify.config.onUserClick?.call(widget.user),
                       child: Row(
                         children: [
                           CustomImage(
-                            url: user.profileImage,
-                            width: 45,
-                            height: 45,
+                            url: widget.user.profileImage,
+                            width: 44,
+                            height: 44,
                             radius: 45,
                             fit: BoxFit.cover,
                             onError:
@@ -190,7 +196,7 @@ class ChatAppBar extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  user.name,
+                                  widget.user.name,
                                   style: TextStyle(
                                     color: theme.chatForegroundColor,
                                     fontSize: 16,
@@ -200,42 +206,16 @@ class ChatAppBar extends StatelessWidget {
                                   height: 15,
                                   child: KrStreamBuilder<UserLastSeen>(
                                     stream: Chatify.datasource.getUserLastSeen(
-                                      user.id,
-                                      chatController.chat.id,
+                                      widget.user.id,
+                                      widget.chatController.chat.id,
                                     ),
-                                    onLoading: SizedBox.shrink(),
+                                    onLoading: lastSeen != null
+                                        ? _UserStatusWidget(user: lastSeen!)
+                                        : SizedBox.shrink(),
                                     builder: (user) {
-                                      return KrExpandedSection(
-                                        expand: true,
-                                        child: Column(
-                                          key: ValueKey('none_user_status'),
-                                          children: [
-                                            Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              children: [
-                                                if (user.isActive)
-                                                  Container(
-                                                    height: 8,
-                                                    width: 8,
-                                                    margin:
-                                                        EdgeInsetsDirectional
-                                                            .only(
-                                                      end: 5,
-                                                    ),
-                                                    decoration: BoxDecoration(
-                                                      shape: BoxShape.circle,
-                                                      color: Colors.green,
-                                                    ),
-                                                  ),
-                                                TimerRefresher(
-                                                  lastSeen: user.lastSeen,
-                                                  isActive: user.isActive,
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+                                      lastSeen = user;
+                                      return _UserStatusWidget(
+                                        user: user,
                                       );
                                     },
                                   ),
@@ -276,17 +256,18 @@ class ChatAppBar extends StatelessWidget {
                             textOK: 'Delete',
                             textCancel: 'Cacnel',
                             showDeleteForAll: true,
-                            isKeyboardShown: chatController
+                            isKeyboardShown: widget.chatController
                                 .keyboardController.isKeybaordOpen,
                           );
                           if (deleteForAll == null) return;
                           if (deleteForAll == true) {
-                            Chatify.datasource
-                                .deleteChatForAll(chatController.chat.id);
+                            Chatify.datasource.deleteChatForAll(
+                              widget.chatController.chat.id,
+                            );
                             Navigator.pop(context);
                           } else if (deleteForAll == false) {
                             Chatify.datasource
-                                .deleteChatForMe(chatController.chat.id);
+                                .deleteChatForMe(widget.chatController.chat.id);
                             Navigator.pop(context);
                           }
                         },
@@ -307,6 +288,48 @@ class ChatAppBar extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _UserStatusWidget extends StatelessWidget {
+  const _UserStatusWidget({
+    required this.user,
+  });
+
+  final UserLastSeen user;
+
+  @override
+  Widget build(BuildContext context) {
+    return KrExpandedSection(
+      key: ValueKey(user.isActive),
+      expand: true,
+      child: Column(
+        key: ValueKey('none_user_status'),
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (user.isActive)
+                Container(
+                  height: 8,
+                  width: 8,
+                  margin: EdgeInsetsDirectional.only(
+                    end: 5,
+                  ),
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.green,
+                  ),
+                ),
+              TimerRefresher(
+                lastSeen: user.lastSeen,
+                isActive: user.isActive,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

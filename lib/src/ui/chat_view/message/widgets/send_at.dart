@@ -33,9 +33,10 @@ class SendAtWidget extends StatelessWidget {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
-        padding: EdgeInsets.only(left: isMine ? 8 : 0, right: isMine ? 0 : 8),
+        padding: EdgeInsets.only(left: 8),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             if (isMine)
               Padding(
@@ -63,24 +64,20 @@ class SendAtWidget extends StatelessWidget {
               (message.sendAt ?? DateTime.now()).format(context, 'h:mm a'),
               style: TextStyle(
                 fontSize: 11,
-                color: !isMine && isTextOrVoice
-                    ? theme.chatForegroundColor
-                        .withOpacity(isTextOrVoice || isVoice ? 0.5 : 1)
-                    : Colors.white
-                        .withOpacity(isTextOrVoice || isVoice ? 0.5 : 1),
-                height: 1,
+                color: isTextOrVoice && !isMine
+                    ? theme.chatForegroundColor.withOpacity(0.3)
+                    : Colors.white.withOpacity(isTextOrVoice ? 0.5 : 1),
+                height: 1.2,
               ),
               textDirection: TextDirection.ltr,
             ),
             Text(
               message.isEdited ? ' ${'edited'} ' : '',
               style: TextStyle(
-                fontSize: 12,
-                color: !isMine && isTextOrVoice
-                    ? theme.chatForegroundColor
-                        .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1)
-                    : Colors.white
-                        .withOpacity(isTextOrVoice || isVoice ? 0.7 : 1),
+                fontSize: 11,
+                color: !isMine
+                    ? theme.chatForegroundColor.withOpacity(0.6)
+                    : Colors.white.withOpacity(0.6),
                 height: 1,
               ),
             ),

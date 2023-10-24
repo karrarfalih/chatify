@@ -1,5 +1,4 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,9 @@ class MyVoiceMessage extends StatelessWidget {
       user: message.isMine ? 'Me' : user.name,
       meBgColor: Chatify.theme.primaryColor,
       contactPlayIconColor: Colors.white,
-      contactBgColor: Chatify.theme.chatGreyForegroundColor,
+      contactBgColor: Chatify.theme.chatBrightness == Brightness.light
+          ? Colors.white
+          : Colors.black,
       contactFgColor: Chatify.theme.primaryColor,
       message: message,
       chatController: controller,

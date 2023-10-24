@@ -20,40 +20,48 @@ class EmojisKeyboard extends StatelessWidget {
         child: child!,
         visible: isEmoji,
       ),
-      child: SizedBox(
-        height: controller.keyboardController.keyboardHeight,
-        child: EmojiPicker(
-          key: ValueKey('emojis'),
-          textEditingController: controller.textController,
-          onBackspacePressed: () {},
-          config: Config(
-            columns: MediaQuery.of(context).size.width ~/ 45,
-            emojiSizeMax: 24 *
-                (foundation.defaultTargetPlatform == TargetPlatform.iOS
-                    ? 1.30
-                    : 1.0),
-            verticalSpacing: 0,
-            horizontalSpacing: 0,
-            gridPadding: EdgeInsets.zero,
-            initCategory: Category.RECENT,
-            bgColor: Theme.of(context).scaffoldBackgroundColor,
-            indicatorColor: Chatify.theme.primaryColor,
-            iconColor: Colors.grey,
-            iconColorSelected: Chatify.theme.primaryColor,
-            backspaceColor: Chatify.theme.primaryColor,
-            skinToneDialogBgColor: Theme.of(context).scaffoldBackgroundColor,
-            skinToneIndicatorColor: Colors.grey,
-            noRecents: Text(
-              'No Recents',
-              style: TextStyle(
-                fontSize: 20,
-                color: Chatify.theme.chatForegroundColor,
-              ),
-              textAlign: TextAlign.center,
-            ), // Needs to be const Widget
-            loadingIndicator:
-                const SizedBox.shrink(), // Needs to be const Widget
-            buttonMode: ButtonMode.CUPERTINO,
+      child: WillPopScope(
+        onWillPop: () async {
+          controller.isEmoji.value = false;
+          return false;
+        },
+        child: SizedBox(
+          height: controller.keyboardController.keyboardHeight,
+          child: EmojiPicker(
+            key: ValueKey('emojis'),
+            textEditingController: controller.textController,
+            onBackspacePressed: () {},
+            config: Config(
+              columns: MediaQuery.of(context).size.width ~/ 45,
+              emojiSizeMax: 24 *
+                  (foundation.defaultTargetPlatform == TargetPlatform.iOS
+                      ? 1.30
+                      : 1.0),
+              verticalSpacing: 0,
+              horizontalSpacing: 0,
+              gridPadding: EdgeInsets.zero,
+              initCategory: Category.RECENT,
+              bgColor: Colors.transparent,
+              indicatorColor: Chatify.theme.primaryColor,
+              iconColor: Chatify.theme.chatForegroundColor.withOpacity(0.3),
+
+              iconColorSelected: Chatify.theme.primaryColor,
+              backspaceColor: Chatify.theme.primaryColor,
+              skinToneDialogBgColor: Theme.of(context).scaffoldBackgroundColor,
+              skinToneIndicatorColor: Colors.grey,
+              enableSkinTones: true,
+              noRecents: Text(
+                'No Recents',
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Chatify.theme.chatForegroundColor,
+                ),
+                textAlign: TextAlign.center,
+              ), // Needs to be const Widget
+              loadingIndicator:
+                  const SizedBox.shrink(), // Needs to be const Widget
+              buttonMode: ButtonMode.CUPERTINO,
+            ),
           ),
         ),
       ),

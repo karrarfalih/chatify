@@ -1,5 +1,8 @@
+import 'dart:ui';
+
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/action_header.dart';
+import 'package:chatify/src/ui/chat_view/body/bottom_space.dart';
 import 'package:chatify/src/ui/chat_view/body/emojis_keyboard.dart';
 import 'package:chatify/src/ui/chat_view/body/input_box.dart';
 import 'package:chatify/src/ui/chat_view/body/messages.dart';
@@ -77,7 +80,7 @@ class _ChatViewState extends State<ChatView> {
                   if (Chatify.theme.backgroundImage == null) ...[
                     Positioned.fill(
                       child: ColoredBox(
-                        color: Chatify.theme.primaryColor.withOpacity(0.1),
+                        color: Chatify.theme.primaryColor.withOpacity(0.05),
                       ),
                     ),
                     Center(
@@ -89,7 +92,7 @@ class _ChatViewState extends State<ChatView> {
                           boxShadow: [
                             BoxShadow(
                               color:
-                                  Chatify.theme.primaryColor.withOpacity(0.2),
+                                  Chatify.theme.primaryColor.withOpacity(0.1),
                               blurRadius: MediaQuery.of(context).size.width / 2,
                               spreadRadius:
                                   MediaQuery.of(context).size.width / 2,
@@ -112,11 +115,37 @@ class _ChatViewState extends State<ChatView> {
                         controller: controller,
                         user: widget.user,
                       ),
-                      ChatInputBox(
-                        controller: controller,
-                        chat: widget.chat,
+                      ClipRRect(
+                        child: BackdropFilter(
+                          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Chatify.theme.isChatDark
+                                  ? Colors.black.withOpacity(0.4)
+                                  : Colors.white.withOpacity(0.4),
+                              border: Border(
+                                top: BorderSide(
+                                  color: (Chatify.theme.isChatDark
+                                          ? Colors.white
+                                          : Colors.black)
+                                      .withOpacity(0.07),
+                                  width: 1,
+                                ),
+                              ),
+                            ),
+                            child: Column(
+                              children: [
+                                ChatInputBox(
+                                  controller: controller,
+                                  chat: widget.chat,
+                                ),
+                                ChatBottomSpace(controller: controller),
+                                EmojisKeyboard(controller: controller)
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                      EmojisKeyboard(controller: controller)
                     ],
                   ),
                   Column(

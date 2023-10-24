@@ -105,24 +105,35 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
         constraints: BoxConstraints(maxWidth: 70.w()),
         child: Padding(
           padding:
-              const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
+              const EdgeInsets.only(left: 15, right: 0, top: 10, bottom: 10),
+          child: Stack(
             children: [
-              Row(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  _playButton(context),
-                  const SizedBox(width: 8),
-                  _durationWithNoise(context),
-                  const SizedBox(width: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _playButton(context),
+                      const SizedBox(width: 12),
+                      Align(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        child: _durationWithNoise(context),
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                  ),
                 ],
               ),
-              SendAtWidget(
-                message: message,
-                isSending: message.uploadAttachment != null,
-              ),
+              Positioned(
+                bottom: -3,
+                right: 10,
+                child: SendAtWidget(
+                  message: message,
+                  isSending: message.uploadAttachment != null,
+                ),
+              )
             ],
           ),
         ),
@@ -276,41 +287,45 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
         ),
       );
 
-  _durationWithNoise(BuildContext context) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _noise(context),
-          SizedBox(height: 1.w()),
-          Row(
-            children: [
-              ValueListenableBuilder<String>(
-                valueListenable: player.remainingTime!,
-                builder: (context, remainingTime, child) {
-                  return Text(
-                    remainingTime,
-                    style: TextStyle(
-                      fontSize: 10,
+  _durationWithNoise(BuildContext context) => SizedBox(
+        width: noiseWidth + 10,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _noise(context),
+            SizedBox(height: 1.w()),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ValueListenableBuilder<String>(
+                  valueListenable: player.remainingTime!,
+                  builder: (context, remainingTime, child) {
+                    return Text(
+                      remainingTime,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isMe ? widget.meFgColor : widget.contactFgColor,
+                      ),
+                    );
+                  },
+                ),
+                Visibility(
+                  visible: !message.isPlayed,
+                  child: Container(
+                    margin: EdgeInsetsDirectional.symmetric(horizontal: 4),
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
                       color: isMe ? widget.meFgColor : widget.contactFgColor,
                     ),
-                  );
-                },
-              ),
-              Visibility(
-                visible: !message.isPlayed,
-                child: Container(
-                  margin: EdgeInsetsDirectional.symmetric(horizontal: 4),
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: isMe ? widget.meFgColor : widget.contactFgColor,
+                    width: 1.4.w(),
+                    height: 1.4.w(),
                   ),
-                  width: 1.4.w(),
-                  height: 1.4.w(),
                 ),
-              )
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       );
 
   _noise(BuildContext context) {
@@ -378,9 +393,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
   }
 }
 
-/// document will be added
 class CustomTrackShape extends RoundedRectSliderTrackShape {
-  /// document will be added
   @override
   Rect getPreferredRect({
     required RenderBox parentBox,

@@ -52,7 +52,7 @@ class ChatifyDatasource {
   }
 
   Future<VoiceMessage?> getNextVoice(Message message) async {
-    if(message.sendAt == null) return null;
+    if (message.sendAt == null) return null;
     final res = await _messages
         .where('chatId', isEqualTo: message.chatId)
         .where('sendAt', isGreaterThan: message.sendAt)
@@ -171,8 +171,26 @@ class ChatifyDatasource {
     });
   }
 
-  Future<void> deleteChatForAll(String id) async {
-    await _chats.doc(id).delete();
+  Future<void> deleteChatForAll(String chatId) async {
+    final chat = await _chats.doc(chatId).get();
+    final unSeenMessages = await _messages
+        .where('chatId', isEqualTo: chatId)
+        .where(
+          'unSeenBy',
+          arrayContains: chat
+              .data()!
+              .members
+              .where((e) => e != Chatify.currentUserId)
+              .first,
+        )
+        .get();
+    for (final message in unSeenMessages.docs) {
+      message.reference.update({
+        'unSeenBy': [],
+        'seenBy': chat.data()!.members.toList(),
+      });
+    }
+    await _chats.doc(chatId).delete();
   }
 
   Query<Message> messagesQuery(Chat chat) {
