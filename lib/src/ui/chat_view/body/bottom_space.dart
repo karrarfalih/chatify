@@ -1,4 +1,4 @@
-import 'package:chatify/src/theme/theme_widget.dart';
+
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/keyboard_size.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
@@ -61,19 +61,12 @@ class _BottomSpaceWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: ChatifyTheme.of(context).isChatDark
-          ? Colors.black.withOpacity(0.4)
-          : Colors.white.withOpacity(0.4),
-      child: SafeArea(
-        top: false,
-        bottom: !isEmoji,
-        child: Container(
-          height: isEmoji ? 0 : keyboardHeight,
-          color: ChatifyTheme.of(context).isChatDark
-              ? Colors.black.withOpacity(0.4)
-              : Colors.white.withOpacity(0.4),
-        ),
+    return SafeArea(
+      top: false,
+      bottom: !isEmoji,
+      child: SizedBox(
+        height: isEmoji ? 0 : keyboardHeight,
+        width: double.maxFinite,
       ),
     );
   }

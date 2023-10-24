@@ -1,3 +1,4 @@
+
 import 'package:chatify/chatify.dart';
 
 final chatifyConfig = ChatifyConfig(

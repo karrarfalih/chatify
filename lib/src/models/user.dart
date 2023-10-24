@@ -14,5 +14,27 @@ class ChatifyUser {
     this.profileImage,
     this.data,
   });
-  
+}
+
+enum ChatStatus {
+  none,
+  attend,
+  typing,
+  recording,
+  sendingMedia,
+}
+
+class UserLastSeen {
+  final bool isActive;
+  final DateTime? _lastSeen;
+  final DateTime? _lastConnection;
+
+  UserLastSeen({
+    required this.isActive,
+    DateTime? lastSeen,
+    DateTime? lastConnection,
+  })  : _lastConnection = lastConnection,
+        _lastSeen = lastSeen;
+
+  DateTime? get lastSeen => _lastSeen ?? _lastConnection;
 }

@@ -9,7 +9,7 @@ class VoiceRecordingController {
 
   Timer? _timer;
   final seconds = 0.obs;
-  final _record = Record();
+  late AudioRecorder _record;
   String? path;
 
   final micRadius = 80.0.obs;
@@ -26,6 +26,9 @@ class VoiceRecordingController {
 
   record() async {
     if (isRecording.value) return;
+    _record = AudioRecorder();
+    Chatify.datasource
+        .updateChatStaus(ChatStatus.recording, controller.chat.id);
     isRecording.value = true;
     micPos.value = Offset.zero;
     micLockPos.value = Offset.zero;
@@ -52,9 +55,13 @@ class VoiceRecordingController {
     }
     isPermissionGranted = true;
     Directory documents = await getApplicationDocumentsDirectory();
+    Directory dir = Directory('${documents.path}/recorded_voices');
+    await dir.create(recursive: true);
     await _record.start(
-      path: Platform.isIOS ? '${documents.path}/${Uuid.generate()}.aac' : null,
-      encoder: AudioEncoder.aacLc,
+      RecordConfig(
+        encoder: AudioEncoder.aacLc,
+      ),
+      path: '${documents.path}/recorded_voices/${Uuid.generate()}.aac',
     );
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => seconds.value++);
@@ -86,7 +93,7 @@ class VoiceRecordingController {
     if (isLocked.value) return;
     if (offset.distance.round() == micPos.value.distance.round()) return;
     if (offset.dx < -180) {
-      controller.voiceController.stopRecord();
+      stopRecord(false);
     }
     micPos.value = offset;
     if (offset.dy < -90 && offset.dx > -70) {
@@ -126,6 +133,7 @@ class VoiceRecordingController {
   stopRecord([bool submit = true]) async {
     if (!isRecording.value) return;
     vibrate();
+    Chatify.datasource.updateChatStaus(ChatStatus.none, controller.chat.id);
     isRecording.value = false;
     _micRadiusTimer?.cancel();
     _micLockTimer?.cancel();
@@ -164,6 +172,7 @@ class VoiceRecordingController {
         pendingMsg.copyWith(url: url),
       );
     }
+    _record.dispose();
   }
 
   void dispose() {

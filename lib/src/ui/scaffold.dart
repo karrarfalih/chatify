@@ -1,5 +1,4 @@
 import 'package:chatify/src/core/chatify.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chats/new_chat/new_chat.dart';
 import 'package:chatify/src/ui/chats/search.dart';
 import 'package:chatify/src/utils/context_provider.dart';
@@ -19,7 +18,7 @@ class ChatScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     return Scaffold(
       key: ContextProvider.recentChatsKey,
       appBar: AppBar(

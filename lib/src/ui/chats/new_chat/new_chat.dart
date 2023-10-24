@@ -1,5 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chats/new_chat/controllers/search_controller.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -13,7 +13,7 @@ class NewChat extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -94,7 +94,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     return Column(
       children: [
         Container(

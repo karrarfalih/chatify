@@ -2,7 +2,7 @@ import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image/image.dart';
@@ -73,7 +73,7 @@ class _MessageCardState extends State<MessageCard> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     final isMine = widget.message.isMine;
     widget.message.type == MessageType.unSupported;
     final textColor = isMine ? Colors.white : theme.chatForegroundColor;
@@ -442,7 +442,7 @@ class _TextMessageState extends State<TextMessage> {
                               decoration: BoxDecoration(
                                 color: widget.isMine
                                     ? Colors.white70
-                                    : ChatifyTheme.of(context).primaryColor,
+                                    : Chatify.theme.primaryColor,
                                 borderRadius: BorderRadius.circular(4),
                               ),
                             ),
@@ -508,8 +508,8 @@ class _TextMessageState extends State<TextMessage> {
                                                   lineWidth: 1,
                                                   color: widget.isMine
                                                       ? Colors.white
-                                                      : ChatifyTheme.of(context)
-                                                          .primaryColor,
+                                                      : Chatify
+                                                          .theme.primaryColor,
                                                 ),
                                               ),
                                             ),

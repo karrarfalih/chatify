@@ -4,11 +4,18 @@ class KrExpandedSection extends StatefulWidget {
   final Widget child;
   final bool expand;
   final Function? onFinish;
+  final Duration? duration;
+  final Curve? curve;
+  final Curve? reverseCurve;
+
   const KrExpandedSection({
     Key? key,
     this.expand = false,
     required this.child,
     this.onFinish,
+    this.duration,
+    this.curve,
+    this.reverseCurve,
   }) : super(key: key);
 
   @override
@@ -30,11 +37,12 @@ class _KrExpandedSectionState extends State<KrExpandedSection>
   void prepareAnimations() {
     expandController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: widget.duration ?? const Duration(milliseconds: 300),
     );
     animation = CurvedAnimation(
       parent: expandController,
-      curve: Curves.fastOutSlowIn,
+      curve: widget.curve ?? Curves.fastOutSlowIn,
+      reverseCurve: widget.reverseCurve ?? Curves.fastOutSlowIn,
     );
   }
 

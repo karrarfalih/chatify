@@ -1,5 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
 import 'package:flutter/material.dart';
@@ -22,10 +22,10 @@ class MyVoiceMessage extends StatelessWidget {
       key: ValueKey(message.id),
       onSeek: () => controller.preventEmoji = true,
       user: message.isMine ? 'Me' : user.name,
-      meBgColor: ChatifyTheme.of(context).primaryColor,
+      meBgColor: Chatify.theme.primaryColor,
       contactPlayIconColor: Colors.white,
-      contactBgColor: ChatifyTheme.of(context).chatGreyForegroundColor,
-      contactFgColor: ChatifyTheme.of(context).primaryColor,
+      contactBgColor: Chatify.theme.chatGreyForegroundColor,
+      contactFgColor: Chatify.theme.primaryColor,
       message: message,
       chatController: controller,
       width: MediaQuery.of(context).size.width,
@@ -52,7 +52,7 @@ class MyVoiceMessageBloc extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: ChatifyTheme.of(context).primaryColor,
+        color: Chatify.theme.primaryColor,
         borderRadius: BorderRadiusDirectional.only(
           topStart: Radius.circular(linkedWithTop ? 0 : 12),
           bottomStart: Radius.circular(linkedWithBottom ? 0 : 12),

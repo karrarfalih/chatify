@@ -2,7 +2,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image/controller.dart';
 import 'package:chatify/src/ui/common/image.dart';
@@ -64,7 +64,7 @@ class ImageCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(
                 15,
               ),
-              color: ChatifyTheme.of(context).primaryColor.withOpacity(0.2),
+              color: Chatify.theme.primaryColor.withOpacity(0.2),
             ),
             child: Hero(
               tag: message.id,

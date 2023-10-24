@@ -1,8 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/body/action_header.dart';
-import 'package:chatify/src/ui/chat_view/body/bottom_space.dart';
 import 'package:chatify/src/ui/chat_view/body/emojis_keyboard.dart';
 import 'package:chatify/src/ui/chat_view/body/input_box.dart';
 import 'package:chatify/src/ui/chat_view/body/messages.dart';
@@ -48,7 +45,7 @@ class _ChatViewState extends State<ChatView> {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: ChatifyTheme.of(context).isChatDark
+        value: Chatify.theme.isChatDark
             ? SystemUiOverlayStyle.light.copyWith(
                 systemNavigationBarDividerColor: Colors.black,
                 systemNavigationBarColor: Colors.black,
@@ -64,12 +61,12 @@ class _ChatViewState extends State<ChatView> {
             key: ContextProvider.chatKey,
             resizeToAvoidBottomInset: false,
             body: Container(
-              decoration: ChatifyTheme.of(context).backgroundImage == null
+              decoration: Chatify.theme.backgroundImage == null
                   ? null
                   : BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage(
-                          ChatifyTheme.of(context).backgroundImage!,
+                          Chatify.theme.backgroundImage!,
                         ),
                         fit: BoxFit.cover,
                       ),
@@ -77,6 +74,31 @@ class _ChatViewState extends State<ChatView> {
               child: Stack(
                 alignment: AlignmentDirectional.topCenter,
                 children: [
+                  if (Chatify.theme.backgroundImage == null) ...[
+                    Positioned.fill(
+                      child: ColoredBox(
+                        color: Chatify.theme.primaryColor.withOpacity(0.1),
+                      ),
+                    ),
+                    Center(
+                      child: Container(
+                        width: MediaQuery.of(context).size.width / 3,
+                        height: MediaQuery.of(context).size.width / 3,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color:
+                                  Chatify.theme.primaryColor.withOpacity(0.2),
+                              blurRadius: MediaQuery.of(context).size.width / 2,
+                              spreadRadius:
+                                  MediaQuery.of(context).size.width / 2,
+                            )
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                   Column(
                     children: [
                       Expanded(
@@ -94,7 +116,6 @@ class _ChatViewState extends State<ChatView> {
                         controller: controller,
                         chat: widget.chat,
                       ),
-                      ChatBottomSpace(controller: controller),
                       EmojisKeyboard(controller: controller)
                     ],
                   ),

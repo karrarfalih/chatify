@@ -33,10 +33,11 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   Brightness _brightness = Brightness.light;
   bool isLTR = true;
+  Color primary = Colors.deepPurple;
+  String? image;
 
   @override
   Widget build(BuildContext context) {
-    final primary = Colors.deepPurple;
     return MaterialApp(
       title: 'Chatify Demo',
       debugShowCheckedModeBanner: false,
@@ -55,119 +56,141 @@ class _MyAppState extends State<MyApp> {
       ],
       supportedLocales: [
         Locale("en", "US"),
-        Locale("ar", "IQ"), // OR Locale('ar', 'AE') OR Other RTL locales
+        Locale("ar", "IQ"),
       ],
       locale: Locale(isLTR ? 'en' : 'ar'),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Chatify Demo'),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: StreamBuilder(
-                stream: Chatify.unreadMessagesCount,
-                builder: (context, snapshot) {
-                  int count = 0;
-                  if (snapshot.hasData) {
-                    count = snapshot.data as int;
-                  }
-                  return Badge(
-                    label: Text(
-                      count.toString(),
-                      style: const TextStyle(
-                        color: Colors.white,
+      home: ChatifyWraper(
+        theme: ChatifyThemeData(
+          recentChatsBrightness: _brightness,
+          chatBrightness: _brightness,
+          primaryColor: primary,
+          backgroundImage: image,
+        ),
+        child: Builder(
+          builder: (context) {
+            print(Chatify.theme.backgroundImage);
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Chatify Demo'),
+                actions: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: StreamBuilder(
+                      stream: Chatify.unreadMessagesCount,
+                      builder: (context, snapshot) {
+                        int count = 0;
+                        if (snapshot.hasData) {
+                          count = snapshot.data as int;
+                        }
+                        return Badge(
+                          label: Text(
+                            count.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                            ),
+                          ),
+                          isLabelVisible: count > 0,
+                          padding: EdgeInsets.symmetric(horizontal: 7),
+                          largeSize: 20,
+                          backgroundColor: Colors.red,
+                          offset: Offset(-3, 3),
+                          child: IconButton(
+                            onPressed: () {
+                              Chatify.openAllChats(context);
+                            },
+                            icon: const Icon(CupertinoIcons.chat_bubble_text),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              body: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: ListView(
+                  children: [
+                    SizedBox(height: 20),
+                    Center(child: Text('Select Current User')),
+                    SizedBox(height: 10),
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: Wrap(
+                        alignment: WrapAlignment.center,
+                        spacing: 10,
+                        runSpacing: 10,
+                        children: users
+                            .map(
+                              (e) => _UserButton(
+                                user: e,
+                                onChanged: () => setState(() {}),
+                              ),
+                            )
+                            .toList(),
                       ),
                     ),
-                    isLabelVisible: count > 0,
-                    padding: EdgeInsets.symmetric(horizontal: 7),
-                    largeSize: 20,
-                    backgroundColor: Colors.red,
-                    offset: Offset(-3, 3),
-                    child: IconButton(
+                    SizedBox(height: 20),
+                    _MainButton(
                       onPressed: () {
-                        Chatify.openAllChats(context);
+                        setState(() {
+                          _brightness = _brightness == Brightness.dark
+                              ? Brightness.light
+                              : Brightness.dark;
+                        });
                       },
-                      icon: const Icon(CupertinoIcons.chat_bubble_text),
+                      text: 'Change Brightness',
+                      icon: CupertinoIcons.moon,
                     ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              SizedBox(height: 20),
-              Text('Select Current User'),
-              SizedBox(height: 10),
-              SizedBox(
-                width: double.maxFinite,
-                child: Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: 10,
-                  runSpacing: 10,
-                  children: users
-                      .map(
-                        (e) => _UserButton(
-                          user: e,
-                          onChanged: () => setState(() {}),
-                        ),
-                      )
-                      .toList(),
+                    _MainButton(
+                      onPressed: () {
+                        setState(() {
+                          isLTR = !isLTR;
+                        });
+                      },
+                      text: 'Change Direction',
+                      icon: Icons.language_outlined,
+                    ),
+                    SizedBox(height: 20),
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 10,
+                      alignment: WrapAlignment.center,
+                      children: Colors.primaries
+                          .map(
+                            (e) => _ColorButton(
+                              onPressed: () {
+                                setState(() {
+                                  primary = e;
+                                });
+                              },
+                              color: e,
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    SizedBox(height: 20),
+                    Wrap(
+                        spacing: 10,
+                        runSpacing: 10,
+                        alignment: WrapAlignment.center,
+                        children: List.generate(
+                          4,
+                          (i) => _ImageButton(
+                            onPressed: () {
+                              setState(() {
+                                image = 'assets/chat_background/${i + 1}.jpg';
+                              });
+                            },
+                            isSelected:
+                                image == 'assets/chat_background/${i + 1}.jpg',
+                            image: 'assets/chat_background/${i + 1}.jpg',
+                          ),
+                        )),
+                  ],
                 ),
               ),
-              SizedBox(height: 20),
-              _MainButton(
-                onPressed: () {
-                  setState(() {
-                    _brightness = _brightness == Brightness.dark
-                        ? Brightness.light
-                        : Brightness.dark;
-                  });
-                },
-                text: 'Change Brightness',
-                icon: CupertinoIcons.moon,
-              ),
-              _MainButton(
-                onPressed: () {
-                  setState(() {
-                    isLTR = !isLTR;
-                  });
-                },
-                text: 'Change Direction',
-                icon: Icons.language_outlined,
-              ),
-              // Builder(
-              //   builder: (context) {
-              //     return _MainButton(
-              //       onPressed: () {
-              //         Chatify.openAllChats(context);
-              //       },
-              //       text: 'Show Recent Chats',
-              //       icon: CupertinoIcons.time,
-              //     );
-              //   },
-              // ),
-              // Builder(
-              //   builder: (context) {
-              //     final targetedUser = _currentUser == sara ? karrar : sara;
-              //     return _MainButton(
-              //       onPressed: () {
-              //         Chatify.openChatByUser(
-              //           context,
-              //           user: targetedUser,
-              //         );
-              //       },
-              //       text: 'Start Chat with ${targetedUser.name}',
-              //       icon: CupertinoIcons.paperplane,
-              //     );
-              //   },
-              // ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -204,6 +227,76 @@ class _MainButton extends StatelessWidget {
             SizedBox(width: 10),
           ],
           Text(text),
+        ],
+      ),
+    );
+  }
+}
+
+class _ColorButton extends StatelessWidget {
+  const _ColorButton({
+    required this.onPressed,
+    required this.color,
+  });
+  final Function() onPressed;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        backgroundColor: color,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(50),
+        ),
+        minimumSize: Size.square(50),
+      ),
+      child: Icon(
+        Icons.check,
+        color: Theme.of(context).primaryColor == color
+            ? Colors.white
+            : Colors.transparent,
+      ),
+    );
+  }
+}
+
+class _ImageButton extends StatelessWidget {
+  const _ImageButton({
+    required this.onPressed,
+    required this.image,
+    required this.isSelected,
+  });
+  final Function() onPressed;
+  final String image;
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: onPressed,
+      style: TextButton.styleFrom(
+        padding: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(0),
+        ),
+        fixedSize: Size(100, 200),
+      ),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset(
+              image,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Center(
+            child: Icon(
+              Icons.check,
+              color: isSelected ? Colors.black : Colors.transparent,
+            ),
+          )
         ],
       ),
     );

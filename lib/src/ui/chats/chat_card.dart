@@ -6,7 +6,7 @@ import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:chatify/src/ui/common/image.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 
 class ChatRoomCard extends StatelessWidget {
@@ -22,7 +22,9 @@ class ChatRoomCard extends StatelessWidget {
       color: Colors.transparent,
       child: KrFutureBuilder<ChatifyUser?>(
         future: Chatify.config.getUserById(
-          chat.members.where((e) => e != Chatify.currentUserId).first,
+          chat.members
+              .where((e) => e != Chatify.currentUserId)
+              .firstWhere((_) => true, orElse: () => Chatify.currentUserId),
         ),
         onLoading: const ChatRoomBloc(),
         builder: (user) {
@@ -79,8 +81,8 @@ class ChatRoomCard extends StatelessWidget {
                                           '',
                                       style: TextStyle(
                                         height: 1,
-                                        color: ChatifyTheme.of(context)
-                                            .recentChatsForegroundColor
+                                        color: Chatify
+                                            .theme.recentChatsForegroundColor
                                             .withOpacity(.5),
                                         fontSize: 12,
                                       ),
@@ -106,7 +108,7 @@ class ChatRoomCard extends StatelessWidget {
                                           message?.message ?? '',
                                           style: TextStyle(
                                             height: 1.4,
-                                            color: ChatifyTheme.of(context)
+                                            color: Chatify.theme
                                                 .recentChatsForegroundColor
                                                 .withOpacity(.5),
                                           ),
@@ -132,8 +134,7 @@ class ChatRoomCard extends StatelessWidget {
                                         ),
                                         decoration: BoxDecoration(
                                           shape: BoxShape.circle,
-                                          color: ChatifyTheme.of(context)
-                                              .primaryColor,
+                                          color: Chatify.theme.primaryColor,
                                         ),
                                         alignment: Alignment.center,
                                         child: Text(

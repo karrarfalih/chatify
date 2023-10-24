@@ -1,5 +1,5 @@
 import 'dart:math' as math;
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
 import 'package:flutter/material.dart';
 
@@ -87,7 +87,7 @@ class _SingleNoise extends StatelessWidget {
       height: height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1000),
-        color: isMe ? Colors.white : ChatifyTheme.of(context).primaryColor,
+        color: isMe ? Colors.white : Chatify.theme.primaryColor,
       ),
     );
   }

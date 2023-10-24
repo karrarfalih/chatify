@@ -1,5 +1,5 @@
 import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/bottom_sheet.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
@@ -20,9 +20,7 @@ class ChatInputField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = ChatifyTheme.of(
-      context,
-    ).chatForegroundColor.withOpacity(0.5);
+    final iconColor = Chatify.theme.chatForegroundColor.withOpacity(0.5);
     return Row(
       children: [
         CircularButton(
@@ -78,25 +76,17 @@ class ChatInputField extends StatelessWidget {
             maxLines: 5,
             minLines: 1,
             style: TextStyle(
-              color: ChatifyTheme.of(
-                context,
-              ).chatForegroundColor,
+              color: Chatify.theme.chatForegroundColor,
             ),
-            onChanged: (x) {
-              controller.isTyping.value = x.isNotEmpty;
-            },
             focusNode: controller.focus,
             textInputAction: TextInputAction.newline,
             keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
-              fillColor: Colors.transparent,
-              filled: true,
+              filled: false,
               hintText: 'Message',
               hintStyle: TextStyle(
                 fontWeight: FontWeight.normal,
-                color: ChatifyTheme.of(
-                  context,
-                ).chatForegroundColor.withOpacity(0.4),
+                color: Chatify.theme.chatForegroundColor.withOpacity(0.4),
               ),
               isDense: true,
               enabledBorder: const OutlineInputBorder(
@@ -142,9 +132,7 @@ class ChatInputField extends StatelessWidget {
                           ],
                           child: Icon(
                             Iconsax.send_1,
-                            color: ChatifyTheme.of(
-                              context,
-                            ).primaryColor,
+                            color: Chatify.theme.primaryColor,
                             size: 26,
                           ),
                         ),

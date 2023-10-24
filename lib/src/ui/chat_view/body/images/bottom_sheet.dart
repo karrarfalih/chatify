@@ -1,5 +1,5 @@
 import 'package:chatify/src/const.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/camera_thumnail.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_preview.dart';
@@ -62,7 +62,7 @@ class _ChatImagesState extends State<_ChatImages> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     return Stack(
       children: [
         NotificationListener(
@@ -294,8 +294,8 @@ class _ChatImagesState extends State<_ChatImages> {
                                             height: 23,
                                             width: 23,
                                             decoration: BoxDecoration(
-                                              color: ChatifyTheme.of(context)
-                                                  .chatForegroundColor
+                                              color: Chatify
+                                                  .theme.chatForegroundColor
                                                   .withOpacity(0.07),
                                               border: Border.all(
                                                 color: Colors.white,

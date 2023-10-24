@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -133,8 +133,7 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
                       ),
                       TextButton(
                         style: TextButton.styleFrom(
-                          backgroundColor:
-                              ChatifyTheme.of(context).primaryColor,
+                          backgroundColor: Chatify.theme.primaryColor,
                           minimumSize: Size.zero,
                           padding: EdgeInsets.all(10),
                           shape: RoundedRectangleBorder(

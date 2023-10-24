@@ -5,7 +5,8 @@ import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/identical_list.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/uuid.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
+import 'package:firebase_database/firebase_database.dart' hide Query;
 
 class ChatifyDatasource {
   final instance = FirebaseFirestore.instance;
@@ -201,6 +202,71 @@ class ChatifyDatasource {
     return messagesQuery(roomId).limit(1).snapshots().map((event) {
       if (event.docs.isNotEmpty) return event.docs.first.data();
       return null;
+    });
+  }
+
+  Stream<UserLastSeen> getUserLastSeen(String userId, String chatId) {
+    return FirebaseDatabase.instance
+        .ref("users/$userId")
+        .onValue
+        .asBroadcastStream()
+        .map((event) {
+      final data = event.snapshot.value;
+      if (data is Map) {
+        return UserLastSeen(
+          isActive: data['isActive'] == true,
+          lastSeen: data['lastSeen'] == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(data['lastSeen']),
+          lastConnection: data['lastConnection'] == null
+              ? null
+              : DateTime.fromMillisecondsSinceEpoch(data['lastConnection']),
+        );
+      }
+      return UserLastSeen(isActive: false);
+    });
+  }
+
+  Stream<ChatStatus> getChatStatus(String userId, String chatId) {
+    return FirebaseDatabase.instance
+        .ref("users/$userId/chats/$chatId/status")
+        .onValue
+        .asBroadcastStream()
+        .map((event) {
+      final data = event.snapshot.value;
+      if (data is String) {
+        var chatStatus = ChatStatus.none;
+        chatStatus = ChatStatus.values.firstWhere(
+          (e) => e.name == data,
+          orElse: () => ChatStatus.none,
+        );
+        return chatStatus;
+      }
+      return ChatStatus.none;
+    });
+  }
+
+  updateChatStaus(ChatStatus status, String chatId) {
+    FirebaseDatabase.instance
+        .ref("users/${Chatify.currentUserId}/chats/$chatId")
+        .update({'status': status.name});
+  }
+
+  updateUserStaus(bool isOnline) {
+    FirebaseDatabase.instance
+        .ref("users/${Chatify.currentUserId}")
+        .runTransaction((value) {
+      if (value is Map) {
+        if (value['isActive'] == isOnline) {
+          return Transaction.abort();
+        }
+        value['isActive'] = isOnline;
+        value['lastSeen'] =
+            isOnline ? null : DateTime.now().millisecondsSinceEpoch;
+        if(!isOnline) value['chats'] = null;
+        return Transaction.success(value);
+      }
+      return Transaction.abort();
     });
   }
 }

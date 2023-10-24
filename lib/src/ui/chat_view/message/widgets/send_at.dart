@@ -1,5 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -22,7 +22,7 @@ class SendAtWidget extends StatelessWidget {
     final isTextOrVoice =
         message.type.isTextOrUnsupported || message.type.isVoice;
     final isVoice = message.type == MessageType.voice;
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     final iconColor = !isMine && isTextOrVoice
         ? theme.chatForegroundColor.withOpacity(
             isTextOrVoice || isVoice ? 0.7 : 1,

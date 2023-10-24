@@ -1,6 +1,6 @@
 import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:flutter/material.dart';
 
 class UserResultCard extends StatelessWidget {
@@ -35,7 +35,7 @@ class UserResultCard extends StatelessWidget {
             Text(
               user.name,
               style: TextStyle(
-                color: ChatifyTheme.of(context).recentChatsForegroundColor,
+                color: Chatify.theme.recentChatsForegroundColor,
                 fontSize: 16,
               ),
             )

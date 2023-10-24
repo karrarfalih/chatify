@@ -25,6 +25,14 @@ class ChatController {
   ChatController(this.chat) {
     keyboardController = KeyboardController(this);
     voiceController = VoiceRecordingController(this);
+    textController.addListener(() {
+      isTyping.value = textController.text.isNotEmpty;
+      if (isTyping.value) {
+        Chatify.datasource.updateChatStaus(ChatStatus.typing, chat.id);
+      } else {
+        Chatify.datasource.updateChatStaus(ChatStatus.none, chat.id);
+      }
+    });
   }
 
   late final KeyboardController keyboardController;
@@ -84,15 +92,14 @@ class ChatController {
       Chatify.datasource.addChat(chat);
     }
     messageAction.value = null;
-    isTyping.value = false;
     textController.clear();
   }
 
   sendImages(List<Medium> images) async {
+    Chatify.datasource.updateChatStaus(ChatStatus.sendingMedia, chat.id);
     final imgs = await getImages(images);
-    for (final img in imgs) {
-      _sendSingleImage(img);
-    }
+    await Future.wait(imgs.map((e) => _sendSingleImage(e)));
+    Chatify.datasource.updateChatStaus(ChatStatus.none, chat.id);
   }
 
   Future<void> _sendSingleImage(ImageAttachment img) async {

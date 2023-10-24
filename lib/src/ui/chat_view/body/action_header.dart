@@ -1,5 +1,5 @@
 import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
@@ -18,7 +18,7 @@ class MessageActionHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     MessageActionArgs? latsArgs;
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     return ValueListenableBuilder<MessageActionArgs?>(
       valueListenable: controller.messageAction,
       builder: (contex, value, child) {

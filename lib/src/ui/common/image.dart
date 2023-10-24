@@ -1,6 +1,6 @@
 import 'dart:typed_data';
 
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:flutter/material.dart';
@@ -104,7 +104,7 @@ class CustomImage extends StatelessWidget {
     if (_size == null) {
       return Center(
         child: LoadingWidget(
-          color: ChatifyTheme.of(context).primaryColor,
+          color: Chatify.theme.primaryColor,
           size: 40,
           lineWidth: 4,
         ),

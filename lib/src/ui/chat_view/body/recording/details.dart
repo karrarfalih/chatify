@@ -1,5 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +35,7 @@ class ChatRecordDetails extends StatelessWidget {
                   seconds.toDurationString,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: ChatifyTheme.of(context).chatForegroundColor,
+                    color: Chatify.theme.chatForegroundColor,
                   ),
                 );
               },
@@ -44,16 +44,14 @@ class ChatRecordDetails extends StatelessWidget {
           Icon(
             Icons.arrow_back_ios,
             size: 20,
-            color:
-                ChatifyTheme.of(context).chatForegroundColor.withOpacity(0.6),
+            color: Chatify.theme.chatForegroundColor.withOpacity(0.6),
           ),
           Text(
             'Slide to cancel',
             overflow: TextOverflow.clip,
             style: TextStyle(
               fontSize: 16,
-              color:
-                  ChatifyTheme.of(context).chatForegroundColor.withOpacity(0.7),
+              color: Chatify.theme.chatForegroundColor.withOpacity(0.7),
             ),
             maxLines: 1,
           ),

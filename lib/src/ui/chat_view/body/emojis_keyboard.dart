@@ -1,4 +1,4 @@
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
@@ -25,14 +25,7 @@ class EmojisKeyboard extends StatelessWidget {
         child: EmojiPicker(
           key: ValueKey('emojis'),
           textEditingController: controller.textController,
-          onBackspacePressed: () {
-            if (controller.textController.text.isEmpty) {
-              controller.isTyping.value = false;
-            }
-          },
-          onEmojiSelected: (category, emoji) {
-            controller.isTyping.value = true;
-          },
+          onBackspacePressed: () {},
           config: Config(
             columns: MediaQuery.of(context).size.width ~/ 45,
             emojiSizeMax: 24 *
@@ -44,17 +37,17 @@ class EmojisKeyboard extends StatelessWidget {
             gridPadding: EdgeInsets.zero,
             initCategory: Category.RECENT,
             bgColor: Theme.of(context).scaffoldBackgroundColor,
-            indicatorColor: ChatifyTheme.of(context).primaryColor,
+            indicatorColor: Chatify.theme.primaryColor,
             iconColor: Colors.grey,
-            iconColorSelected: ChatifyTheme.of(context).primaryColor,
-            backspaceColor: ChatifyTheme.of(context).primaryColor,
+            iconColorSelected: Chatify.theme.primaryColor,
+            backspaceColor: Chatify.theme.primaryColor,
             skinToneDialogBgColor: Theme.of(context).scaffoldBackgroundColor,
             skinToneIndicatorColor: Colors.grey,
             noRecents: Text(
               'No Recents',
               style: TextStyle(
                 fontSize: 20,
-                color: ChatifyTheme.of(context).chatForegroundColor,
+                color: Chatify.theme.chatForegroundColor,
               ),
               textAlign: TextAlign.center,
             ), // Needs to be const Widget

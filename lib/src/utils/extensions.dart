@@ -98,6 +98,29 @@ bool hasMatch(String? value, String pattern) {
 extension DateTimeFormat on DateTime {
   String fullDate(BuildContext context) =>
       format(context, 'MMM d, yyyy - HH:mm a');
+  String get ago {
+    int min = DateTime.now().difference(this).inMinutes;
+    int count = 0;
+    String text = '';
+    if (min == 0) {
+      return 'just now';
+    }
+    if (min < 60) {
+      count = max(min, 0);
+      text = 'm';
+    } else if (min < 60 * 24) {
+      count = min ~/ 60;
+      text = 'h';
+    } else if (min < 60 * 24 * 7) {
+      count = min ~/ (60 * 24);
+      text = 'd';
+    } else {
+      count = min ~/ (60 * 24 * 7);
+      text = 'w';
+    }
+    text = text;
+    return '$count $text ago';
+  }
 
   String format(BuildContext context, String format) {
     initializeDateFormatting();

@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
@@ -102,8 +102,7 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
                       ),
                       Container(
                         width: double.maxFinite,
-                        color: ChatifyTheme.of(context)
-                            .primaryColor
+                        color: Chatify.theme.primaryColor
                             .darken(0.6)
                             .withOpacity(0.7),
                         height: 35,
@@ -133,16 +132,19 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
                             SizedBox(
                               width: 4,
                             ),
-                            if(player.message.sendAt != null) Text(
-                              player.message.sendAt!.format(context, 'MMM EEE') +
-                                  ' at ' +
-                                  player.message.sendAt!.format(context, 'h:mm a'),
-                              style: TextStyle(
-                                color: Colors.white60,
-                                fontSize: 14,
-                                height: 1,
+                            if (player.message.sendAt != null)
+                              Text(
+                                player.message.sendAt!
+                                        .format(context, 'MMM EEE') +
+                                    ' at ' +
+                                    player.message.sendAt!
+                                        .format(context, 'h:mm a'),
+                                style: TextStyle(
+                                  color: Colors.white60,
+                                  fontSize: 14,
+                                  height: 1,
+                                ),
                               ),
-                            ),
                             Spacer(),
                             InkWell(
                               onTap: player.toggleSpeed,
@@ -168,8 +170,7 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: speed != 1
-                                            ? ChatifyTheme.of(context)
-                                                .primaryColor
+                                            ? Chatify.theme.primaryColor
                                             : Colors.white,
                                         height: 1,
                                       ),

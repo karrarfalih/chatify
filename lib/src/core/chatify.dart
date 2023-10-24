@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 class Chatify {
   static late ChatifyDatasource _datasource;
+  static late ChatifyThemeData theme;
 
   /// The current datasource for the Chatify library.
   static ChatifyDatasource get datasource {
@@ -59,7 +60,7 @@ class Chatify {
   }) async {
     _config = config;
     if (isInititialized) {
-      _removeConnectionHandler(currentUserId);
+      _removeConnectionHandler(_currentUserId);
     }
     _currentUserId = currentUserId;
     _setConnectionHandler(currentUserId);
@@ -77,16 +78,18 @@ class Chatify {
   static void _setConnectionHandler(String userId) {
     final ref = FirebaseDatabase.instance.ref("users/$userId");
     ref.onDisconnect().set({
-      'online': false,
-      'lastSeen': ServerValue.timestamp,
+      'isActive': false,
+      'lastConnection': ServerValue.timestamp,
+      'chats': null,
     });
     _onMessageAddedSubscription =
         FirebaseDatabase.instance.ref('.info/connected').onValue.listen(
       (event) {
         final isConnected = event.snapshot.value == true;
         ref.set({
-          'online': isConnected,
-          'lastSeen': ServerValue.timestamp,
+          'isActive': isConnected,
+          'lastConnection': ServerValue.timestamp,
+          if(!isConnected) 'chats': null,
         });
         ChatifyLog.d('User ${isConnected ? 'connected' : 'disconnected'}.');
       },

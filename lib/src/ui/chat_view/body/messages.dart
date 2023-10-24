@@ -1,13 +1,16 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
+import 'package:chatify/src/ui/common/expanded_section.dart';
+import 'package:chatify/src/ui/common/image.dart';
+import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
 import 'package:flutter/rendering.dart';
+import 'package:lottie/lottie.dart';
 
 class ChatMessages extends StatefulWidget {
   const ChatMessages({
@@ -181,6 +184,42 @@ class _ChatMessagesState extends State<ChatMessages> {
                           user: widget.user,
                           linkedWithBottom: false,
                           linkedWithTop: msg.isMine,
+                        ),
+                      if (i == 0)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                          child: KrStreamBuilder<ChatStatus>(
+                            stream: Chatify.datasource.getChatStatus(
+                              widget.user.id,
+                              widget.chat.id,
+                            ),
+                            builder: (status) {
+                              return KrExpandedSection(
+                                expand: status != ChatStatus.none,
+                                duration: Duration(milliseconds: 600),
+                                child: AnimatedSwitcher(
+                                  duration: Duration(milliseconds: 600),
+                                  switchInCurve: Curves.easeOutQuad,
+                                  switchOutCurve: Curves.easeInQuad,
+                                  transitionBuilder: (child, animation) {
+                                    return FadeTransition(
+                                      opacity: animation,
+                                      child: ScaleTransition(
+                                        scale: animation,
+                                        alignment: Alignment.bottomLeft,
+                                        child: child,
+                                      ),
+                                    );
+                                  },
+                                  child: getUserChatStatusWidget(
+                                    context,
+                                    status,
+                                    widget.user,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
                         )
                     ],
                   ),
@@ -195,7 +234,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                     Text(
                       'Say Hi',
                       style: TextStyle(
-                        color: ChatifyTheme.of(context).chatForegroundColor,
+                        color: Chatify.theme.chatForegroundColor,
                       ),
                     ),
                   ],
@@ -217,6 +256,144 @@ class _ChatMessagesState extends State<ChatMessages> {
         },
       ),
     );
+  }
+
+  getUserChatStatusWidget(
+    BuildContext context,
+    ChatStatus status,
+    ChatifyUser user,
+  ) {
+    switch (status) {
+      case ChatStatus.typing:
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Row(
+            key: ValueKey('typing_user_status'),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CustomImage(
+                url: user.profileImage,
+                width: 30,
+                height: 30,
+                radius: 30,
+                fit: BoxFit.cover,
+                onError: const Icon(Icons.person, color: Colors.grey),
+              ),
+              SizedBox(
+                width: 6,
+              ),
+              Lottie.asset(
+                'assets/lottie/typing.json',
+                package: 'chatify',
+                fit: BoxFit.fitHeight,
+                height: 18,
+                delegates: LottieDelegates(
+                  values: [
+                    ValueDelegate.color(
+                      const ['**'],
+                      value: Colors.green,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      case ChatStatus.recording:
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Row(
+            key: ValueKey('recording_user_status'),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CustomImage(
+                url: user.profileImage,
+                width: 30,
+                height: 30,
+                radius: 30,
+                fit: BoxFit.cover,
+                onError: const Icon(Icons.person, color: Colors.grey),
+              ),
+              SizedBox(
+                width: 6,
+              ),
+              Transform.scale(
+                scale: 1.4,
+                child: Lottie.asset(
+                  'assets/lottie/recording.json',
+                  package: 'chatify',
+                  fit: BoxFit.fitHeight,
+                  height: 30,
+                  delegates: LottieDelegates(
+                    values: [
+                      ValueDelegate.color(
+                        const ['**'],
+                        value: Colors.green,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      case ChatStatus.sendingMedia:
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Row(
+            key: ValueKey('sending_media_user_status'),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CustomImage(
+                url: user.profileImage,
+                width: 30,
+                height: 30,
+                radius: 30,
+                fit: BoxFit.cover,
+                onError: const Icon(Icons.person, color: Colors.grey),
+              ),
+              SizedBox(
+                width: 6,
+              ),
+              Lottie.asset(
+                'assets/lottie/three_dots.json',
+                package: 'chatify',
+                height: 30,
+                delegates: LottieDelegates(
+                  values: [
+                    ValueDelegate.color(
+                      const ['**'],
+                      value: Colors.green,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      case ChatStatus.attend:
+        return Padding(
+          padding: const EdgeInsets.only(top: 5),
+          child: Row(
+            key: ValueKey('attend_user_status'),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              CustomImage(
+                url: user.profileImage,
+                width: 30,
+                height: 30,
+                radius: 30,
+                fit: BoxFit.cover,
+                onError: const Icon(Icons.person, color: Colors.grey),
+              ),
+            ],
+          ),
+        );
+      case ChatStatus.none:
+        return SizedBox(
+          key: ValueKey('none_user_status'),
+        );
+    }
   }
 }
 

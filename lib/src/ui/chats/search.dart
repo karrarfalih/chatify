@@ -1,4 +1,4 @@
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/chatify.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -9,7 +9,7 @@ class ChatSearch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = ChatifyTheme.of(context);
+    final theme = Chatify.theme;
     return Container(
       height: 55,
       color: Colors.transparent,

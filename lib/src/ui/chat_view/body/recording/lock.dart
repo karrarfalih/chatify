@@ -1,4 +1,4 @@
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -28,9 +28,7 @@ class RecordingLock extends StatelessWidget {
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: ChatifyTheme.of(context)
-                      .chatForegroundColor
-                      .withOpacity(0.3),
+                  color: Chatify.theme.chatForegroundColor.withOpacity(0.3),
                   blurRadius: 2,
                 )
               ],
@@ -62,7 +60,7 @@ class RecordingLock extends StatelessWidget {
                       : Icon(
                           Iconsax.lock5,
                           key: ValueKey('lock_icon'),
-                          color: ChatifyTheme.of(context).chatForegroundColor,
+                          color: Chatify.theme.chatForegroundColor,
                         ),
                 );
               },

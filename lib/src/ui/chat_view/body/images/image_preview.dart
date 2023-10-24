@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/body/images/input_field.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
@@ -301,8 +301,7 @@ class _GalleryImagePreviewState extends State<GalleryImagePreview> {
                                     width: 32,
                                     decoration: BoxDecoration(
                                       color: isSelected
-                                          ? ChatifyTheme.of(context)
-                                              .primaryColor
+                                          ? Chatify.theme.primaryColor
                                           : null,
                                       shape: BoxShape.circle,
                                       border: Border.all(

@@ -1,4 +1,4 @@
-import 'package:chatify/src/theme/theme_widget.dart';
+import 'package:chatify/src/core/chatify.dart';
 import 'package:flutter/material.dart';
 
 class LoadingWidget extends StatelessWidget {
@@ -21,7 +21,7 @@ class LoadingWidget extends StatelessWidget {
       child: CircularProgressIndicator(
         backgroundColor: Colors.transparent,
         strokeWidth: lineWidth,
-        color: color ?? ChatifyTheme.of(context).primaryColor,
+        color: color ?? Chatify.theme.primaryColor,
       ),
     );
   }

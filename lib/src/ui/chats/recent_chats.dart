@@ -1,6 +1,5 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/chat.dart';
-import 'package:chatify/src/theme/theme_widget.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -38,9 +37,8 @@ class RecentChats extends StatelessWidget {
             children: [
               Icon(
                 CupertinoIcons.chat_bubble,
-                color: ChatifyTheme.of(context)
-                    .recentChatsForegroundColor
-                    .withOpacity(0.7),
+                color:
+                    Chatify.theme.recentChatsForegroundColor.withOpacity(0.7),
                 size: 50,
               ),
               const SizedBox(
@@ -49,9 +47,8 @@ class RecentChats extends StatelessWidget {
               Text(
                 'No messages',
                 style: TextStyle(
-                  color: ChatifyTheme.of(context)
-                      .recentChatsForegroundColor
-                      .withOpacity(0.8),
+                  color:
+                      Chatify.theme.recentChatsForegroundColor.withOpacity(0.8),
                   fontSize: 16,
                 ),
               ),
