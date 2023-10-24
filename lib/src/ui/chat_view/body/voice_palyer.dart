@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui';
 
 import 'package:chatify/src/core/chatify.dart';
@@ -25,9 +26,20 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
     playPauseController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
-      value: 1,
+      value: VoicePlayerController.currentPlayer.value?.player.playing ?? false
+          ? 1
+          : 0,
     );
     super.initState();
+  }
+
+  StreamSubscription? _subscription;
+
+  @override
+  void dispose() {
+    _subscription?.cancel();
+    playPauseController.dispose();
+    super.dispose();
   }
 
   @override
@@ -36,11 +48,10 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
     return ValueListenableBuilder<VoicePlayerController?>(
       valueListenable: VoicePlayerController.currentPlayer,
       builder: (context, player, child) {
-        player?.playPauseController?.addListener(() {
-          if (VoicePlayerController.currentPlayer.value?.player.playing ??
-              false) {
+        _subscription ??= player?.player.playingStream.listen((value) {
+          if (value && !playPauseController.isCompleted) {
             playPauseController.forward();
-          } else {
+          } else if (!value && !playPauseController.isDismissed) {
             playPauseController.reverse();
           }
         });

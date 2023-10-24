@@ -27,6 +27,11 @@ class VoiceRecordingController {
   record() async {
     if (isRecording.value) return;
     _record = AudioRecorder();
+    final inputs = await _record.listInputDevices();
+    if (inputs.isEmpty) {
+      showToast('No microphone found');
+      return;
+    }
     Chatify.datasource
         .updateChatStaus(ChatStatus.recording, controller.chat.id);
     isRecording.value = true;
@@ -59,7 +64,10 @@ class VoiceRecordingController {
     await dir.create(recursive: true);
     await _record.start(
       RecordConfig(
-        encoder: AudioEncoder.aacLc,
+        // encoder: AudioEncoder.aacLc,
+        noiseSuppress: true,
+        autoGain: true,
+        echoCancel: true,
       ),
       path: '${documents.path}/recorded_voices/${Uuid.generate()}.aac',
     );
@@ -179,10 +187,9 @@ class VoiceRecordingController {
     _timer?.cancel();
     _micRadiusTimer?.cancel();
     _micLockTimer?.cancel();
-    _record.dispose();
     isRecording.dispose();
+    if (isRecording.value) stopRecord(false);
     seconds.dispose();
-    _record.dispose();
     micRadius.dispose();
     micPos.dispose();
     micLockPos.dispose();

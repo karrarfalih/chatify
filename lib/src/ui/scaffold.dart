@@ -1,4 +1,5 @@
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
 import 'package:chatify/src/ui/chats/new_chat/new_chat.dart';
 import 'package:chatify/src/ui/chats/search.dart';
 import 'package:chatify/src/utils/context_provider.dart';
@@ -85,14 +86,15 @@ class ChatScreen extends StatelessWidget {
         ],
       ),
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: const Padding(
-        padding: EdgeInsetsDirectional.only(top: 10),
-        child: Column(
-          children: [
-            ChatSearch(),
-            Expanded(child: RecentChats()),
-          ],
-        ),
+      body: Column(
+        children: [
+          Padding(
+            padding: EdgeInsets.only(bottom: 5),
+            child: CurrentVoicePlayer(),
+          ),
+          ChatSearch(),
+          Expanded(child: RecentChats()),
+        ],
       ),
     );
   }

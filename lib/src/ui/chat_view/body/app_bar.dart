@@ -194,10 +194,6 @@ class ChatAppBar extends StatelessWidget {
                                       chatController.chat.id,
                                     ),
                                     onLoading: SizedBox.shrink(),
-                                    onError: (e) {
-                                      print(e);
-                                      return SizedBox.shrink();
-                                    },
                                     builder: (user) {
                                       return KrExpandedSection(
                                         expand: true,

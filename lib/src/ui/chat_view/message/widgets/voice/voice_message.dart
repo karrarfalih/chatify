@@ -87,6 +87,15 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
   }
 
   @override
+  void dispose() {
+    player.playPauseController?.dispose();
+    player.playPauseController = null;
+    player.progressController?.dispose();
+    player.progressController = null;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -140,6 +149,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
             child: ValueListenableBuilder<VoiceStatus>(
               valueListenable: player.status,
               builder: (context, status, child) {
+                final color = isMe ? widget.meBgColor : widget.contactBgColor;
                 if (attachment != null) {
                   return GestureDetector(
                     onTap: () {
@@ -162,9 +172,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                               child: CircularProgressIndicator(
                                 value: 1,
                                 strokeWidth: 2.5,
-                                color: isMe
-                                    ? widget.meBgColor
-                                    : widget.contactBgColor,
+                                color: color,
                               ),
                             ),
                             builder: (snapshot) {
@@ -176,15 +184,16 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                                   value: snapshot.bytesTransferred /
                                       snapshot.totalBytes,
                                   strokeWidth: 2.5,
-                                  color: isMe
-                                      ? widget.meBgColor
-                                      : widget.contactBgColor,
+                                  color: color,
                                 ),
                               );
                             },
                           ),
                         ),
-                        Icon(Icons.close_rounded),
+                        Icon(
+                          Icons.close_rounded,
+                          color: color,
+                        ),
                       ],
                     ),
                   );
@@ -208,15 +217,16 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                                 child: CircularProgressIndicator(
                                   value: progress,
                                   strokeWidth: 2.5,
-                                  color: isMe
-                                      ? widget.meBgColor
-                                      : widget.contactBgColor,
+                                  color: color,
                                 ),
                               );
                             },
                           ),
                         ),
-                        Icon(Icons.close_rounded),
+                        Icon(
+                          Icons.close_rounded,
+                          color: color,
+                        ),
                       ],
                     ),
                   );
@@ -230,24 +240,31 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                         height: 40,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
-                          color:
-                              isMe ? widget.meBgColor : widget.contactBgColor,
+                          color: color,
                         ),
                       ),
-                      Center(child: Icon(Icons.close_rounded)),
+                      Center(
+                        child: Icon(
+                          Icons.close_rounded,
+                          color: color,
+                        ),
+                      ),
                     ],
                   );
                 }
                 if (status == VoiceStatus.dowload) {
-                  return Center(child: Icon(Icons.download_sharp));
+                  return Center(
+                    child: Icon(
+                      Icons.download_sharp,
+                      color: color,
+                    ),
+                  );
                 }
                 return Center(
                   child: AnimatedIcon(
                     icon: AnimatedIcons.play_pause,
                     progress: player.playPauseController!,
-                    color: isMe
-                        ? widget.mePlayIconColor
-                        : widget.contactPlayIconColor,
+                    color: color,
                     size: 22,
                   ),
                 );

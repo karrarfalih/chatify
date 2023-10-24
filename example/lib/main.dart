@@ -66,131 +66,126 @@ class _MyAppState extends State<MyApp> {
           primaryColor: primary,
           backgroundImage: image,
         ),
-        child: Builder(
-          builder: (context) {
-            print(Chatify.theme.backgroundImage);
-            return Scaffold(
-              appBar: AppBar(
-                title: const Text('Chatify Demo'),
-                actions: [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10),
-                    child: StreamBuilder(
-                      stream: Chatify.unreadMessagesCount,
-                      builder: (context, snapshot) {
-                        int count = 0;
-                        if (snapshot.hasData) {
-                          count = snapshot.data as int;
-                        }
-                        return Badge(
-                          label: Text(
-                            count.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                            ),
-                          ),
-                          isLabelVisible: count > 0,
-                          padding: EdgeInsets.symmetric(horizontal: 7),
-                          largeSize: 20,
-                          backgroundColor: Colors.red,
-                          offset: Offset(-3, 3),
-                          child: IconButton(
-                            onPressed: () {
-                              Chatify.openAllChats(context);
-                            },
-                            icon: const Icon(CupertinoIcons.chat_bubble_text),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              body: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: ListView(
-                  children: [
-                    SizedBox(height: 20),
-                    Center(child: Text('Select Current User')),
-                    SizedBox(height: 10),
-                    SizedBox(
-                      width: double.maxFinite,
-                      child: Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 10,
-                        runSpacing: 10,
-                        children: users
-                            .map(
-                              (e) => _UserButton(
-                                user: e,
-                                onChanged: () => setState(() {}),
-                              ),
-                            )
-                            .toList(),
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text('Chatify Demo'),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                child: StreamBuilder(
+                  stream: Chatify.unreadMessagesCount,
+                  builder: (context, snapshot) {
+                    int count = 0;
+                    if (snapshot.hasData) {
+                      count = snapshot.data as int;
+                    }
+                    return Badge(
+                      label: Text(
+                        count.toString(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 20),
-                    _MainButton(
-                      onPressed: () {
-                        setState(() {
-                          _brightness = _brightness == Brightness.dark
-                              ? Brightness.light
-                              : Brightness.dark;
-                        });
-                      },
-                      text: 'Change Brightness',
-                      icon: CupertinoIcons.moon,
-                    ),
-                    _MainButton(
-                      onPressed: () {
-                        setState(() {
-                          isLTR = !isLTR;
-                        });
-                      },
-                      text: 'Change Direction',
-                      icon: Icons.language_outlined,
-                    ),
-                    SizedBox(height: 20),
-                    Wrap(
-                      spacing: 10,
-                      runSpacing: 10,
-                      alignment: WrapAlignment.center,
-                      children: Colors.primaries
-                          .map(
-                            (e) => _ColorButton(
-                              onPressed: () {
-                                setState(() {
-                                  primary = e;
-                                });
-                              },
-                              color: e,
-                            ),
-                          )
-                          .toList(),
-                    ),
-                    SizedBox(height: 20),
-                    Wrap(
-                        spacing: 10,
-                        runSpacing: 10,
-                        alignment: WrapAlignment.center,
-                        children: List.generate(
-                          4,
-                          (i) => _ImageButton(
-                            onPressed: () {
-                              setState(() {
-                                image = 'assets/chat_background/${i + 1}.jpg';
-                              });
-                            },
-                            isSelected:
-                                image == 'assets/chat_background/${i + 1}.jpg',
-                            image: 'assets/chat_background/${i + 1}.jpg',
-                          ),
-                        )),
-                  ],
+                      isLabelVisible: count > 0,
+                      padding: EdgeInsets.symmetric(horizontal: 7),
+                      largeSize: 20,
+                      backgroundColor: Colors.red,
+                      offset: Offset(-3, 3),
+                      child: IconButton(
+                        onPressed: () {
+                          Chatify.openAllChats(context);
+                        },
+                        icon: const Icon(CupertinoIcons.chat_bubble_text),
+                      ),
+                    );
+                  },
                 ),
               ),
-            );
-          },
+            ],
+          ),
+          body: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: ListView(
+              children: [
+                SizedBox(height: 20),
+                Center(child: Text('Select Current User')),
+                SizedBox(height: 10),
+                SizedBox(
+                  width: double.maxFinite,
+                  child: Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 10,
+                    runSpacing: 10,
+                    children: users
+                        .map(
+                          (e) => _UserButton(
+                            user: e,
+                            onChanged: () => setState(() {}),
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
+                SizedBox(height: 20),
+                _MainButton(
+                  onPressed: () {
+                    setState(() {
+                      _brightness = _brightness == Brightness.dark
+                          ? Brightness.light
+                          : Brightness.dark;
+                    });
+                  },
+                  text: 'Change Brightness',
+                  icon: CupertinoIcons.moon,
+                ),
+                _MainButton(
+                  onPressed: () {
+                    setState(() {
+                      isLTR = !isLTR;
+                    });
+                  },
+                  text: 'Change Direction',
+                  icon: Icons.language_outlined,
+                ),
+                SizedBox(height: 20),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
+                  children: Colors.primaries
+                      .map(
+                        (e) => _ColorButton(
+                          onPressed: () {
+                            setState(() {
+                              primary = e;
+                            });
+                          },
+                          color: e,
+                        ),
+                      )
+                      .toList(),
+                ),
+                SizedBox(height: 20),
+                Wrap(
+                    spacing: 10,
+                    runSpacing: 10,
+                    alignment: WrapAlignment.center,
+                    children: List.generate(
+                      4,
+                      (i) => _ImageButton(
+                        onPressed: () {
+                          setState(() {
+                            image = 'assets/chat_background/${i + 1}.jpg';
+                          });
+                        },
+                        isSelected:
+                            image == 'assets/chat_background/${i + 1}.jpg',
+                        image: 'assets/chat_background/${i + 1}.jpg',
+                      ),
+                    )),
+              ],
+            ),
+          ),
         ),
       ),
     );

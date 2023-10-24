@@ -146,6 +146,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                   widget.controller.pendingMessages.refresh();
                 }
                 return SelectableMessage(
+                  key: ValueKey('selectable message $i ${msg.id}'),
                   index: i,
                   message: msg,
                   child: Column(
@@ -189,10 +190,12 @@ class _ChatMessagesState extends State<ChatMessages> {
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 12),
                           child: KrStreamBuilder<ChatStatus>(
+                            key: ValueKey('chat status'),
                             stream: Chatify.datasource.getChatStatus(
                               widget.user.id,
                               widget.chat.id,
                             ),
+                            onLoading: SizedBox.shrink(),
                             builder: (status) {
                               return KrExpandedSection(
                                 expand: status != ChatStatus.none,
