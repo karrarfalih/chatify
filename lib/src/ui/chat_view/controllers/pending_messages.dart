@@ -9,16 +9,14 @@ class PendingMessagesHandler {
   PendingMessagesHandler({
     required Chat chat,
   }) : _chat = chat {
-    messages = Rx<List<Message>>(
-      _PendingMessagesCache[_chat.id] ?? _loadFromCache(),
-    );
+    messages = Rx<List<Message>>(_loadFromCache());
   }
 
   final Chat _chat;
 
   late final Rx<List<Message>> messages;
 
-  static final _PendingMessagesCache = <String, List<Message>>{};
+  static final _memoryCache = <String, List<Message>>{};
 
   add(Message message) {
     messages
@@ -35,10 +33,12 @@ class PendingMessagesHandler {
   }
 
   removeById(String id) {
-    messages
-      ..value.removeWhere((element) => element.id == id)
-      ..refresh();
-    _updateCache();
+    if (messages.value.any((e) => e.id == id)) {
+      messages
+        ..value.removeWhere((e) => e.id == id)
+        ..refresh();
+      _updateCache();
+    }
   }
 
   _updateCache() {
@@ -48,15 +48,19 @@ class PendingMessagesHandler {
         {
           _chat.id: messages.value.whereType<TextMessage>().map((e) {
             final json = e.toJson
-              ..removeWhere((key, value) => value is Timestamp || value is FieldValue);
+              ..removeWhere(
+                (key, value) => value is Timestamp || value is FieldValue,
+              );
             return json;
           }).toList(),
         },
       ),
     );
+    _memoryCache[_chat.id] = messages.value;
   }
 
   List<Message> _loadFromCache() {
+    if(_memoryCache[_chat.id] != null) return _memoryCache[_chat.id]!;
     final cache = Cache.instance.getString('pendingMessages');
     if (cache == null) return [];
     final json = jsonDecode(cache);
@@ -67,9 +71,9 @@ class PendingMessagesHandler {
 
   dispose() {
     if (messages.value.isNotEmpty) {
-      _PendingMessagesCache[_chat.id] = messages.value;
+      _memoryCache[_chat.id] = messages.value;
     } else {
-      _PendingMessagesCache.remove(_chat.id);
+      _memoryCache.remove(_chat.id);
     }
     messages.dispose();
   }

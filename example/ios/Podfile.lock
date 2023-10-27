@@ -643,6 +643,9 @@ PODS:
     - firebase_core
     - Flutter
     - nanopb (< 2.30910.0, >= 2.30908.0)
+  - connectivity_plus (0.0.1):
+    - Flutter
+    - ReachabilitySwift
   - device_info_plus (0.0.1):
     - Flutter
   - emoji_picker_flutter (0.0.1):
@@ -810,6 +813,7 @@ PODS:
   - photo_gallery (0.0.1):
     - Flutter
   - PromisesObjC (2.3.1)
+  - ReachabilitySwift (5.0.0)
   - record (0.0.1):
     - Flutter
   - SDWebImage (5.18.1):
@@ -824,6 +828,8 @@ PODS:
   - sqflite (0.0.3):
     - Flutter
     - FMDB (>= 2.7.5)
+  - url_launcher_ios (0.0.1):
+    - Flutter
   - vibration (1.7.5):
     - Flutter
 
@@ -831,6 +837,7 @@ DEPENDENCIES:
   - audio_session (from `.symlinks/plugins/audio_session/ios`)
   - camera_avfoundation (from `.symlinks/plugins/camera_avfoundation/ios`)
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
+  - connectivity_plus (from `.symlinks/plugins/connectivity_plus/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - emoji_picker_flutter (from `.symlinks/plugins/emoji_picker_flutter/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -846,6 +853,7 @@ DEPENDENCIES:
   - record (from `.symlinks/plugins/record/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
   - vibration (from `.symlinks/plugins/vibration/ios`)
 
 SPEC REPOS:
@@ -871,6 +879,7 @@ SPEC REPOS:
     - Mantle
     - nanopb
     - PromisesObjC
+    - ReachabilitySwift
     - SDWebImage
     - SDWebImageWebPCoder
 
@@ -881,6 +890,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/camera_avfoundation/ios"
   cloud_firestore:
     :path: ".symlinks/plugins/cloud_firestore/ios"
+  connectivity_plus:
+    :path: ".symlinks/plugins/connectivity_plus/ios"
   device_info_plus:
     :path: ".symlinks/plugins/device_info_plus/ios"
   emoji_picker_flutter:
@@ -911,6 +922,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
   vibration:
     :path: ".symlinks/plugins/vibration/ios"
 
@@ -920,6 +933,7 @@ SPEC CHECKSUMS:
   BoringSSL-GRPC: 3175b25143e648463a56daeaaa499c6cb86dad33
   camera_avfoundation: 3125e8cd1a4387f6f31c6c63abb8a55892a9eeeb
   cloud_firestore: 9c9fb3500360c9b338e9eb2fec40b38e7a004cac
+  connectivity_plus: bf0076dd84a130856aa636df1c71ccaff908fa1d
   device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
   emoji_picker_flutter: fe2e6151c5b548e975d546e6eeb567daf0962a58
   Firebase: 66043bd4579e5b73811f96829c694c7af8d67435
@@ -951,13 +965,15 @@ SPEC CHECKSUMS:
   permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
   photo_gallery: 9f95e57747cd22c10676ece3660d1ffe6c603ee5
   PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   record: cae05d8dd3cdb1dea3511b20e5a5811a1ae00d0d
   SDWebImage: ebdbcebc7933a45226d9313bd0118bc052ad458b
   SDWebImageWebPCoder: af09429398d99d524cae2fe00f6f0f6e491ed102
   shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
+  url_launcher_ios: 68d46cc9766d0c41dbdc884310529557e3cd7a86
   vibration: 7d883d141656a1c1a6d8d238616b2042a51a1241
 
-PODFILE CHECKSUM: 395c8476a64c9dea4fe73abcb979b6fe9eff5cfc
+PODFILE CHECKSUM: 1db15ea75f6885186c5e614006b4e83803877047
 
 COCOAPODS: 1.12.1

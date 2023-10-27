@@ -139,10 +139,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                         );
                   showTime = d.toString() != prevD.toString();
                 }
-                if (widget.controller.pending.messages.value
-                    .any((e) => e.id == msg.id)) {
-                  widget.controller.pending.removeById(msg.id);
-                }
+                widget.controller.pending.removeById(msg.id);
                 return SelectableMessage(
                   key: ValueKey('selectable message $i ${msg.id}'),
                   index: i,

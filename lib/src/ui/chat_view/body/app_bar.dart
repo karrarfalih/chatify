@@ -1,8 +1,11 @@
+import 'dart:io';
 import 'dart:ui';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/animated_flip_counter.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
+import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
 import 'package:chatify/src/ui/common/image.dart';
@@ -13,22 +16,17 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
 
-class ChatAppBar extends StatefulWidget {
+class ChatAppBar extends StatelessWidget {
   const ChatAppBar({
     super.key,
     required this.user,
     required this.chatController,
+    required this.connectivity,
   });
 
   final ChatifyUser user;
   final ChatController chatController;
-
-  @override
-  State<ChatAppBar> createState() => _ChatAppBarState();
-}
-
-class _ChatAppBarState extends State<ChatAppBar> {
-  UserLastSeen? lastSeen;
+  final ChatifyConnectivity connectivity;
 
   @override
   Widget build(BuildContext context) {
@@ -37,10 +35,11 @@ class _ChatAppBarState extends State<ChatAppBar> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
         child: ValueListenableBuilder<Map<String, Message>>(
-          valueListenable: widget.chatController.selecetdMessages,
+          valueListenable: chatController.selecetdMessages,
           builder: (context, selecetdMessages, child) {
             return Container(
-              padding: const EdgeInsets.only(bottom: 10, top: 16),
+              padding:
+                  EdgeInsets.only(bottom: 10, top: Platform.isIOS ? 0 : 16),
               decoration: BoxDecoration(
                 color: selecetdMessages.isEmpty
                     ? (theme.isChatDark ? Colors.black : Colors.white)
@@ -67,7 +66,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
                             InkWell(
                               highlightColor: Colors.transparent,
                               onTap: () {
-                                widget.chatController.selecetdMessages
+                                chatController.selecetdMessages
                                   ..value.clear()
                                   ..refresh();
                               },
@@ -113,7 +112,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
                                   textOK: 'Delete',
                                   textCancel: 'Cacnel',
                                   showDeleteForAll: true,
-                                  isKeyboardShown: widget.chatController
+                                  isKeyboardShown: chatController
                                       .keyboardController.isKeybaordOpen,
                                 );
                                 if (deleteForAll == null) return;
@@ -128,7 +127,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
                                     );
                                   }
                                 }
-                                widget.chatController.selecetdMessages
+                                chatController.selecetdMessages
                                   ..value.clear()
                                   ..refresh();
                               },
@@ -173,12 +172,11 @@ class _ChatAppBarState extends State<ChatAppBar> {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () =>
-                          Chatify.config.onUserClick?.call(widget.user),
+                      onTap: () => Chatify.config.onUserClick?.call(user),
                       child: Row(
                         children: [
                           CustomImage(
-                            url: widget.user.profileImage,
+                            url: user.profileImage,
                             width: 44,
                             height: 44,
                             radius: 45,
@@ -196,7 +194,7 @@ class _ChatAppBarState extends State<ChatAppBar> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  widget.user.name,
+                                  user.name,
                                   style: TextStyle(
                                     color: theme.chatForegroundColor,
                                     fontSize: 16,
@@ -204,20 +202,10 @@ class _ChatAppBarState extends State<ChatAppBar> {
                                 ),
                                 SizedBox(
                                   height: 15,
-                                  child: KrStreamBuilder<UserLastSeen>(
-                                    stream: Chatify.datasource.getUserLastSeen(
-                                      widget.user.id,
-                                      widget.chatController.chat.id,
-                                    ),
-                                    onLoading: lastSeen != null
-                                        ? _UserStatusWidget(user: lastSeen!)
-                                        : SizedBox.shrink(),
-                                    builder: (user) {
-                                      lastSeen = user;
-                                      return _UserStatusWidget(
-                                        user: user,
-                                      );
-                                    },
+                                  child: _UserStatus(
+                                    chatController: chatController,
+                                    user: user,
+                                    connectivity: connectivity,
                                   ),
                                 ),
                               ],
@@ -256,18 +244,18 @@ class _ChatAppBarState extends State<ChatAppBar> {
                             textOK: 'Delete',
                             textCancel: 'Cacnel',
                             showDeleteForAll: true,
-                            isKeyboardShown: widget.chatController
+                            isKeyboardShown: chatController
                                 .keyboardController.isKeybaordOpen,
                           );
                           if (deleteForAll == null) return;
                           if (deleteForAll == true) {
                             Chatify.datasource.deleteChatForAll(
-                              widget.chatController.chat.id,
+                              chatController.chat.id,
                             );
                             Navigator.pop(context);
                           } else if (deleteForAll == false) {
                             Chatify.datasource
-                                .deleteChatForMe(widget.chatController.chat.id);
+                                .deleteChatForMe(chatController.chat.id);
                             Navigator.pop(context);
                           }
                         },
@@ -293,44 +281,112 @@ class _ChatAppBarState extends State<ChatAppBar> {
   }
 }
 
-class _UserStatusWidget extends StatelessWidget {
-  const _UserStatusWidget({
+class _UserStatus extends StatelessWidget {
+  const _UserStatus({
+    required this.chatController,
     required this.user,
+    required this.connectivity,
   });
-
-  final UserLastSeen user;
+  final ChatController chatController;
+  final ChatifyUser user;
+  final ChatifyConnectivity connectivity;
 
   @override
   Widget build(BuildContext context) {
-    return KrExpandedSection(
-      key: ValueKey(user.isActive),
-      expand: true,
-      child: Column(
-        key: ValueKey('none_user_status'),
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+    return KrStreamBuilder<ConnectivityStatus>(
+      stream: connectivity.connection,
+      onLoading: SizedBox.shrink(),
+      builder: (connectionStatus) {
+        if (connectionStatus == ConnectivityStatus.waiting) {
+          return Row(
             children: [
-              if (user.isActive)
-                Container(
-                  height: 8,
-                  width: 8,
-                  margin: EdgeInsetsDirectional.only(
-                    end: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.green,
-                  ),
+              LoadingWidget(
+                size: 10,
+                lineWidth: 1,
+                color: Chatify.theme.chatForegroundColor.withOpacity(
+                  0.5,
                 ),
-              TimerRefresher(
-                lastSeen: user.lastSeen,
-                isActive: user.isActive,
+              ),
+              SizedBox(
+                width: 6,
+              ),
+              Text(
+                'Waiting connection...',
+                style: TextStyle(
+                  color: Chatify.theme.chatForegroundColor.withOpacity(
+                    0.5,
+                  ),
+                  fontSize: 11,
+                  height: 1,
+                ),
               ),
             ],
+          );
+        } else if (connectionStatus == ConnectivityStatus.connecting)
+          return Row(
+            children: [
+              LoadingWidget(
+                size: 10,
+                lineWidth: 1,
+                color: Chatify.theme.chatForegroundColor.withOpacity(
+                  0.5,
+                ),
+              ),
+              SizedBox(
+                width: 6,
+              ),
+              Text(
+                'Connecting...',
+                style: TextStyle(
+                  color: Chatify.theme.chatForegroundColor.withOpacity(
+                    0.5,
+                  ),
+                  fontSize: 11,
+                  height: 1,
+                ),
+              ),
+            ],
+          );
+        return KrStreamBuilder<UserLastSeen>(
+          stream: Chatify.datasource.getUserLastSeen(
+            user.id,
+            chatController.chat.id,
           ),
-        ],
-      ),
+          onLoading: SizedBox.shrink(),
+          builder: (user) {
+            return KrExpandedSection(
+              key: ValueKey(user.isActive),
+              expand: true,
+              child: Column(
+                key: ValueKey('none_user_status'),
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      if (user.isActive)
+                        Container(
+                          height: 8,
+                          width: 8,
+                          margin: EdgeInsetsDirectional.only(
+                            end: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.green,
+                          ),
+                        ),
+                      TimerRefresher(
+                        lastSeen: user.lastSeen,
+                        isActive: user.isActive,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 }

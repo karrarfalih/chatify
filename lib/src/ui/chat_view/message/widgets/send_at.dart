@@ -1,8 +1,7 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:lottie/lottie.dart';
 
 class SendAtWidget extends StatelessWidget {
   const SendAtWidget({
@@ -45,10 +44,13 @@ class SendAtWidget extends StatelessWidget {
                   width: 14,
                   height: 14,
                   child: isSending
-                      ? Icon(
-                          Iconsax.clock,
-                          size: 12,
-                          color: iconColor,
+                      ? Center(
+                          child: Lottie.asset(
+                            'assets/lottie/sending.json',
+                            package: 'chatify',
+                            fit: BoxFit.fitHeight,
+                            height: 12,
+                          ),
                         )
                       : Image.asset(
                           isSeen

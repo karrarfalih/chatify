@@ -11,6 +11,8 @@ import 'package:chatify/src/ui/chat_view/body/recording/lock.dart';
 import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/body/app_bar.dart';
+import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
+import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/keyboard_size.dart';
 import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/material.dart';
@@ -21,25 +23,33 @@ class ChatView extends StatefulWidget {
     Key? key,
     required this.chat,
     required this.user,
+    this.pendingMessagesHandler,
+    this.connectivity,
   }) : super(key: key);
   final Chat chat;
   final ChatifyUser user;
+  final PendingMessagesHandler? pendingMessagesHandler;
+  final ChatifyConnectivity? connectivity;
+
   @override
   State<ChatView> createState() => _ChatViewState();
 }
 
 class _ChatViewState extends State<ChatView> {
   late final ChatController controller;
+  late final ChatifyConnectivity connectivity;
 
   @override
   void initState() {
-    controller = ChatController(widget.chat);
+    controller = ChatController(widget.chat, widget.pendingMessagesHandler);
+    connectivity = widget.connectivity ?? ChatifyConnectivity();
     super.initState();
   }
 
   @override
   dispose() {
     controller.dispose();
+    if (widget.connectivity == null) connectivity.dispose();
     super.dispose();
   }
 
@@ -154,6 +164,7 @@ class _ChatViewState extends State<ChatView> {
                       ChatAppBar(
                         user: widget.user,
                         chatController: controller,
+                        connectivity: connectivity,
                       ),
                       CurrentVoicePlayer(),
                     ],

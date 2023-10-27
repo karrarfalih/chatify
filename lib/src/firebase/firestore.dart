@@ -154,7 +154,7 @@ class ChatifyDatasource {
         .where('membersCount', isEqualTo: members.length)
         .where('members', whereIn: [members, members.reversed.toList()]).get();
     if (res.size > 0) return res.docs.first.data();
-    final chat = Chat(id: Uuid.generate(), members: members);
+    final chat = Chat(id: Uuid.generate(), members: members, isCreaeted: false);
     return chat;
   }
 

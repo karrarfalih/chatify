@@ -1,7 +1,10 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
+import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/chats/new_chat/new_chat.dart';
 import 'package:chatify/src/ui/chats/search.dart';
+import 'package:chatify/src/ui/common/circular_loading.dart';
+import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,13 +12,26 @@ import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
 import 'chats/recent_chats.dart';
 
-class ChatScreen extends StatelessWidget {
+class ChatScreen extends StatefulWidget {
   ChatScreen({Key? key})
       : assert(
           Chatify.isInititialized,
           'initialize the chat options. use init method in the main entry.',
         ),
         super(key: key);
+
+  @override
+  State<ChatScreen> createState() => _ChatScreenState();
+}
+
+class _ChatScreenState extends State<ChatScreen> {
+  final connectivity = ChatifyConnectivity();
+
+  @override
+  void dispose() {
+    connectivity.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,13 +54,65 @@ class ChatScreen extends StatelessWidget {
                 systemNavigationBarColor: Colors.white,
                 systemNavigationBarIconBrightness: Brightness.dark,
               ),
-        title: Text(
-          'Messages',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: theme.recentChatsForegroundColor,
-          ),
+        title: KrStreamBuilder<ConnectivityStatus>(
+          stream: connectivity.connection,
+          onLoading: SizedBox.shrink(),
+          builder: (connectionStatus) {
+            if (connectionStatus == ConnectivityStatus.waiting) {
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoadingWidget(
+                    size: 14,
+                    lineWidth: 1,
+                    color: Chatify.theme.recentChatsForegroundColor.withOpacity(
+                      0.5,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    'Waiting connection...',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.recentChatsForegroundColor,
+                    ),
+                  ),
+                ],
+              );
+            } else if (connectionStatus == ConnectivityStatus.connecting)
+              return Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LoadingWidget(
+                    size: 10,
+                    lineWidth: 1,
+                    color: Chatify.theme.recentChatsForegroundColor.withOpacity(
+                      0.5,
+                    ),
+                  ),
+                  SizedBox(
+                    width: 8,
+                  ),
+                  Text(
+                    'Connecting...',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: theme.recentChatsForegroundColor,
+                    ),
+                  ),
+                ],
+              );
+            return Text(
+              'Messages',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+                color: theme.recentChatsForegroundColor,
+              ),
+            );
+          },
         ),
         leading: IconButton(
           onPressed: () {
@@ -93,7 +161,11 @@ class ChatScreen extends StatelessWidget {
             child: CurrentVoicePlayer(),
           ),
           ChatSearch(),
-          Expanded(child: RecentChats()),
+          Expanded(
+            child: RecentChats(
+              connectivity: connectivity,
+            ),
+          ),
         ],
       ),
     );

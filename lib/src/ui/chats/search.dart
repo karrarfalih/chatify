@@ -20,13 +20,16 @@ class ChatSearch extends StatelessWidget {
         child: TextFormField(
           style: TextStyle(),
           textAlign: TextAlign.start,
-          textAlignVertical: TextAlignVertical.bottom,
+          textAlignVertical: TextAlignVertical.center,
           textInputAction: TextInputAction.search,
+          cursorHeight: 20,
           decoration: InputDecoration(
             hintText: 'Search',
             enabled: true,
             hintStyle: TextStyle(
               color: theme.recentChatsForegroundColor.withOpacity(0.5),
+              fontWeight: FontWeight.w400,
+              fontSize: 14,
             ),
             isDense: true,
             filled: true,

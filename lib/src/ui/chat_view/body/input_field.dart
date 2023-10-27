@@ -81,6 +81,8 @@ class ChatInputField extends StatelessWidget {
             minLines: 1,
             style: TextStyle(
               color: Chatify.theme.chatForegroundColor,
+              height: 1.1,
+              fontSize: 16,
             ),
             focusNode: controller.focus,
             textInputAction: TextInputAction.newline,

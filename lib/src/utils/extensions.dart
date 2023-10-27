@@ -113,13 +113,13 @@ extension DateTimeFormat on DateTime {
       text = 'h';
     } else if (min < 60 * 24 * 7) {
       count = min ~/ (60 * 24);
-      text = 'd';
+      text = ' days';
     } else {
       count = min ~/ (60 * 24 * 7);
-      text = 'w';
+      text = ' weeks';
     }
     text = text;
-    return '$count $text ago';
+    return '$count$text ago';
   }
 
   String format(BuildContext context, String format) {
@@ -144,5 +144,13 @@ extension DurationInt on int {
     int s = this % 60;
     int m = this ~/ 60;
     return '$m:${s < 10 ? '0$s' : s}';
+  }
+}
+
+extension UrlFormatter on String {
+  String get urlFormat {
+    if (this.isEmpty) return '';
+    if (this.startsWith('http')) return this;
+    return 'https://$this';
   }
 }

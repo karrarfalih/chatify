@@ -1,5 +1,6 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/chat.dart';
+import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,8 +8,10 @@ import 'package:chatify/src/ui/chats/chat_card.dart';
 
 class RecentChats extends StatelessWidget {
   const RecentChats({
-    Key? key,
+    Key? key, required this.connectivity,
   }) : super(key: key);
+
+  final ChatifyConnectivity connectivity;
 
   @override
   Widget build(BuildContext context) {
@@ -19,6 +22,7 @@ class RecentChats extends StatelessWidget {
         return ChatRoomCard(
           key: ValueKey(room),
           chat: room,
+          connectivity: connectivity,
         );
       },
       separator: Padding(

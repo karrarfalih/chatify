@@ -22,7 +22,9 @@ part 'record_controller.dart';
 
 class ChatController {
   final Chat chat;
-  ChatController(this.chat) : pending = PendingMessagesHandler(chat: chat) {
+  ChatController(this.chat, this._receivedPendingHandler)
+      : pending =
+            _receivedPendingHandler ?? PendingMessagesHandler(chat: chat) {
     keyboardController = KeyboardController(this);
     voiceController = VoiceRecordingController(this);
     textController.addListener(() {
@@ -38,6 +40,7 @@ class ChatController {
   late final KeyboardController keyboardController;
   late final VoiceRecordingController voiceController;
   final PendingMessagesHandler pending;
+  final PendingMessagesHandler? _receivedPendingHandler;
 
   final FocusNode focus = FocusNode();
   final isTyping = false.obs;
@@ -87,10 +90,10 @@ class ChatController {
           replyUid: messageAction.value?.message?.sender,
           canReadBy: chat.members,
         );
-        Chatify.datasource.addMessage(message);
         pending.add(message);
+        Chatify.datasource.addMessage(message);
       }
-      Chatify.datasource.addChat(chat);
+      if (!chat.isCreaeted) Chatify.datasource.addChat(chat);
     }
     messageAction.value = null;
     textController.clear();
@@ -143,7 +146,7 @@ class ChatController {
 
   void dispose() {
     textController.dispose();
-    pending.dispose();
+    if (_receivedPendingHandler == null) pending.dispose();
     voiceController.dispose();
     keyboardController.dispose();
     isSelecting.dispose();

@@ -1,21 +1,29 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/ui/chat_view/chatting_room.dart';
 import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
+import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/bloc.dart';
 import 'package:chatify/src/ui/common/kr_builder.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
+import 'package:chatify/src/ui/common/swipeable_page_route.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
-import 'package:iconsax/iconsax.dart';
+import 'package:lottie/lottie.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ChatRoomCard extends StatefulWidget {
   final Chat chat;
+
   const ChatRoomCard({
     Key? key,
     required this.chat,
+    required this.connectivity,
   }) : super(key: key);
+
+  final ChatifyConnectivity connectivity;
 
   @override
   State<ChatRoomCard> createState() => _ChatRoomCardState();
@@ -23,25 +31,39 @@ class ChatRoomCard extends StatefulWidget {
 
 class _ChatRoomCardState extends State<ChatRoomCard> {
   late final PendingMessagesHandler pendingMessages;
+  final BehaviorSubject<Message?> pendingMessagesSubject =
+      BehaviorSubject.seeded(null);
+  late final Stream<_PendingMessage?> lastMessage;
 
   @override
   void initState() {
     pendingMessages = PendingMessagesHandler(chat: widget.chat);
+    _listenToPendingMessages();
+    pendingMessages.messages.addListener(_listenToPendingMessages);
+    lastMessage = Rx.combineLatest2<Message?, Message?, _PendingMessage?>(
+        Chatify.datasource.lastMessageStream(widget.chat),
+        pendingMessagesSubject, (actual, pending) {
+      if (pending == null || pending.id == actual?.id) {
+        if (actual == null) return null;
+        return _PendingMessage(actual, true);
+      }
+      return _PendingMessage(pending, false);
+    }).asBroadcastStream();
     super.initState();
+  }
+
+  void _listenToPendingMessages() {
+    if (pendingMessages.messages.value.isEmpty)
+      return pendingMessagesSubject.add(null);
+    pendingMessagesSubject.add(pendingMessages.messages.value.last);
   }
 
   @override
   void dispose() {
+    pendingMessages.messages.removeListener(_listenToPendingMessages);
     pendingMessages.dispose();
+    pendingMessagesSubject.close();
     super.dispose();
-  }
-
-  _PendingMessage? getLastMessage(Message? message) {
-    if (pendingMessages.messages.value.isEmpty) {
-      if (message == null) return null;
-      return _PendingMessage(message, true);
-    }
-    return _PendingMessage(pendingMessages.messages.value.last, false);
   }
 
   @override
@@ -59,7 +81,16 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
           return InkWell(
             highlightColor: Colors.transparent,
             onTap: () async {
-              await Chatify.openChat(context, chat: widget.chat, user: user!);
+              Navigator.of(context).push(
+                SwipeablePageRoute(
+                  builder: (context) => ChatView(
+                    chat: widget.chat,
+                    user: user!,
+                    pendingMessagesHandler: pendingMessages,
+                    connectivity: widget.connectivity,
+                  ),
+                ),
+              );
             },
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 15),
@@ -69,13 +100,41 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
-                      CustomImage(
-                        url: widget.chat.imageUrl ?? user?.profileImage ?? '',
-                        height: 50,
-                        width: 50,
-                        radius: 50,
-                        fit: BoxFit.cover,
-                        onError: const Icon(Icons.person, color: Colors.grey),
+                      Stack(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        children: [
+                          CustomImage(
+                            url: widget.chat.imageUrl ??
+                                user?.profileImage ??
+                                '',
+                            height: 50,
+                            width: 50,
+                            radius: 50,
+                            fit: BoxFit.cover,
+                            onError:
+                                const Icon(Icons.person, color: Colors.grey),
+                          ),
+                          KrStreamBuilder<UserLastSeen>(
+                            stream: Chatify.datasource
+                                .getUserLastSeen(user?.id??'', widget.chat.id),
+                            builder: (lastSeen) {
+                              if (!lastSeen.isActive) return const SizedBox();
+                              return Container(
+                                height: 15,
+                                width: 15,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.green,
+                                  border: Border.all(
+                                    color: Theme.of(context)
+                                        .scaffoldBackgroundColor,
+                                    width: 2,
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        ],
                       ),
                       Expanded(
                         child: Container(
@@ -96,9 +155,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                     ),
                                     const Spacer(),
                                     KrStreamBuilder<_PendingMessage?>(
-                                      stream: Chatify.datasource
-                                          .lastMessageStream(widget.chat)
-                                          .map(getLastMessage),
+                                      stream: lastMessage,
                                       onLoading: const SizedBox.shrink(),
                                       builder: (message) {
                                         return ConstrainedBox(
@@ -110,12 +167,11 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
                                               if (!message!.isSent)
-                                                Icon(
-                                                  Iconsax.clock,
-                                                  size: 16,
-                                                  color: Chatify
-                                                      .theme.primaryColor
-                                                      .withOpacity(.5),
+                                                Lottie.asset(
+                                                  'assets/lottie/sending${Chatify.theme.isRecentChatsDark ? '' : '_black'}.json',
+                                                  package: 'chatify',
+                                                  fit: BoxFit.fitHeight,
+                                                  height: 12,
                                                 )
                                               else
                                                 Image.asset(
@@ -151,9 +207,11 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                                         context,
                                                         DateTime.now()
                                                                     .difference(
-                                                                      message
-                                                                          .message!
-                                                                          .sendAt!,
+                                                                      (message.message
+                                                                              ?.sendAt ??
+                                                                          message
+                                                                              .message
+                                                                              ?.pendingTime)!,
                                                                     )
                                                                     .inHours <
                                                                 24
@@ -181,9 +239,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                               Row(
                                 children: [
                                   KrStreamBuilder<_PendingMessage?>(
-                                    stream: Chatify.datasource
-                                        .lastMessageStream(widget.chat)
-                                        .map(getLastMessage),
+                                    stream: lastMessage,
                                     onLoading: const Padding(
                                       padding: EdgeInsets.only(top: 3),
                                       child: ShimmerBloc(
