@@ -9,11 +9,11 @@ class MessageActionHeader extends StatelessWidget {
   const MessageActionHeader({
     super.key,
     required this.controller,
-    required this.user,
+    required this.users,
   });
 
   final ChatController controller;
-  final ChatifyUser user;
+  final List<ChatifyUser> users;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,13 @@ class MessageActionHeader extends StatelessWidget {
         }
         final args = value ?? latsArgs;
         final isMine = args?.message?.isMine ?? false;
-        final name = isMine ? 'Me' : user.name;
+        final name = isMine
+            ? 'Me'
+            : users
+                .firstWhere(
+                  (e) => e.id == (args?.message?.sender ?? users.first.id),
+                )
+                .name;
         final message = args?.message;
         final icon =
             args?.type == MessageActionType.reply ? Icons.reply : Icons.edit;

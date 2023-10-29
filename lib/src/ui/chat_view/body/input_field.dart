@@ -187,6 +187,8 @@ class ChatInputField extends StatelessWidget {
                         GestureDetector(
                           onTapDown: (details) =>
                               controller.voiceController.record(),
+                          onTapUp: (details) =>
+                              controller.voiceController.endMicDarg(chat),
                           onHorizontalDragStart: (_) =>
                               controller.voiceController.record(),
                           onHorizontalDragUpdate: (d) {
@@ -197,10 +199,10 @@ class ChatInputField extends StatelessWidget {
                               controller.voiceController.endMicDarg(chat),
                           onHorizontalDragCancel: () =>
                               controller.voiceController.endMicDarg(chat),
-                          child: Padding(
-                            padding: const EdgeInsets.all(
-                              3,
-                            ),
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            color: Colors.transparent,
                             child: Animate(
                               effects: [
                                 ScaleEffect(

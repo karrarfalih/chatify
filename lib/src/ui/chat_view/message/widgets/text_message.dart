@@ -93,7 +93,14 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                       widget.widget.message.replyUid ==
                                               Chatify.currentUserId
                                           ? 'Me'
-                                          : widget.widget.user.name,
+                                          : widget.widget.users
+                                              .firstWhere(
+                                                (e) =>
+                                                    e.id ==
+                                                    widget.widget.message
+                                                        .replyUid,
+                                              )
+                                              .name,
                                       style: TextStyle(
                                         color:
                                             widget.textColor.withOpacity(0.8),
@@ -171,6 +178,20 @@ class _TextMessageCardState extends State<TextMessageCard> {
                               ),
                             ],
                           ),
+                        ),
+                      ),
+                    if (widget.widget.users.length > 2 &&
+                        !widget.isMine &&
+                        !widget.widget.linkedWithTop)
+                      Text(
+                        widget.widget.users
+                            .firstWhere(
+                              (e) => e.id == widget.widget.message.sender,
+                            )
+                            .name,
+                        style: TextStyle(
+                          color: Chatify.theme.primaryColor,
+                          fontSize: 14,
                         ),
                       ),
                     Row(

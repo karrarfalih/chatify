@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/utils/cache.dart';
+import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -19,24 +20,39 @@ class PendingMessagesHandler {
   static final _memoryCache = <String, List<Message>>{};
 
   add(Message message) {
-    messages
-      ..value.add(message)
-      ..refresh();
-    _updateCache();
+    try {
+      messages.value = [...messages.value, message];
+    } catch (e) {
+      ChatifyLog.d(e.toString(), isError: true);
+    } finally {
+      _updateCache();
+    }
   }
 
   remove(Message message) {
-    messages
-      ..value.remove(message)
-      ..refresh();
-    _updateCache();
+    try {
+      if (messages.value.any((e) => e.id == message.id)) {
+        messages
+          ..value.removeWhere((e) => e.id == message.id)
+          ..refresh();
+      }
+    } catch (e) {
+      ChatifyLog.d(e.toString(), isError: true);
+    } finally {
+      _updateCache();
+    }
   }
 
   removeById(String id) {
-    if (messages.value.any((e) => e.id == id)) {
-      messages
-        ..value.removeWhere((e) => e.id == id)
-        ..refresh();
+    try {
+      if (messages.value.any((e) => e.id == id)) {
+        messages
+          ..value.removeWhere((e) => e.id == id)
+          ..refresh();
+      }
+    } catch (e) {
+      ChatifyLog.d(e.toString(), isError: true);
+    } finally {
       _updateCache();
     }
   }
@@ -60,13 +76,15 @@ class PendingMessagesHandler {
   }
 
   List<Message> _loadFromCache() {
-    if(_memoryCache[_chat.id] != null) return _memoryCache[_chat.id]!;
+    if (_memoryCache[_chat.id] != null)
+      // ignore: unnecessary_cast
+      return _memoryCache[_chat.id]! as List<Message>;
     final cache = Cache.instance.getString('pendingMessages');
     if (cache == null) return [];
     final json = jsonDecode(cache);
     if (json[_chat.id] == null) return [];
     final msgs = json[_chat.id] as List;
-    return msgs.map((e) => TextMessage.fromJson(e)).toList();
+    return msgs.map((e) => TextMessage.fromJson(e)).toList().cast<Message>();
   }
 
   dispose() {

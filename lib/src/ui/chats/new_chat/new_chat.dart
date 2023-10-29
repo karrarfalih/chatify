@@ -1,5 +1,4 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chats/new_chat/controllers/search_controller.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -85,10 +84,12 @@ class SelectUserBySearch extends StatefulWidget {
 
 class _SelectUserBySearchState extends State<SelectUserBySearch> {
   final search = SearchController();
+  final selected = Rx<List<ChatifyUser>>([]);
 
   @override
   void dispose() {
     search.dispose();
+    selected.dispose();
     super.dispose();
   }
 
@@ -198,7 +199,11 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                           var e = search.results.value.elementAt(index);
                           return UserResultCard(
                             user: e,
-                            onTap: widget.onSelect,
+                            onTap: (e) {
+                              selected
+                                ..value.add(e)
+                                ..refresh();
+                            },
                           );
                         },
                       ),
@@ -231,7 +236,11 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                                 var e = search.history.value.elementAt(index);
                                 return UserResultCard(
                                   user: e,
-                                  onTap: widget.onSelect,
+                                  onTap: (e) {
+                                    selected
+                                      ..value.add(e)
+                                      ..refresh();
+                                  },
                                 );
                               },
                             ),

@@ -1,5 +1,6 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
 import 'package:flutter/material.dart';
 
@@ -51,16 +52,11 @@ class MyVoiceMessageBloc extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        color: Chatify.theme.primaryColor,
-        borderRadius: BorderRadiusDirectional.only(
-          topStart: Radius.circular(linkedWithTop ? 0 : 12),
-          bottomStart: Radius.circular(linkedWithBottom ? 0 : 12),
-          topEnd: const Radius.circular(12),
-          bottomEnd: const Radius.circular(12),
-        ),
-      ),
+    return MyBubble(
+      bkColor: Chatify.theme.primaryColor,
+      linkedWithBottom: linkedWithBottom,
+      linkedWithTop: linkedWithTop,
+      message: message,
       child: VoiceMessageWidget(
         meBgColor: theme.primaryColor,
         contactBgColor: theme.scaffoldBackgroundColor,

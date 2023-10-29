@@ -2,29 +2,30 @@ import 'dart:io';
 import 'dart:ui';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/animated_flip_counter.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
-import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/ui/common/timer_refresher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:kr_pull_down_button/pull_down_button.dart';
+import 'package:rxdart/rxdart.dart';
 
 class ChatAppBar extends StatelessWidget {
   const ChatAppBar({
     super.key,
-    required this.user,
+    required this.users,
     required this.chatController,
     required this.connectivity,
   });
 
-  final ChatifyUser user;
+  final List<ChatifyUser> users;
   final ChatController chatController;
   final ChatifyConnectivity connectivity;
 
@@ -172,17 +173,11 @@ class ChatAppBar extends StatelessWidget {
                   ),
                   Expanded(
                     child: InkWell(
-                      onTap: () => Chatify.config.onUserClick?.call(user),
                       child: Row(
                         children: [
-                          CustomImage(
-                            url: user.profileImage,
-                            width: 44,
-                            height: 44,
-                            radius: 45,
-                            fit: BoxFit.cover,
-                            onError:
-                                const Icon(Icons.person, color: Colors.grey),
+                          Transform.scale(
+                            scale: 44 / 50,
+                            child: ChatImage(users: users.withoutMeOrMe),
                           ),
                           SizedBox(
                             width: 10,
@@ -194,17 +189,21 @@ class ChatAppBar extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  user.name,
+                                  users.withoutMeOrMe
+                                      .map((e) => e.name.split(' ').first)
+                                      .join(', '),
                                   style: TextStyle(
                                     color: theme.chatForegroundColor,
                                     fontSize: 16,
                                   ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(
                                   height: 15,
-                                  child: _UserStatus(
+                                  child: _ChatStatus(
                                     chatController: chatController,
-                                    user: user,
+                                    users: users,
                                     connectivity: connectivity,
                                   ),
                                 ),
@@ -281,14 +280,14 @@ class ChatAppBar extends StatelessWidget {
   }
 }
 
-class _UserStatus extends StatelessWidget {
-  const _UserStatus({
+class _ChatStatus extends StatelessWidget {
+  const _ChatStatus({
     required this.chatController,
-    required this.user,
+    required this.users,
     required this.connectivity,
   });
   final ChatController chatController;
-  final ChatifyUser user;
+  final List<ChatifyUser> users;
   final ChatifyConnectivity connectivity;
 
   @override
@@ -347,44 +346,151 @@ class _UserStatus extends StatelessWidget {
               ),
             ],
           );
-        return KrStreamBuilder<UserLastSeen>(
-          stream: Chatify.datasource.getUserLastSeen(
-            user.id,
-            chatController.chat.id,
-          ),
-          onLoading: SizedBox.shrink(),
-          builder: (user) {
-            return KrExpandedSection(
-              key: ValueKey(user.isActive),
-              expand: true,
-              child: Column(
-                key: ValueKey('none_user_status'),
+        if (users.length > 2) {
+          return _MutipleUsersLastSeen(
+            chatController: chatController,
+            users: users,
+          );
+        }
+        return _SingleUserLastSeen(
+          chatController: chatController,
+          user: users.withoutMeOrMe.first,
+        );
+      },
+    );
+  }
+}
+
+class _SingleUserLastSeen extends StatelessWidget {
+  const _SingleUserLastSeen({
+    required this.chatController,
+    required this.user,
+  });
+
+  final ChatController chatController;
+  final ChatifyUser user;
+
+  @override
+  Widget build(BuildContext context) {
+    return KrStreamBuilder<UserLastSeen>(
+      stream: Chatify.datasource.getUserLastSeen(
+        user.id,
+        chatController.chat.id,
+      ),
+      onLoading: SizedBox.shrink(),
+      builder: (user) {
+        return KrExpandedSection(
+          key: ValueKey(user.isActive),
+          expand: true,
+          child: Column(
+            key: ValueKey('none_user_status'),
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      if (user.isActive)
-                        Container(
-                          height: 8,
-                          width: 8,
-                          margin: EdgeInsetsDirectional.only(
-                            end: 5,
-                          ),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.green,
-                          ),
-                        ),
-                      TimerRefresher(
-                        lastSeen: user.lastSeen,
-                        isActive: user.isActive,
+                  if (user.isActive)
+                    Container(
+                      height: 8,
+                      width: 8,
+                      margin: EdgeInsetsDirectional.only(
+                        end: 5,
                       ),
-                    ],
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.green,
+                      ),
+                    ),
+                  TimerRefresher(
+                    lastSeen: user.lastSeen,
+                    isActive: user.isActive,
                   ),
                 ],
               ),
-            );
-          },
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _MutipleUsersLastSeen extends StatefulWidget {
+  const _MutipleUsersLastSeen({
+    required this.chatController,
+    required this.users,
+  });
+
+  final ChatController chatController;
+  final List<ChatifyUser> users;
+
+  @override
+  State<_MutipleUsersLastSeen> createState() => _MutipleUsersLastSeenState();
+}
+
+class _MutipleUsersLastSeenState extends State<_MutipleUsersLastSeen> {
+  late Stream<int> activeUserCount;
+
+  _SingleUserLastSeen getSingleUserScreen(ChatifyUser user) =>
+      _SingleUserLastSeen(
+        chatController: widget.chatController,
+        user: user,
+      );
+
+  @override
+  void initState() {
+    activeUserCount = Rx.combineLatest(
+      widget.users.withoutMeOrMe.map(
+        (e) => Chatify.datasource.getUserLastSeen(
+          e.id,
+          widget.chatController.chat.id,
+        ),
+      ),
+      (List<UserLastSeen> users) {
+        return users.where((e) => e.isActive).length;
+      },
+    );
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KrStreamBuilder<int>(
+      stream: activeUserCount,
+      onLoading: SizedBox.shrink(),
+      builder: (activeUsers) {
+        return KrExpandedSection(
+          expand: true,
+          child: Column(
+            key: ValueKey('none_user_status'),
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    '${widget.users.length} Members',
+                    style: TextStyle(
+                      color: Chatify.theme.chatForegroundColor.withOpacity(
+                        0.5,
+                      ),
+                      fontSize: 11,
+                      height: 1,
+                    ),
+                  ),
+                  if (activeUsers != 0)
+                    Text(
+                      ', $activeUsers Online',
+                      style: TextStyle(
+                        color: Chatify.theme.chatForegroundColor.withOpacity(
+                          0.5,
+                        ),
+                        fontSize: 11,
+                        height: 1,
+                      ),
+                    ),
+                ],
+              ),
+            ],
+          ),
         );
       },
     );

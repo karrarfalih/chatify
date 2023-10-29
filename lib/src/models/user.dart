@@ -1,3 +1,5 @@
+import 'package:chatify/chatify.dart';
+
 class ChatifyUser {
   final String id;
   final String? uid;
@@ -37,4 +39,15 @@ class UserLastSeen {
         _lastSeen = lastSeen;
 
   DateTime? get lastSeen => _lastSeen ?? _lastConnection;
+}
+
+extension Users on Iterable<ChatifyUser> {
+  List<ChatifyUser> get withoutMe =>
+      where((e) => e.id != Chatify.currentUserId).toList();
+
+  List<ChatifyUser> get withoutMeOrMe {
+    final users = withoutMe;
+    if (users.isEmpty) return [first];
+    return users;
+  }
 }

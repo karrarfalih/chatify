@@ -154,7 +154,7 @@ class ChatifyDatasource {
         .where('membersCount', isEqualTo: members.length)
         .where('members', whereIn: [members, members.reversed.toList()]).get();
     if (res.size > 0) return res.docs.first.data();
-    final chat = Chat(id: Uuid.generate(), members: members, isCreaeted: false);
+    final chat = Chat(id: Uuid.generate(), members: members);
     return chat;
   }
 
@@ -266,12 +266,10 @@ class ChatifyDatasource {
     return FirebaseDatabase.instance
         .ref("users/$userId/chats/$chatId/status")
         .onValue
-        .asBroadcastStream()
         .map((event) {
       final data = event.snapshot.value;
       if (data is String) {
-        var chatStatus = ChatStatus.none;
-        chatStatus = ChatStatus.values.firstWhere(
+        final chatStatus = ChatStatus.values.firstWhere(
           (e) => e.name == data,
           orElse: () => ChatStatus.none,
         );
@@ -282,6 +280,12 @@ class ChatifyDatasource {
   }
 
   updateChatStaus(ChatStatus status, String chatId) {
+    if (status == ChatStatus.none) {
+      FirebaseDatabase.instance
+          .ref("users/${Chatify.currentUserId}/chats/$chatId")
+          .remove();
+      return;
+    }
     FirebaseDatabase.instance
         .ref("users/${Chatify.currentUserId}/chats/$chatId")
         .update({'status': status.name});

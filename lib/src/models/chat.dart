@@ -11,7 +11,6 @@ class Chat {
   final String? title;
   final DateTime? updatedAt;
   final Map<String, DateTime?> readAfter;
-  final bool isCreaeted;
 
   const Chat({
     required this.id,
@@ -20,7 +19,6 @@ class Chat {
     this.title,
     this.updatedAt,
     this.readAfter = const {},
-    required this.isCreaeted,
   }) : membersCount = members.length;
 
   static Chat fromJson(Map data, String id) {
@@ -32,7 +30,6 @@ class Chat {
       updatedAt: data['updatedAt']?.toDate(),
       readAfter: Map.from(data['readAfter'] ?? {})
           .map((key, value) => MapEntry(key, value?.toDate())),
-      isCreaeted: true,
     );
   }
 
@@ -61,7 +58,6 @@ class Chat {
       title: title ?? this.title,
       updatedAt: updatedAt ?? this.updatedAt,
       readAfter: readAfter ?? this.readAfter,
-      isCreaeted: isCreaeted,
     );
   }
 }

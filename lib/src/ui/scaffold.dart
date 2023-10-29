@@ -1,5 +1,6 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
+import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/chats/new_chat/new_chat.dart';
 import 'package:chatify/src/ui/chats/search.dart';
@@ -22,14 +23,21 @@ class ChatScreen extends StatefulWidget {
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
+
+  static Map<String, PendingMessagesHandler> pendingMessagesHandlers = {};
 }
 
-class _ChatScreenState extends State<ChatScreen> {
+class _ChatScreenState extends State<ChatScreen>
+    with SingleTickerProviderStateMixin {
   final connectivity = ChatifyConnectivity();
 
   @override
   void dispose() {
     connectivity.dispose();
+    ChatScreen.pendingMessagesHandlers.forEach((key, value) {
+      value.dispose();
+    });
+    ChatScreen.pendingMessagesHandlers.clear();
     super.dispose();
   }
 

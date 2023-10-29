@@ -89,7 +89,7 @@ class Chatify {
         ref.set({
           'isActive': isConnected,
           'lastConnection': ServerValue.timestamp,
-          if(!isConnected) 'chats': null,
+          if (!isConnected) 'chats': null,
         });
         ChatifyLog.d('User ${isConnected ? 'connected' : 'disconnected'}.');
       },
@@ -126,7 +126,7 @@ class Chatify {
     final chat = await datasource.findChatOrCreate([user.id, currentUserId]);
     Navigator.of(context).push(
       SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, user: user),
+        builder: (context) => ChatView(chat: chat, users: [user]),
       ),
     );
   }
@@ -138,7 +138,7 @@ class Chatify {
   }) async {
     Navigator.of(context).push(
       SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, user: user),
+        builder: (context) => ChatView(chat: chat, users: [user]),
       ),
     );
   }

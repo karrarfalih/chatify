@@ -99,7 +99,8 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
                                           (duration.inMilliseconds /
                                               (player.player.duration
                                                       ?.inMilliseconds ??
-                                                  (player.seconds * 1000))))
+                                                  (player
+                                                      .lastPositionInMilliSeconds))))
                                       .withRange(0, screenWidth);
                                   return Container(
                                     color: Colors.black38,

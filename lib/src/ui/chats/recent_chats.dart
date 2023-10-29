@@ -8,7 +8,8 @@ import 'package:chatify/src/ui/chats/chat_card.dart';
 
 class RecentChats extends StatelessWidget {
   const RecentChats({
-    Key? key, required this.connectivity,
+    Key? key,
+    required this.connectivity,
   }) : super(key: key);
 
   final ChatifyConnectivity connectivity;
@@ -20,16 +21,16 @@ class RecentChats extends StatelessWidget {
       itemBuilder: (context, docs, i) {
         Chat room = docs.elementAt(i).data() as Chat;
         return ChatRoomCard(
-          key: ValueKey(room),
+          key: ValueKey(room.id),
           chat: room,
           connectivity: connectivity,
         );
       },
       separator: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsetsDirectional.only(start: 80),
         child: Divider(
           height: 1,
-          color: Colors.black.withOpacity(0.08),
+          color: Colors.black.withOpacity(0.05),
         ),
       ),
       query: Chatify.datasource.chatsQuery,

@@ -2,12 +2,12 @@ import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/controller.dart';
-import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/ui/common/rotated_widget.dart';
 import 'package:chatify/src/utils/storage_utils.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import './noises.dart';
 
 class VoiceMessageWidget extends StatefulWidget {
@@ -45,7 +45,7 @@ class VoiceMessageWidget extends StatefulWidget {
 class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
     with TickerProviderStateMixin {
   late final VoicePlayerController player;
-  late final double maxNoiseHeight, noiseWidth;
+  late final double noiseWidth;
   double maxDurationForSlider = .0000001;
   late final VoiceMessage message;
   late final bool isMe;
@@ -55,9 +55,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
 
   @override
   void initState() {
-    width = widget.width;
-    maxNoiseHeight = 6.w();
-    noiseWidth = 25.w();
+    noiseWidth = 110;
     message = widget.message;
     isMe = message.isMine;
     attachment = message.uploadAttachment;
@@ -76,17 +74,19 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
       lowerBound: 0,
       upperBound: noiseWidth,
       duration: Duration(
-        seconds: (player.seconds ~/ VoicePlayerController.speed.value) + 1,
+        milliseconds:
+            (player.milliseconds ~/ VoicePlayerController.speed.value),
       ),
-      value: (player.lastPositionInSeconds / player.seconds) * noiseWidth,
+      value: (player.lastPositionInMilliSeconds / player.milliseconds) *
+          noiseWidth,
     );
+    player.playPauseController = playPauseController;
+    player.progressController = progressController;
     if (player.player.playing) {
       player.progressController!
           .forward()
           .then((value) => player.progressController!.reset());
     }
-    player.playPauseController = playPauseController;
-    player.progressController = progressController;
     super.initState();
   }
 
@@ -102,32 +102,35 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Container(
-        constraints: BoxConstraints(maxWidth: 70.w()),
+        constraints: BoxConstraints(maxWidth: 300),
         child: Padding(
-          padding:
-              const EdgeInsets.only(left: 15, right: 0, top: 10, bottom: 10),
+          padding: const EdgeInsets.only(left: 10, right: 0, top: 8),
           child: Stack(
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _playButton(context),
-                      const SizedBox(width: 12),
-                      Align(
-                        alignment: AlignmentDirectional.bottomEnd,
-                        child: _durationWithNoise(context),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                  ),
-                ],
+              Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _playButton(context),
+                        const SizedBox(width: 6),
+                        Align(
+                          alignment: AlignmentDirectional.bottomEnd,
+                          child: _durationWithNoise(context),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               Positioned(
-                bottom: -3,
+                bottom: 8,
                 right: 10,
                 child: SendAtWidget(
                   message: message,
@@ -142,146 +145,200 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
   }
 
   _playButton(BuildContext context) => InkWell(
-        child: Container(
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isMe ? widget.meFgColor : widget.contactFgColor,
-          ),
-          width: 40,
-          height: 40,
-          child: InkWell(
-            onTap: () async {
-              if (attachment != null) {
-                attachment!.cancel();
-              }
-              if (!player.isReady!.value) {
-                await player.init();
-              }
-              player.togglePlay();
-            },
-            child: ValueListenableBuilder<VoiceStatus>(
-              valueListenable: player.status,
-              builder: (context, status, child) {
-                final color = isMe ? widget.meBgColor : widget.contactBgColor;
-                if (attachment != null) {
-                  return GestureDetector(
-                    onTap: () {
-                      attachment!.cancel();
-                      widget.chatController.pending.remove(message);
-                    },
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        AnimatedRotatingWidget(
-                          duration: Duration(milliseconds: 3000),
-                          child: KrStreamBuilder<TaskSnapshot>(
-                            stream: attachment!.task.snapshotEvents,
-                            onLoading: Container(
-                              padding: EdgeInsets.all(4),
-                              width: 40,
-                              height: 40,
-                              child: CircularProgressIndicator(
-                                value: 1,
-                                strokeWidth: 2.5,
-                                color: color,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            SizedBox(
+              width: 50,
+              height: 50,
+              child: Center(
+                child: OverflowBox(
+                  minWidth: 65,
+                  minHeight: 65,
+                  maxHeight: 65,
+                  maxWidth: 65,
+                  child: KrStreamBuilder<bool>(
+                    stream: player.player.playingStream,
+                    builder: (playing) {
+                      return AnimatedSwitcher(
+                        duration: Duration(milliseconds: 1000),
+                        child: !playing
+                            ? SizedBox(
+                                width: 65,
+                                height: 65,
+                                key: ValueKey('not-playing${message.id}'),
+                              )
+                            : Lottie.asset(
+                                'assets/lottie/playing.json',
+                                key: ValueKey('playing${message.id}'),
+                                package: 'chatify',
+                                fit: BoxFit.cover,
+                                height: 65,
+                                delegates: LottieDelegates(
+                                  values: [
+                                    ValueDelegate.color(
+                                      const ['**'],
+                                      value: isMe
+                                          ? widget.meFgColor
+                                          : widget.contactFgColor,
+                                    ),
+                                  ],
+                                ),
                               ),
-                            ),
-                            builder: (snapshot) {
-                              return Container(
-                                padding: EdgeInsets.all(4),
-                                width: 40,
-                                height: 40,
-                                child: CircularProgressIndicator(
-                                  value: snapshot.bytesTransferred /
-                                      snapshot.totalBytes,
-                                  strokeWidth: 2.5,
-                                  color: color,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Icon(
-                          Icons.close_rounded,
-                          color: color,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                if (status == VoiceStatus.downloading) {
-                  return GestureDetector(
-                    behavior: HitTestBehavior.deferToChild,
-                    onTap: player.cancel,
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        AnimatedRotatingWidget(
-                          duration: Duration(milliseconds: 3000),
-                          child: ValueListenableBuilder<double>(
-                            valueListenable: player.progress,
-                            builder: (context, progress, child) {
-                              return Container(
-                                padding: EdgeInsets.all(4),
-                                width: 40,
-                                height: 40,
-                                child: CircularProgressIndicator(
-                                  value: progress,
-                                  strokeWidth: 2.5,
-                                  color: color,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                        Icon(
-                          Icons.close_rounded,
-                          color: color,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-                if (status == VoiceStatus.loading) {
-                  return Stack(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(4),
-                        width: 40,
-                        height: 40,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: color,
-                        ),
-                      ),
-                      Center(
-                        child: Icon(
-                          Icons.close_rounded,
-                          color: color,
-                        ),
-                      ),
-                    ],
-                  );
-                }
-                if (status == VoiceStatus.dowload) {
-                  return Center(
-                    child: Icon(
-                      Icons.download_sharp,
-                      color: color,
-                    ),
-                  );
-                }
-                return Center(
-                  child: AnimatedIcon(
-                    icon: AnimatedIcons.play_pause,
-                    progress: player.playPauseController!,
-                    color: color,
-                    size: 22,
+                      );
+                    },
                   ),
-                );
-              },
+                ),
+              ),
             ),
-          ),
+            Container(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: isMe ? widget.meFgColor : widget.contactFgColor,
+              ),
+              width: 40,
+              height: 40,
+              child: InkWell(
+                onTap: () async {
+                  if (attachment != null) {
+                    attachment!.cancel();
+                  }
+                  if (!player.isReady!.value) {
+                    await player.init();
+                  }
+                  player.togglePlay();
+                },
+                child: Stack(
+                  children: [
+                    ValueListenableBuilder<VoiceStatus>(
+                      valueListenable: player.status,
+                      builder: (context, status, child) {
+                        final color =
+                            isMe ? widget.meBgColor : widget.contactBgColor;
+                        if (attachment != null) {
+                          return GestureDetector(
+                            onTap: () {
+                              attachment!.cancel();
+                              widget.chatController.pending.remove(message);
+                            },
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                AnimatedRotatingWidget(
+                                  duration: Duration(milliseconds: 3000),
+                                  child: KrStreamBuilder<TaskSnapshot>(
+                                    stream: attachment!.task.snapshotEvents,
+                                    onLoading: Container(
+                                      padding: EdgeInsets.all(4),
+                                      width: 40,
+                                      height: 40,
+                                      child: CircularProgressIndicator(
+                                        value: 1,
+                                        strokeWidth: 2.5,
+                                        color: color,
+                                      ),
+                                    ),
+                                    builder: (snapshot) {
+                                      return Container(
+                                        padding: EdgeInsets.all(4),
+                                        width: 40,
+                                        height: 40,
+                                        child: CircularProgressIndicator(
+                                          value: snapshot.bytesTransferred /
+                                              snapshot.totalBytes,
+                                          strokeWidth: 2.5,
+                                          color: color,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.close_rounded,
+                                  color: color,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        if (status == VoiceStatus.downloading) {
+                          return GestureDetector(
+                            behavior: HitTestBehavior.deferToChild,
+                            onTap: player.cancel,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                AnimatedRotatingWidget(
+                                  duration: Duration(milliseconds: 3000),
+                                  child: ValueListenableBuilder<double>(
+                                    valueListenable: player.progress,
+                                    builder: (context, progress, child) {
+                                      return Container(
+                                        padding: EdgeInsets.all(4),
+                                        width: 40,
+                                        height: 40,
+                                        child: CircularProgressIndicator(
+                                          value: progress,
+                                          strokeWidth: 2.5,
+                                          color: color,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Icon(
+                                  Icons.close_rounded,
+                                  color: color,
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        if (status == VoiceStatus.loading) {
+                          return Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(4),
+                                width: 40,
+                                height: 40,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: color,
+                                ),
+                              ),
+                              Center(
+                                child: Icon(
+                                  Icons.close_rounded,
+                                  color: color,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                        if (status == VoiceStatus.dowload) {
+                          return Center(
+                            child: Icon(
+                              Icons.download_sharp,
+                              color: color,
+                            ),
+                          );
+                        }
+                        return Center(
+                          child: AnimatedIcon(
+                            icon: AnimatedIcons.play_pause,
+                            progress: player.playPauseController!,
+                            color: color,
+                            size: 22,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       );
 
@@ -289,11 +346,12 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
         width: noiseWidth + 10,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
+            SizedBox(height: 6),
             _noise(context),
-            SizedBox(height: 1.w()),
+            SizedBox(height: 4),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 ValueListenableBuilder<String>(
                   valueListenable: player.remainingTime!,
@@ -316,8 +374,8 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                       shape: BoxShape.circle,
                       color: isMe ? widget.meFgColor : widget.contactFgColor,
                     ),
-                    width: 1.4.w(),
-                    height: 1.4.w(),
+                    width: 5,
+                    height: 5,
                   ),
                 ),
               ],
@@ -335,7 +393,6 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
         minThumbSeparation: 0,
       ),
     );
-    final count = (50 * noiseWidth ~/ 50.w());
     return Theme(
       data: newTHeme,
       child: SizedBox(
@@ -345,7 +402,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
           clipBehavior: Clip.hardEdge,
           children: [
             Noises(
-              count: count,
+              count: 30,
               isMe: isMe,
               samples: message.samples,
             ),
@@ -366,7 +423,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                     },
                     child: Container(
                       width: noiseWidth,
-                      height: 6.w(),
+                      height: 15,
                       color: isMe
                           ? widget.meBgColor.withOpacity(.6)
                           : widget.contactBgColor.withOpacity(.6),
@@ -375,7 +432,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                 else if (message.isPlayed) {
                   return Container(
                     width: noiseWidth,
-                    height: 6.w(),
+                    height: 15,
                     color: isMe
                         ? widget.meBgColor.withOpacity(.6)
                         : widget.contactBgColor.withOpacity(.6),

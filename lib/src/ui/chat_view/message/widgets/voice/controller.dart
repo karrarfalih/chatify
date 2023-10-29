@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/cache.dart';
-import 'package:chatify/src/ui/chat_view/message/widgets/voice/utils.dart';
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -50,7 +49,7 @@ class VoicePlayerController {
   }
 
   String get url => message.url;
-  int get seconds => message.duration.inSeconds;
+  int get milliseconds => message.duration.inMilliseconds;
   bool get isMe => Chatify.currentUserId == message.sender;
 
   final player = AudioPlayer();
@@ -66,7 +65,7 @@ class VoicePlayerController {
 
   Rx<String>? remainingTime;
   String? latsRemainingTime;
-  double maxNoiseHeight = 6.w(), noiseWidth = 26.5.w();
+  double noiseWidth = 110;
   double maxDurationForSlider = .0000001;
   Rx<bool>? isReady;
   bool? wasReady;
@@ -74,7 +73,7 @@ class VoicePlayerController {
 
   AnimationController? progressController;
   AnimationController? playPauseController;
-  int lastPositionInSeconds = 0;
+  int lastPositionInMilliSeconds = 0;
   StreamSubscription<Duration>? _durationListener;
   VoicePlayerController? _nextPlayer;
 
@@ -82,7 +81,6 @@ class VoicePlayerController {
 
   StreamSubscription? stream;
   download() async {
-    print(url);
     if (url.isEmpty) return;
     progress.value = 0;
     StreamSubscription? stream;
@@ -119,8 +117,6 @@ class VoicePlayerController {
 
   bool isBusy = false;
   Future<void> init() async {
-    print(isReady!.value);
-    print(isBusy);
     if (isReady!.value || isBusy) return;
     status.value = VoiceStatus.loading;
     isBusy = true;
@@ -135,7 +131,7 @@ class VoicePlayerController {
       }
       await player.setFilePath(file!.path);
       if (player.speed != speed.value) player.setSpeed(speed.value);
-      maxDurationForSlider = seconds.toDouble();
+      maxDurationForSlider = milliseconds / 1000;
       listenToRemainingTime();
       progressController?.addListener(() {
         if (progressController?.isCompleted ?? false) {
@@ -173,9 +169,9 @@ class VoicePlayerController {
     if (player.speed != speed.value) {
       player.setSpeed(speed.value);
     }
-    final animationDuration = Duration(seconds: seconds ~/ speed.value);
+    final animationDuration = Duration(milliseconds: milliseconds ~/ speed.value);
     if (progressController?.duration?.compareTo(animationDuration) != 0) {
-      progressController?.duration = Duration(seconds: seconds ~/ speed.value);
+      progressController?.duration = Duration(milliseconds: milliseconds ~/ speed.value);
     }
     _preventAutoPause = false;
     playPauseController?.forward();
@@ -213,19 +209,19 @@ class VoicePlayerController {
     progressController?.reset();
     stopPlaying();
     player.seek(Duration.zero);
-    remainingTime?.value = seconds.toDurationString;
+    remainingTime?.value = (milliseconds/1000).round().toDurationString;
   }
 
   void listenToRemainingTime() {
     if (_durationListener != null) return;
     _durationListener = player.createPositionStream().listen((p) {
       remainingTime?.value = p.inSeconds.toDurationString;
-      lastPositionInSeconds = p.inSeconds;
+      lastPositionInMilliSeconds = p.inMilliseconds;
     });
   }
 
   updateRemainingTime(Duration currentDuration) {
-    lastPositionInSeconds = currentDuration.inSeconds;
+    lastPositionInMilliSeconds = currentDuration.inMilliseconds;
     latsRemainingTime = remainingTime?.value;
   }
 
@@ -244,7 +240,7 @@ class VoicePlayerController {
       speed.value = 2;
     else if (speed.value == 2) speed.value = 1;
 
-    progressController!.duration = Duration(seconds: seconds ~/ speed.value);
+    progressController!.duration = Duration(milliseconds: milliseconds ~/ speed.value);
     if (progressController!.isAnimating) progressController!.forward();
     player.setSpeed(speed.value);
     Cache.instance.setDouble('voice_player_speed', speed.value);

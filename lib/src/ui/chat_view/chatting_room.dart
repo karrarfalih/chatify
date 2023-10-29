@@ -22,12 +22,12 @@ class ChatView extends StatefulWidget {
   const ChatView({
     Key? key,
     required this.chat,
-    required this.user,
+    required this.users,
     this.pendingMessagesHandler,
     this.connectivity,
   }) : super(key: key);
   final Chat chat;
-  final ChatifyUser user;
+  final List<ChatifyUser> users;
   final PendingMessagesHandler? pendingMessagesHandler;
   final ChatifyConnectivity? connectivity;
 
@@ -117,13 +117,13 @@ class _ChatViewState extends State<ChatView> {
                       Expanded(
                         child: ChatMessages(
                           chat: widget.chat,
-                          user: widget.user,
+                          users: widget.users,
                           controller: controller,
                         ),
                       ),
                       MessageActionHeader(
                         controller: controller,
-                        user: widget.user,
+                        users: widget.users,
                       ),
                       ClipRRect(
                         child: BackdropFilter(
@@ -162,7 +162,7 @@ class _ChatViewState extends State<ChatView> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       ChatAppBar(
-                        user: widget.user,
+                        users: widget.users,
                         chatController: controller,
                         connectivity: connectivity,
                       ),

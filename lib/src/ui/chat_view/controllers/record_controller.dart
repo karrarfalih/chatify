@@ -24,6 +24,8 @@ class VoiceRecordingController {
   bool isPermissionGranted = false;
   List<double> samples = [];
 
+  DateTime? recordStart;
+
   record() async {
     if (isRecording.value) return;
     _record = Record();
@@ -61,6 +63,7 @@ class VoiceRecordingController {
       path: Platform.isIOS ? '${documents.path}/${Uuid.generate()}.aac' : null,
       encoder: AudioEncoder.aacLc,
     );
+    recordStart = DateTime.now();
 
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => seconds.value++);
     _micRadiusTimer = Timer.periodic(Duration(milliseconds: 200), (timer) {
@@ -149,7 +152,7 @@ class VoiceRecordingController {
           id: id,
           chatId: controller.chat.id,
           url: '',
-          duration: Duration(seconds: seconds.value),
+          duration: Duration(milliseconds: DateTime.now().difference(recordStart!).inMilliseconds),
           unSeenBy: controller.chat.members
               .where((e) => e != Chatify.currentUserId)
               .toList(),
@@ -166,6 +169,7 @@ class VoiceRecordingController {
         Chatify.datasource.addMessage(
           pendingMsg.copyWith(url: url),
         );
+        Chatify.datasource.addChat(controller.chat);
       }
     } finally {
       Chatify.datasource.updateChatStaus(ChatStatus.none, controller.chat.id);

@@ -93,7 +93,7 @@ class ChatController {
         pending.add(message);
         Chatify.datasource.addMessage(message);
       }
-      if (!chat.isCreaeted) Chatify.datasource.addChat(chat);
+      Chatify.datasource.addChat(chat);
     }
     messageAction.value = null;
     textController.clear();
@@ -104,6 +104,7 @@ class ChatController {
     final imgs = await getImages(images);
     await Future.wait(imgs.map((e) => _sendSingleImage(e)));
     Chatify.datasource.updateChatStaus(ChatStatus.none, chat.id);
+    Chatify.datasource.addChat(chat);
   }
 
   Future<void> _sendSingleImage(ImageAttachment img) async {

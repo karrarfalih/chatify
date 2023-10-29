@@ -1,27 +1,24 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/input_status.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
-import 'package:chatify/src/ui/common/expanded_section.dart';
-import 'package:chatify/src/ui/common/image.dart';
-import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
 import 'package:flutter/rendering.dart';
-import 'package:lottie/lottie.dart';
 
 class ChatMessages extends StatefulWidget {
   const ChatMessages({
     super.key,
     required this.chat,
-    required this.user,
+    required this.users,
     required this.controller,
   });
 
   final Chat chat;
-  final ChatifyUser user;
+  final List<ChatifyUser> users;
   final ChatController controller;
 
   @override
@@ -159,66 +156,47 @@ class _ChatMessagesState extends State<ChatMessages> {
                             date: date ?? DateTime.now(),
                           ),
                         ),
-                      MessageCard(
-                        key: ValueKey(msg.id),
-                        chat: widget.chat,
-                        message: msg,
-                        user: widget.user,
-                        controller: widget.controller,
-                        linkedWithBottom: (nextMsg != null &&
-                            nextMsg.sender == msg.sender &&
-                            nextMsg.sendAt?.day == msg.sendAt?.day),
-                        linkedWithTop: !showTime &&
-                            prevMsg != null &&
-                            prevMsg.sender == msg.sender,
-                      ),
+                      if (i != 0)
+                        MessageCard(
+                          key: ValueKey(msg.id),
+                          chat: widget.chat,
+                          message: msg,
+                          users: widget.users,
+                          controller: widget.controller,
+                          linkedWithBottom: (nextMsg != null &&
+                              nextMsg.sender == msg.sender &&
+                              nextMsg.sendAt?.day == msg.sendAt?.day),
+                          linkedWithTop: !showTime &&
+                              prevMsg != null &&
+                              prevMsg.sender == msg.sender,
+                        )
+                      else
+                        ValueListenableBuilder<List<Message>>(
+                          valueListenable: widget.controller.pending.messages,
+                          builder: (context, value, cild) => MessageCard(
+                            key: ValueKey(msg.id),
+                            chat: widget.chat,
+                            message: msg,
+                            users: widget.users,
+                            controller: widget.controller,
+                            linkedWithBottom: (nextMsg?.sender == msg.sender &&
+                                    nextMsg?.sendAt?.day == msg.sendAt?.day) ||
+                                (msg.isMine && value.isNotEmpty),
+                            linkedWithTop: !showTime &&
+                                prevMsg != null &&
+                                prevMsg.sender == msg.sender,
+                          ),
+                        ),
                       if (i == 0)
                         PendingMessages(
                           key: ValueKey('pending messages'),
                           controller: widget.controller,
                           chat: widget.chat,
-                          user: widget.user,
-                          linkedWithBottom: false,
-                          linkedWithTop: msg.isMine,
-                        ),
-                      if (i == 0)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: KrStreamBuilder<ChatStatus>(
-                            key: ValueKey('chat status'),
-                            stream: Chatify.datasource.getChatStatus(
-                              widget.user.id,
-                              widget.chat.id,
-                            ),
-                            onLoading: SizedBox.shrink(),
-                            builder: (status) {
-                              return KrExpandedSection(
-                                expand: status != ChatStatus.none,
-                                duration: Duration(milliseconds: 600),
-                                child: AnimatedSwitcher(
-                                  duration: Duration(milliseconds: 600),
-                                  switchInCurve: Curves.easeOutQuad,
-                                  switchOutCurve: Curves.easeInQuad,
-                                  transitionBuilder: (child, animation) {
-                                    return FadeTransition(
-                                      opacity: animation,
-                                      child: ScaleTransition(
-                                        scale: animation,
-                                        alignment: Alignment.bottomLeft,
-                                        child: child,
-                                      ),
-                                    );
-                                  },
-                                  child: getUserChatStatusWidget(
-                                    context,
-                                    status,
-                                    widget.user,
-                                  ),
-                                ),
-                              );
-                            },
+                          firstMessage: msg,
+                          user: widget.users.firstWhere(
+                            (e) => e.id == msg.sender,
                           ),
-                        )
+                        ),
                     ],
                   ),
                 );
@@ -239,8 +217,16 @@ class _ChatMessagesState extends State<ChatMessages> {
                 ),
               ),
               header: SliverToBoxAdapter(
-                child: SizedBox(
-                  height: 5,
+                child: Column(
+                  children: [
+                    UsersInputStatus(
+                      chatId: widget.chat.id,
+                      users: widget.users,
+                    ),
+                    SizedBox(
+                      height: 5,
+                    ),
+                  ],
                 ),
               ),
               itemBuilderType: PaginateBuilderType.listView,
@@ -255,144 +241,6 @@ class _ChatMessagesState extends State<ChatMessages> {
       ),
     );
   }
-
-  getUserChatStatusWidget(
-    BuildContext context,
-    ChatStatus status,
-    ChatifyUser user,
-  ) {
-    switch (status) {
-      case ChatStatus.typing:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('typing_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CustomImage(
-                url: user.profileImage,
-                width: 30,
-                height: 30,
-                radius: 30,
-                fit: BoxFit.cover,
-                onError: const Icon(Icons.person, color: Colors.grey),
-              ),
-              SizedBox(
-                width: 6,
-              ),
-              Lottie.asset(
-                'assets/lottie/typing.json',
-                package: 'chatify',
-                fit: BoxFit.fitHeight,
-                height: 18,
-                delegates: LottieDelegates(
-                  values: [
-                    ValueDelegate.color(
-                      const ['**'],
-                      value: Colors.green,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      case ChatStatus.recording:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('recording_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CustomImage(
-                url: user.profileImage,
-                width: 30,
-                height: 30,
-                radius: 30,
-                fit: BoxFit.cover,
-                onError: const Icon(Icons.person, color: Colors.grey),
-              ),
-              SizedBox(
-                width: 6,
-              ),
-              Transform.scale(
-                scale: 1.4,
-                child: Lottie.asset(
-                  'assets/lottie/recording.json',
-                  package: 'chatify',
-                  fit: BoxFit.fitHeight,
-                  height: 30,
-                  delegates: LottieDelegates(
-                    values: [
-                      ValueDelegate.color(
-                        const ['**'],
-                        value: Colors.green,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      case ChatStatus.sendingMedia:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('sending_media_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CustomImage(
-                url: user.profileImage,
-                width: 30,
-                height: 30,
-                radius: 30,
-                fit: BoxFit.cover,
-                onError: const Icon(Icons.person, color: Colors.grey),
-              ),
-              SizedBox(
-                width: 6,
-              ),
-              Lottie.asset(
-                'assets/lottie/three_dots.json',
-                package: 'chatify',
-                height: 30,
-                delegates: LottieDelegates(
-                  values: [
-                    ValueDelegate.color(
-                      const ['**'],
-                      value: Colors.green,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        );
-      case ChatStatus.attend:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('attend_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              CustomImage(
-                url: user.profileImage,
-                width: 30,
-                height: 30,
-                radius: 30,
-                fit: BoxFit.cover,
-                onError: const Icon(Icons.person, color: Colors.grey),
-              ),
-            ],
-          ),
-        );
-      case ChatStatus.none:
-        return SizedBox(
-          key: ValueKey('none_user_status'),
-        );
-    }
-  }
 }
 
 class PendingMessages extends StatelessWidget {
@@ -401,15 +249,13 @@ class PendingMessages extends StatelessWidget {
     required this.controller,
     required this.chat,
     required this.user,
-    required this.linkedWithTop,
-    required this.linkedWithBottom,
+    required this.firstMessage,
   });
 
   final ChatController controller;
   final Chat chat;
   final ChatifyUser user;
-  final bool linkedWithTop;
-  final bool linkedWithBottom;
+  final Message firstMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -422,45 +268,15 @@ class PendingMessages extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ...value.map(
-                (e) => Column(
-                  children: [
-                    if (e is VoiceMessage)
-                      Padding(
-                        padding: const EdgeInsetsDirectional.only(
-                          bottom: 4,
-                          end: 12,
-                          start: 12,
-                        ),
-                        child: MyVoiceMessageBloc(
-                          linkedWithTop: true,
-                          linkedWithBottom: false,
-                          message: e,
-                          controller: controller,
-                        ),
-                      ),
-                    if (e is ImageMessage)
-                      MessageCard(
-                        key: ValueKey(e.id),
-                        chat: chat,
-                        message: e,
-                        user: user,
-                        controller: controller,
-                        linkedWithBottom: linkedWithBottom,
-                        linkedWithTop: linkedWithTop,
-                        isSending: true,
-                      ),
-                    if (e is TextMessage)
-                      MessageCard(
-                        key: ValueKey(e.id),
-                        chat: chat,
-                        message: e,
-                        user: user,
-                        controller: controller,
-                        linkedWithBottom: linkedWithBottom,
-                        linkedWithTop: linkedWithTop,
-                        isSending: true,
-                      ),
-                  ],
+                (e) => MessageCard(
+                  key: ValueKey(e.id),
+                  chat: chat,
+                  message: e,
+                  users: [user],
+                  controller: controller,
+                  linkedWithBottom: value.indexOf(e) != value.length - 1,
+                  linkedWithTop: firstMessage.isMine,
+                  isSending: true,
                 ),
               ),
             ],

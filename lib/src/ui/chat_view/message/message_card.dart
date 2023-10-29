@@ -1,5 +1,6 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/text_message.dart';
+import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
@@ -19,7 +20,7 @@ class MessageCard extends StatefulWidget {
   final bool linkedWithBottom;
   final bool linkedWithTop;
   final Chat chat;
-  final ChatifyUser user;
+  final List<ChatifyUser> users;
   final ChatController controller;
   final bool isSending;
 
@@ -29,9 +30,9 @@ class MessageCard extends StatefulWidget {
     required this.linkedWithBottom,
     required this.linkedWithTop,
     required this.chat,
-    required this.user,
     required this.controller,
     this.isSending = false,
+    required this.users,
   }) : super(key: key);
 
   @override
@@ -85,6 +86,14 @@ class _MessageCardState extends State<MessageCard> {
     final myEmoji = widget.message.emojis
         .cast<MessageEmoji?>()
         .firstWhere((e) => e?.uid == Chatify.currentUserId, orElse: () => null);
+    final sender = widget.users.firstWhere(
+      (e) => e.id == widget.message.sender,
+      orElse: () => ChatifyUser(
+        id: widget.message.sender,
+        name: 'Unknown',
+        profileImage: null,
+      ),
+    );
     return ValueListenableBuilder<Map<String, Message>>(
       valueListenable: widget.controller.selecetdMessages,
       builder: (context, value, child) {
@@ -391,37 +400,60 @@ class _MessageCardState extends State<MessageCard> {
                             widget.controller.reply(widget.message);
                             return Future.value(false);
                           },
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: width,
-                              minWidth: 80,
-                            ),
-                            child: widget.message is VoiceMessage
-                                ? MyBubble(
-                                    bkColor: bkColor,
-                                    linkedWithBottom: widget.linkedWithBottom,
-                                    linkedWithTop: widget.linkedWithTop,
-                                    message: widget.message,
-                                    child: MyVoiceMessage(
-                                      message: widget.message as VoiceMessage,
-                                      controller: widget.controller,
-                                      user: widget.user,
-                                    ),
-                                  )
-                                : widget.message is ImageMessage
-                                    ? ImageCard(
-                                        message: widget.message as ImageMessage,
-                                        chatController: widget.controller,
-                                        user: widget.user,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (widget.users.length > 2 && !isMine)
+                                widget.linkedWithBottom
+                                    ? SizedBox(
+                                        width: 30,
                                       )
-                                    : TextMessageCard(
-                                        widget: widget,
-                                        bkColor: bkColor,
-                                        textColor: textColor,
-                                        controller: widget.controller,
-                                        isMine: isMine,
-                                        isSending: widget.isSending,
+                                    : UserprofileImage(
+                                        url: sender.profileImage,
+                                        firstLetter: sender.name[0],
+                                        size: 30,
                                       ),
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: width,
+                                  minWidth: 80,
+                                ),
+                                child: widget.message is VoiceMessage
+                                    ? MyBubble(
+                                        bkColor: bkColor,
+                                        linkedWithBottom:
+                                            widget.linkedWithBottom,
+                                        linkedWithTop: widget.linkedWithTop,
+                                        message: widget.message,
+                                        child: ConstrainedBox(
+                                          constraints: BoxConstraints(
+                                            maxHeight: 100,
+                                          ),
+                                          child: MyVoiceMessage(
+                                            message:
+                                                widget.message as VoiceMessage,
+                                            controller: widget.controller,
+                                            user: sender,
+                                          ),
+                                        ),
+                                      )
+                                    : widget.message is ImageMessage
+                                        ? ImageCard(
+                                            message:
+                                                widget.message as ImageMessage,
+                                            chatController: widget.controller,
+                                            user: sender,
+                                          )
+                                        : TextMessageCard(
+                                            widget: widget,
+                                            bkColor: bkColor,
+                                            textColor: textColor,
+                                            controller: widget.controller,
+                                            isMine: isMine,
+                                            isSending: widget.isSending,
+                                          ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
