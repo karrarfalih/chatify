@@ -21,8 +21,9 @@ class _ChatDateWidgetState extends State<ChatDateWidget> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(50)),
+          color: Colors.black.withOpacity(0.5),
+          borderRadius: BorderRadius.circular(50),
+        ),
         child: Directionality(
           textDirection: TextDirection.ltr,
           child: Text(

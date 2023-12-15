@@ -36,13 +36,13 @@ class PaginationCubit extends Cubit<PaginationState> {
               .data()
               .toString()
               .toLowerCase()
-              .contains(searchTerm.toLowerCase()))
+              .contains(searchTerm.toLowerCase()),)
           .toList();
 
       emit(loadedState.copyWith(
         documentSnapshots: filteredList,
         hasReachedEnd: loadedState.hasReachedEnd,
-      ));
+      ),);
     }
   }
 
@@ -119,7 +119,7 @@ class PaginationCubit extends Cubit<PaginationState> {
     emit(PaginationLoaded(
       documentSnapshots: _mergeSnapshots(previousList, newList),
       hasReachedEnd: newList.isEmpty,
-    ));
+    ),);
   }
 
   List<QueryDocumentSnapshot> _mergeSnapshots(

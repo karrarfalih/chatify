@@ -73,11 +73,14 @@ class SliverContainer extends StatelessWidget {
     this.clipBehavior = Clip.antiAlias,
     this.clipSliverOnly = false,
     BorderRadiusGeometry? borderRadius,
-  })  : assert(clipper == null || borderRadius == null,
-            'clipper cannot be used with borderRadius'),
+  })  : assert(
+          clipper == null || borderRadius == null,
+          'clipper cannot be used with borderRadius',
+        ),
         clipper = borderRadius != null
             ? ShapeBorderClipper(
-                shape: RoundedRectangleBorder(borderRadius: borderRadius))
+                shape: RoundedRectangleBorder(borderRadius: borderRadius),
+              )
             : clipper;
 
   @override
@@ -161,7 +164,9 @@ class _BaseSliverContainer extends RenderObjectWidget
 
   @override
   void updateRenderObject(
-      BuildContext context, RenderSliverContainer renderObject) {
+    BuildContext context,
+    RenderSliverContainer renderObject,
+  ) {
     renderObject.bufferExtent = bufferExtent;
     renderObject.clipper = clipper;
     renderObject.clipBehavior = clipBehavior;
@@ -344,8 +349,10 @@ class RenderSliverContainer extends RenderSliver
     );
 
     var start = -min(constraints.scrollOffset, maxBufferExtent);
-    var end = min(geometry.maxPaintExtent - constraints.scrollOffset,
-        geometry.paintExtent + maxBufferExtent);
+    var end = min(
+      geometry.maxPaintExtent - constraints.scrollOffset,
+      geometry.paintExtent + maxBufferExtent,
+    );
 
     if (constraints.scrollOffset > 0) {
       start = min(start, end - maxBufferExtent * 2);
@@ -478,7 +485,10 @@ class RenderSliverContainer extends RenderSliver
     required double crossAxisPosition,
   }) {
     final transformedPosition = OffsetAxisUtil.create(
-        constraints.axis, crossAxisPosition, mainAxisPosition);
+      constraints.axis,
+      crossAxisPosition,
+      mainAxisPosition,
+    );
     return result.addWithPaintOffset(
       offset: _bufferRect!.topLeft,
       position: transformedPosition,

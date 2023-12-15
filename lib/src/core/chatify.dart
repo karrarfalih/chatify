@@ -124,9 +124,10 @@ class Chatify {
     required ChatifyUser user,
   }) async {
     final chat = await datasource.findChatOrCreate([user.id, currentUserId]);
+    final currentUser = await config.getUserById(currentUserId);
     Navigator.of(context).push(
       SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, users: [user]),
+        builder: (context) => ChatView(chat: chat, users: [user, currentUser]),
       ),
     );
   }
@@ -145,5 +146,9 @@ class Chatify {
 
   static Stream<int> get unreadMessagesCount {
     return datasource.getUnreadMessagesCount;
+  }
+
+  static testQueries() {
+    datasource.testAllQueries();
   }
 }

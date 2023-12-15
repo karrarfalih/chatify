@@ -152,7 +152,9 @@ class VoiceRecordingController {
           id: id,
           chatId: controller.chat.id,
           url: '',
-          duration: Duration(milliseconds: DateTime.now().difference(recordStart!).inMilliseconds),
+          duration: Duration(
+              milliseconds:
+                  DateTime.now().difference(recordStart!).inMilliseconds),
           unSeenBy: controller.chat.members
               .where((e) => e != Chatify.currentUserId)
               .toList(),
@@ -168,6 +170,7 @@ class VoiceRecordingController {
         }
         Chatify.datasource.addMessage(
           pendingMsg.copyWith(url: url),
+          controller.receiver,
         );
         Chatify.datasource.addChat(controller.chat);
       }

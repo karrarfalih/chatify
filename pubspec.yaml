@@ -1,6 +1,6 @@
 name: chatify
 description: Chat package for flutter
-version: 0.1.8
+version: 0.1.3
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -9,6 +9,8 @@ environment:
 
 dependencies:
   any_link_preview: ^3.0.0
+  bloc: ^8.1.2
+  cached_network_image: ^3.3.0
   camera: ^0.10.5+5
   cloud_firestore: ^4.4.3
   connectivity_plus: ^5.0.1
@@ -22,18 +24,19 @@ dependencies:
   flutter_bloc: ^8.1.3
   flutter_cache_manager: ^3.3.1
   flutter_image_compress: ^1.1.3
-  iconsax: any
+  http: ^0.13.6
+  iconsax: ^0.0.8
   image_picker: ^0.8.6+4
   intl: ^0.18.0
   just_audio: ^0.9.35
   kr_pull_down_button: ^1.0.0
   lottie: ^2.6.0
-  optimized_cached_image: ^3.0.1
   path_provider: ^2.0.13
   permission_handler: ^11.0.1
   photo_gallery: ^2.1.1
   provider: ^6.0.5
   record: ^4.4.4
+  rxdart: ^0.27.7
   shared_preferences: ^2.2.2
   vibration: ^1.8.3
   zoom_widget: ^2.0.1
@@ -47,3 +50,7 @@ flutter:
   assets:
     - assets/icons/
     - assets/lottie/
+
+false_secrets:
+ - example/ios/Runner/GoogleService-Info.plist
+ - example/macos/Runner/GoogleService-Info.plist

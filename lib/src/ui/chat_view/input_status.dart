@@ -210,7 +210,6 @@ class UsersInputStatus extends StatelessWidget {
 
 class _UsersProfile extends StatelessWidget {
   const _UsersProfile({
-    super.key,
     required this.users,
   });
 

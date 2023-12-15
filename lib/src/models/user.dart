@@ -4,7 +4,7 @@ class ChatifyUser {
   final String id;
   final String? uid;
   final String name;
-  final String? clientNotificationId;
+  final List<String>? clientNotificationIds;
   final String? profileImage;
   final Map<String, dynamic>? data;
 
@@ -12,7 +12,7 @@ class ChatifyUser {
     required this.id,
     this.uid,
     required this.name,
-    this.clientNotificationId,
+    this.clientNotificationIds,
     this.profileImage,
     this.data,
   });

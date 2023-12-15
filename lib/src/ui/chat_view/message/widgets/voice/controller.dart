@@ -156,7 +156,7 @@ class VoicePlayerController {
 
   _startPlaying() async {
     if (!message.isPlayed && !isMe) {
-      Chatify.datasource.addMessage(message.copyWith(isPlayed: true));
+      Chatify.datasource.addMessage(message.copyWith(isPlayed: true), null);
     }
     if (currentPlayer.value != this) {
       currentPlayer.value?._preventAutoPause = true;

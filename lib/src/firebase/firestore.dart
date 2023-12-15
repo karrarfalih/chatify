@@ -7,6 +7,7 @@ import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/uuid.dart';
 import 'package:cloud_firestore/cloud_firestore.dart' hide Transaction;
 import 'package:firebase_database/firebase_database.dart' hide Query;
+import 'package:flutter/foundation.dart';
 
 class ChatifyDatasource {
   final instance = FirebaseFirestore.instance;
@@ -37,9 +38,9 @@ class ChatifyDatasource {
     return (await _messages.doc(messageId).get()).data();
   }
 
-  Future<void> addMessage(Message message) async {
+  Future<void> addMessage(Message message, ChatifyUser? user) async {
     await _messages.doc(message.id).set(message, SetOptions(merge: true));
-    Chatify.config.onSendMessage?.call(message);
+    if (user != null) Chatify.config.onSendMessage?.call(message, user);
     ChatifyLog.d('addMessage');
   }
 
@@ -307,5 +308,52 @@ class ChatifyDatasource {
       }
       return Transaction.abort();
     });
+  }
+
+  void testAllQueries() {
+    if (kDebugMode) {
+      //next voice query
+      _messages
+          .where('chatId', isEqualTo: '')
+          .where('sendAt', isGreaterThan: '')
+          .where('type', isEqualTo: MessageType.voice.name)
+          .where('canReadBy', arrayContains: '')
+          .orderBy('sendAt', descending: false)
+          .limit(1)
+          .get();
+
+      //find chat or create
+      _chats
+          .where('membersCount', isEqualTo: 0)
+          .where('members', whereIn: [[], [].reversed.toList()])
+          .limit(1)
+          .get();
+
+      //messages query
+      _messages
+          .where('chatId', isEqualTo: '')
+          .where('canReadBy', arrayContains: '')
+          .where(
+            'sendAt',
+            isGreaterThan: DateTime.now().stamp,
+          )
+          .orderBy('sendAt', descending: true)
+          .limit(1)
+          .get();
+
+      //unseen messages
+      _messages
+          .where('chatId', isEqualTo: '')
+          .where('unSeenBy', arrayContains: '')
+          .limit(1)
+          .get();
+
+      //last message
+      _messages
+          .where('chatId', isEqualTo: '')
+          .orderBy('sendAt', descending: true)
+          .limit(1)
+          .get();
+    }
   }
 }

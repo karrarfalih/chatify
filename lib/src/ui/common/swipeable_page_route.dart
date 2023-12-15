@@ -115,20 +115,26 @@ class SwipeablePageRoute<T> extends CupertinoPageRoute<T> {
   ) {
     if (fullscreenDialog) {
       return (context, animation, secondaryAnimation, isSwipeGesture, child) {
-        return CupertinoFullscreenDialogTransition(
-          primaryRouteAnimation: animation,
-          secondaryRouteAnimation: secondaryAnimation,
-          linearTransition: isSwipeGesture,
-          child: child,
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoFullscreenDialogTransition(
+            primaryRouteAnimation: animation,
+            secondaryRouteAnimation: secondaryAnimation,
+            linearTransition: isSwipeGesture,
+            child: child,
+          ),
         );
       };
     } else {
       return (context, animation, secondaryAnimation, isSwipeGesture, child) {
-        return CupertinoPageTransition(
-          primaryRouteAnimation: animation,
-          secondaryRouteAnimation: secondaryAnimation,
-          linearTransition: isSwipeGesture,
-          child: child,
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: CupertinoPageTransition(
+            primaryRouteAnimation: animation,
+            secondaryRouteAnimation: secondaryAnimation,
+            linearTransition: isSwipeGesture,
+            child: child,
+          ),
         );
       };
     }
@@ -339,7 +345,7 @@ class _FancyBackGestureDetectorState<T>
   }
 
   _DirectionDependentDragGestureRecognizer _gestureRecognizerConstructor() {
-    final directionality = Directionality.of(context);
+    final directionality = TextDirection.ltr;
     return _DirectionDependentDragGestureRecognizer(
       debugOwner: this,
       directionality: directionality,
@@ -371,9 +377,11 @@ class _FancyBackGestureDetectorState<T>
   void _handleDragEnd(DragEndDetails details) {
     assert(mounted);
     assert(_backGestureController != null);
-    _backGestureController!.dragEnd(_convertToLogical(
-      details.velocity.pixelsPerSecond.dx / context.size!.width,
-    ));
+    _backGestureController!.dragEnd(
+      _convertToLogical(
+        details.velocity.pixelsPerSecond.dx / context.size!.width,
+      ),
+    );
     _backGestureController = null;
   }
 
@@ -386,7 +394,7 @@ class _FancyBackGestureDetectorState<T>
   }
 
   double _convertToLogical(double value) {
-    final directionality = Directionality.of(context);
+    final directionality = TextDirection.ltr;
     if (directionality == TextDirection.rtl) return -value;
     return value;
   }
@@ -394,7 +402,7 @@ class _FancyBackGestureDetectorState<T>
   double _dragAreaWidth(BuildContext context) {
     // For devices with notches, the drag area needs to be larger on the side
     // that has the notch.
-    final directionality = Directionality.of(context);
+    final directionality = TextDirection.ltr;
     final media = MediaQuery.of(context);
     final dragAreaWidth = directionality == TextDirection.rtl
         ? media.padding.left

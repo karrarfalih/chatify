@@ -8,7 +8,6 @@ import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/animated_flip_counter.dart';
 import 'package:chatify/src/ui/common/bottom_sheet/flexible_bottom_sheet_route.dart';
 import 'package:chatify/src/ui/common/sliver/sliver_container.dart';
-import 'package:chatify/src/ui/common/sliver_group.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';

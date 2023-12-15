@@ -20,7 +20,7 @@ class CircularButton extends StatelessWidget {
     this.tooltip,
     this.hoverColor,
     this.focusNode,
-    this.highlightColor
+    this.highlightColor,
   }) : super(key: key);
 
   @override

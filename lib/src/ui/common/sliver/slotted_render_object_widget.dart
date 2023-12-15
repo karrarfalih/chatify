@@ -29,7 +29,9 @@ mixin SlottedMultiChildRenderObjectWidgetMixin<S> on RenderObjectWidget {
 
   @override
   void updateRenderObject(
-      BuildContext context, SlottedContainerRenderObjectMixin<S> renderObject);
+    BuildContext context,
+    SlottedContainerRenderObjectMixin<S> renderObject,
+  );
 
   @override
   SlottedRenderObjectElement<S> createElement() =>
@@ -157,7 +159,8 @@ mixin SlottedContainerRenderObjectMixin<S> on RenderObject {
 class SlottedRenderObjectElement<S> extends RenderObjectElement {
   /// Creates an element that uses the given widget as its configuration.
   SlottedRenderObjectElement(
-      SlottedMultiChildRenderObjectWidgetMixin<S> super.widget);
+    SlottedMultiChildRenderObjectWidgetMixin<S> super.widget,
+  );
 
   final Map<S, Element> _slotToChild = <S, Element>{};
 
@@ -198,28 +201,36 @@ class SlottedRenderObjectElement<S> extends RenderObjectElement {
     final SlottedMultiChildRenderObjectWidgetMixin<S>
         slottedMultiChildRenderObjectWidgetMixin =
         widget as SlottedMultiChildRenderObjectWidgetMixin<S>;
-    assert(() {
-      _debugPreviousSlots ??=
-          slottedMultiChildRenderObjectWidgetMixin.slots.toList();
-      return listEquals(_debugPreviousSlots,
-          slottedMultiChildRenderObjectWidgetMixin.slots.toList());
-    }(), '${widget.runtimeType}.slots must not change.');
     assert(
-        slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length ==
-            slottedMultiChildRenderObjectWidgetMixin.slots.length,
-        'slots must be unique');
+      () {
+        _debugPreviousSlots ??=
+            slottedMultiChildRenderObjectWidgetMixin.slots.toList();
+        return listEquals(
+          _debugPreviousSlots,
+          slottedMultiChildRenderObjectWidgetMixin.slots.toList(),
+        );
+      }(),
+      '${widget.runtimeType}.slots must not change.',
+    );
+    assert(
+      slottedMultiChildRenderObjectWidgetMixin.slots.toSet().length ==
+          slottedMultiChildRenderObjectWidgetMixin.slots.length,
+      'slots must be unique',
+    );
 
     for (final S slot in slottedMultiChildRenderObjectWidgetMixin.slots) {
       _updateChild(
-          slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot), slot);
+        slottedMultiChildRenderObjectWidgetMixin.childForSlot(slot),
+        slot,
+      );
     }
   }
 
   void _updateChild(Widget? widget, S slot) {
     final Element? oldChild = _slotToChild[slot];
-    assert(oldChild == null ||
-        oldChild.slot ==
-            slot); // Reason why [moveRenderObjectChild] is not reachable.
+    assert(
+      oldChild == null || oldChild.slot == slot,
+    ); // Reason why [moveRenderObjectChild] is not reachable.
     final Element? newChild = updateChild(oldChild, widget, slot);
     if (oldChild != null) {
       _slotToChild.remove(slot);

@@ -1,5 +1,4 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';

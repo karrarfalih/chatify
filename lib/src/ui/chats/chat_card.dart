@@ -32,49 +32,6 @@ class ChatRoomCard extends StatefulWidget {
 }
 
 class _ChatRoomCardState extends State<ChatRoomCard> {
-  //  late final PendingMessagesHandler pendingMessages;
-  // final BehaviorSubject<_PendingMessage> pendingMessagesSubject =
-  //     BehaviorSubject.seeded(_PendingMessage(null, true));
-  // late final Stream<_PendingMessage> lastMessage;
-
-  // StreamSubscription<Message?>? lastMessageSubscription;
-  // @override
-  // void initState() {
-  //   pendingMessages = PendingMessagesHandler(chat: widget.chat);
-  //   pendingMessages.messages.addListener(_listenToPendingMessages);
-  //   lastMessageSubscription =
-  //       Chatify.datasource.lastMessageStream(widget.chat).listen((event) {
-  //     if (event != null)
-  //       pendingMessagesSubject.add(_PendingMessage(event, true));
-  //   });
-  //   lastMessage = pendingMessagesSubject.distinct((a, b) {
-  //     print('a: $a, b: $b');
-  //     final aIsSent = a.isSent;
-  //     final bIsSent = b.isSent;
-  //     if(aIsSent == bIsSent && a.message?.id == b.message?.id) return true;
-  //     if (aIsSent && bIsSent) return false;
-  //     if (aIsSent && !bIsSent) return a.message?.id == b.message?.id;
-  //     if (!aIsSent && bIsSent) return a.message?.id != b.message?.id;
-  //     return false;
-  //   });
-  //   super.initState();
-  // }
-
-  // void _listenToPendingMessages() {
-  //   if (pendingMessages.messages.value.isNotEmpty)
-  //     pendingMessagesSubject
-  //         .add(_PendingMessage(pendingMessages.messages.value.last, false));
-  // }
-
-  // @override
-  // void dispose() {
-  //   pendingMessages.messages.removeListener(_listenToPendingMessages);
-  //   lastMessageSubscription?.cancel();
-  //   pendingMessages.dispose();
-  //   pendingMessagesSubject.close();
-  //   super.dispose();
-  // }
-
   late final PendingMessagesHandler pendingMessages;
   final BehaviorSubject<Message?> pendingMessagesSubject =
       BehaviorSubject.seeded(null);
@@ -82,6 +39,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
   final BehaviorSubject<_PendingMessage?> lastMessageSubject =
       BehaviorSubject.seeded(null);
   late final StreamSubscription<_PendingMessage?> lastMessageSubscription;
+
   @override
   void initState() {
     pendingMessages = ChatScreen.pendingMessagesHandlers[widget.chat.id] ??
@@ -117,7 +75,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
   }
 
   Future<List<ChatifyUser>> getUsers() async {
-    return Future.wait(
+    return await Future.wait(
       widget.chat.members.map((e) => Chatify.config.getUserById(e)),
     );
   }
@@ -129,6 +87,9 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
       child: KrFutureBuilder<List<ChatifyUser>>(
         future: getUsers(),
         onLoading: const ChatRoomBloc(),
+        onError: (e) {
+          return Text(e.toString());
+        },
         builder: (users) {
           return InkWell(
             highlightColor: Colors.transparent,

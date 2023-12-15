@@ -64,7 +64,11 @@ class RecentChats extends StatelessWidget {
       ),
       itemBuilderType: PaginateBuilderType.listView,
       isLive: true,
-      initialLoader: const ChatRoomBloc(),
+      initialLoader: Column(
+        children: [
+          const ChatRoomBloc(),
+        ],
+      ),
       bottomLoader: const ChatRoomBloc(),
     );
   }

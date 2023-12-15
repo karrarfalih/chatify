@@ -1,5 +1,4 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:flutter/material.dart';
 
 class ChatifyWraper extends StatefulWidget {

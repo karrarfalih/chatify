@@ -87,8 +87,10 @@ extension Phone on String {
 }
 
 extension Url on String? {
-  bool get isURL => hasMatch(this,
-      r"^((((H|h)(T|t)|(F|f))(T|t)(P|p)((S|s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$");
+  bool get isURL => hasMatch(
+        this,
+        r"^((((H|h)(T|t)|(F|f))(T|t)(P|p)((S|s)?))\://)?(www.|[a-zA-Z0-9].)[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,6}(\:[0-9]{1,5})*(/($|[a-zA-Z0-9\.\,\;\?\'\\\+&amp;%\$#\=~_\-]+))*$",
+      );
 }
 
 bool hasMatch(String? value, String pattern) {
@@ -125,8 +127,9 @@ extension DateTimeFormat on DateTime {
   String format(BuildContext context, String format) {
     initializeDateFormatting();
     return DateFormat(
-            format, Localizations.maybeLocaleOf(context)?.languageCode)
-        .format(this);
+      format,
+      Localizations.maybeLocaleOf(context)?.languageCode,
+    ).format(this);
   }
 
   DateTime get withoutTime => DateTime(year, month, day);

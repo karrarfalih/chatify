@@ -4,7 +4,6 @@ import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/hero_dialog.dart';
 import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/common/toast.dart';
-import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/image_saver.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';

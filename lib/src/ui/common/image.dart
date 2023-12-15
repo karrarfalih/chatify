@@ -1,10 +1,10 @@
 import 'dart:typed_data';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:optimized_cached_image/optimized_cached_image.dart';
 
 const _kImageMaxWidthCache = 1000;
 
@@ -61,7 +61,7 @@ class CustomImage extends StatelessWidget {
             Center(child: onError ?? ErrorImage()),
       );
     } else {
-      image = OptimizedCacheImage(
+      image = CachedNetworkImage(
         imageUrl: url != null && url!.isNotEmpty ? url! : onEmptyOrNull ?? '',
         placeholder: (context, url) => _onLoading(context),
         errorWidget: (context, url, error) {

@@ -22,7 +22,8 @@ part 'record_controller.dart';
 
 class ChatController {
   final Chat chat;
-  ChatController(this.chat, this._receivedPendingHandler)
+  final List<ChatifyUser> _users;
+  ChatController(this.chat, this._receivedPendingHandler, this._users)
       : pending =
             _receivedPendingHandler ?? PendingMessagesHandler(chat: chat) {
     keyboardController = KeyboardController(this);
@@ -37,6 +38,9 @@ class ChatController {
     });
   }
 
+  ChatifyUser? get receiver => _users
+      .cast<ChatifyUser?>()
+      .firstWhere((e) => e?.id != Chatify.currentUserId, orElse: () => null);
   late final KeyboardController keyboardController;
   late final VoiceRecordingController voiceController;
   final PendingMessagesHandler pending;
@@ -78,6 +82,7 @@ class ChatController {
     if (messageAction.value?.type == MessageActionType.edit) {
       Chatify.datasource.addMessage(
         (messageAction.value!.message! as TextMessage).copyWith(message: msg),
+        null,
       );
     } else {
       for (int i = 0; i <= (msg.length ~/ 1000); i++) {
@@ -91,7 +96,7 @@ class ChatController {
           canReadBy: chat.members,
         );
         pending.add(message);
-        Chatify.datasource.addMessage(message);
+        Chatify.datasource.addMessage(message, receiver);
       }
       Chatify.datasource.addChat(chat);
     }
@@ -133,6 +138,7 @@ class ChatController {
     }
     Chatify.datasource.addMessage(
       pendingMsg.copyWith(imageUrl: imageUrl, thumbnailBytes: img.thumbnail),
+      receiver,
     );
   }
 

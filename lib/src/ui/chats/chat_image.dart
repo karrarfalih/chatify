@@ -1,6 +1,5 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/common/image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ChatImage extends StatelessWidget {
@@ -56,8 +55,12 @@ class ChatImage extends StatelessWidget {
 }
 
 class UserprofileImage extends StatelessWidget {
-  const UserprofileImage(
-      {super.key, required this.url, this.firstLetter, this.size = 50});
+  const UserprofileImage({
+    super.key,
+    required this.url,
+    this.firstLetter,
+    this.size = 50,
+  });
   final String? url;
   final String? firstLetter;
   final double size;

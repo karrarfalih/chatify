@@ -6,6 +6,6 @@ class InitialLoader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const SingleChildScrollView(
-        child: Center(child: CircularProgressIndicator(strokeWidth: 2)));
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),);
   }
 }

@@ -43,10 +43,12 @@ class BottomInsetObserver extends WidgetsBindingObserver {
   ) {
     _changeListeners.add(onChange);
     if (_currentInset! > 0) {
-      onChange(BottomInsetChanges(
-        currentInset: _currentInset!,
-        delta: 0,
-      ));
+      onChange(
+        BottomInsetChanges(
+          currentInset: _currentInset!,
+          delta: 0,
+        ),
+      );
     }
   }
 
@@ -57,20 +59,24 @@ class BottomInsetObserver extends WidgetsBindingObserver {
 
   void _init() {
     WidgetsBinding.instance.addObserver(this);
+    // ignore: deprecated_member_use
     final window = WidgetsBinding.instance.window;
     _currentInset = window.viewInsets.bottom / window.devicePixelRatio;
   }
 
   /// Calculate changes in bottom insets
   void _listener() {
+    // ignore: deprecated_member_use
     final window = WidgetsBinding.instance.window;
     final newInset = window.viewInsets.bottom / window.devicePixelRatio;
     final delta = newInset - (_currentInset ?? newInset);
     if (delta == 0) return;
-    _onChange(BottomInsetChanges(
-      currentInset: newInset,
-      delta: delta,
-    ));
+    _onChange(
+      BottomInsetChanges(
+        currentInset: newInset,
+        delta: delta,
+      ),
+    );
     _currentInset = newInset;
   }
 

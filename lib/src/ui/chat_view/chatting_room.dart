@@ -41,7 +41,7 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   void initState() {
-    controller = ChatController(widget.chat, widget.pendingMessagesHandler);
+    controller = ChatController(widget.chat, widget.pendingMessagesHandler, widget.users);
     connectivity = widget.connectivity ?? ChatifyConnectivity();
     super.initState();
   }

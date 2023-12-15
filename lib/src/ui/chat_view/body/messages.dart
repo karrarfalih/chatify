@@ -2,7 +2,6 @@ import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/input_status.dart';
-import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';

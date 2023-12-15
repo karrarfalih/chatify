@@ -182,7 +182,7 @@ class _MyAppState extends State<MyApp> {
                             image == 'assets/chat_background/${i + 1}.jpg',
                         image: 'assets/chat_background/${i + 1}.jpg',
                       ),
-                    )),
+                    ),),
               ],
             ),
           ),
