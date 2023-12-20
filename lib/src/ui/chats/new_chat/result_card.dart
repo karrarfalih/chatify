@@ -1,6 +1,7 @@
 import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
 class UserResultCard extends StatelessWidget {
@@ -23,11 +24,36 @@ class UserResultCard extends StatelessWidget {
           children: [
             CustomImage(
               url: user.profileImage,
-              width: 56,
-              height: 56,
-              radius: 56,
+              width: 50,
+              height: 50,
+              radius: 50,
               fit: BoxFit.cover,
-              onError: const Icon(Icons.person, color: Colors.grey),
+              onError: Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.primaries
+                          .elementAt(user.name.getPositionOfFirstLetter())
+                          .withOpacity(0.6),
+                      Colors.primaries
+                          .elementAt(user.name.getPositionOfFirstLetter()),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                  shape: BoxShape.circle,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  user.name.substring(0, 1).toUpperCase(),
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                  ),
+                ),
+              ),
             ),
             SizedBox(
               width: 14,
@@ -38,7 +64,7 @@ class UserResultCard extends StatelessWidget {
                 color: Chatify.theme.recentChatsForegroundColor,
                 fontSize: 16,
               ),
-            )
+            ),
           ],
         ),
       ),

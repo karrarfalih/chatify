@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/ui/chats/search/search.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -17,44 +18,41 @@ class ChatSearch extends StatelessWidget {
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
       child: SizedBox(
         height: 48,
-        child: TextFormField(
-          style: TextStyle(),
-          textAlign: TextAlign.start,
-          textAlignVertical: TextAlignVertical.center,
-          textInputAction: TextInputAction.search,
-          cursorHeight: 20,
-          decoration: InputDecoration(
-            hintText: 'Search',
-            enabled: true,
-            hintStyle: TextStyle(
-              color: theme.recentChatsForegroundColor.withOpacity(0.5),
-              fontWeight: FontWeight.w400,
-              fontSize: 14,
+        child: TextButton(
+          onPressed: () {
+            Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const SearchScreen(),
+                      ),
+                    );
+          },
+          style: TextButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-            isDense: true,
-            filled: true,
-            fillColor: theme.recentChatsForegroundColor.withOpacity(0.05),
-            prefixIcon: SizedBox(
-              child: Padding(
+            backgroundColor: theme.recentChatsForegroundColor.withOpacity(0.05),
+            padding: EdgeInsets.zero,
+          ),
+          child: Row(
+            children: [
+              Padding(
                 padding: const EdgeInsets.all(12),
                 child: Icon(
                   Iconsax.search_normal,
-                  color: theme.recentChatsForegroundColor.withOpacity(0.7),
+                  size: 18,
+                  color: theme.recentChatsForegroundColor.withOpacity(0.5),
                 ),
               ),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: Colors.transparent,
+              Text(
+                'Search',
+                style: TextStyle(
+                  color: theme.recentChatsForegroundColor.withOpacity(0.5),
+                  fontWeight: FontWeight.w400,
+                  fontSize: 14,
+                ),
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide(
-                color: theme.recentChatsForegroundColor.withOpacity(0.1),
-              ),
-            ),
+            ],
           ),
         ),
       ),

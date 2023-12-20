@@ -49,7 +49,7 @@ class CustomImage extends StatelessWidget {
         (onEmptyOrNull == null || onEmptyOrNull!.isEmpty)) {
       return Padding(
         padding: padding ?? EdgeInsets.zero,
-        child: const Center(child: ErrorImage()),
+        child: Center(child: onError ?? ErrorImage()),
       );
     }
     Widget image;

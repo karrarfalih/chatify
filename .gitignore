@@ -8,3 +8,4 @@ example/lib/firebase_options.dart
 example/android/app/google-services.json
 example/ios/firebase_app_id_file.json
 example/macos/firebase_app_id_file.json
+example/android/keystore/keystore.properties

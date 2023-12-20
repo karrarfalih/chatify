@@ -84,12 +84,10 @@ class SelectUserBySearch extends StatefulWidget {
 
 class _SelectUserBySearchState extends State<SelectUserBySearch> {
   final search = SearchController();
-  final selected = Rx<List<ChatifyUser>>([]);
 
   @override
   void dispose() {
     search.dispose();
-    selected.dispose();
     super.dispose();
   }
 
@@ -145,7 +143,6 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
           child: MultiValuesListenableBuilder(
             valueListenables: [
               search.results,
-              search.history,
               search.isSearching,
             ],
             builder: (context, value, child) {
@@ -199,53 +196,9 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                           var e = search.results.value.elementAt(index);
                           return UserResultCard(
                             user: e,
-                            onTap: (e) {
-                              selected
-                                ..value.add(e)
-                                ..refresh();
-                            },
+                            onTap: widget.onSelect,
                           );
                         },
-                      ),
-                    ),
-                  ),
-                  Visibility(
-                    visible: search.query.value.isEmpty &&
-                        search.history.value.isNotEmpty &&
-                        !search.isSearching.value,
-                    child: Expanded(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: Text(
-                              'History',
-                              style: TextStyle(
-                                color: theme.recentChatsForegroundColor,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: ListView.builder(
-                              itemCount: search.history.value.length,
-                              shrinkWrap: true,
-                              scrollDirection: Axis.vertical,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                var e = search.history.value.elementAt(index);
-                                return UserResultCard(
-                                  user: e,
-                                  onTap: (e) {
-                                    selected
-                                      ..value.add(e)
-                                      ..refresh();
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ),

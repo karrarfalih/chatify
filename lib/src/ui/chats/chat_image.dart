@@ -1,5 +1,6 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/ui/common/image.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
 class ChatImage extends StatelessWidget {
@@ -10,9 +11,13 @@ class ChatImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (imageUrl != null) return UserprofileImage(url: imageUrl!);
+    if (imageUrl != null)
+      return UserProfileImage(
+        url: imageUrl!,
+        firstLetter: users.first.name.substring(0, 1).toUpperCase(),
+      );
     if (users.length == 1)
-      return UserprofileImage(
+      return UserProfileImage(
         url: users.first.profileImage,
         firstLetter: users.first.name.substring(0, 1).toUpperCase(),
       );
@@ -25,7 +30,7 @@ class ChatImage extends StatelessWidget {
             PositionedDirectional(
               end: 0,
               top: 0,
-              child: UserprofileImage(
+              child: UserProfileImage(
                 size: 32,
                 url: users.first.profileImage,
                 firstLetter: users.first.name.substring(0, 1).toUpperCase(),
@@ -40,7 +45,7 @@ class ChatImage extends StatelessWidget {
                   color: Theme.of(context).scaffoldBackgroundColor,
                   borderRadius: BorderRadius.circular(50),
                 ),
-                child: UserprofileImage(
+                child: UserProfileImage(
                   size: 32,
                   url: users[1].profileImage,
                   firstLetter: users[1].name.substring(0, 1).toUpperCase(),
@@ -54,46 +59,51 @@ class ChatImage extends StatelessWidget {
   }
 }
 
-class UserprofileImage extends StatelessWidget {
-  const UserprofileImage({
+class UserProfileImage extends StatelessWidget {
+  const UserProfileImage({
     super.key,
     required this.url,
-    this.firstLetter,
+    required this.firstLetter,
     this.size = 50,
   });
   final String? url;
-  final String? firstLetter;
+  final String firstLetter;
   final double size;
 
   @override
   Widget build(BuildContext context) {
-    if (url == null) {
-      return Container(
-        height: size,
-        width: size,
-        decoration: BoxDecoration(
-          color: Chatify.theme.primaryColor,
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Center(
-          child: Text(
-            firstLetter!,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: size / 2,
-              fontWeight: FontWeight.normal,
-            ),
-          ),
-        ),
-      );
-    }
     return CustomImage(
       url: url,
       height: size,
       width: size,
       radius: size,
       fit: BoxFit.cover,
-      onError: const Icon(Icons.person, color: Colors.grey),
+      onError: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.primaries
+                  .elementAt(firstLetter.getPositionOfFirstLetter())
+                  .withOpacity(0.6),
+              Colors.primaries
+                  .elementAt(firstLetter.getPositionOfFirstLetter()),
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          firstLetter.substring(0, 1).toUpperCase(),
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 26,
+          ),
+        ),
+      ),
     );
   }
 }

@@ -41,7 +41,8 @@ class _ChatViewState extends State<ChatView> {
 
   @override
   void initState() {
-    controller = ChatController(widget.chat, widget.pendingMessagesHandler, widget.users);
+    controller = ChatController(
+        widget.chat, widget.pendingMessagesHandler, widget.users);
     connectivity = widget.connectivity ?? ChatifyConnectivity();
     super.initState();
   }
@@ -90,7 +91,7 @@ class _ChatViewState extends State<ChatView> {
                   if (Chatify.theme.backgroundImage == null) ...[
                     Positioned.fill(
                       child: ColoredBox(
-                        color: Chatify.theme.primaryColor.withOpacity(0.05),
+                        color: Chatify.theme.primaryColor.withOpacity(0.03),
                       ),
                     ),
                     Center(
@@ -103,10 +104,10 @@ class _ChatViewState extends State<ChatView> {
                             BoxShadow(
                               color:
                                   Chatify.theme.primaryColor.withOpacity(0.1),
-                              blurRadius: MediaQuery.of(context).size.width / 2,
+                              blurRadius: MediaQuery.of(context).size.width / 3,
                               spreadRadius:
-                                  MediaQuery.of(context).size.width / 2,
-                            )
+                                  MediaQuery.of(context).size.width / 3,
+                            ),
                           ],
                         ),
                       ),
@@ -150,7 +151,7 @@ class _ChatViewState extends State<ChatView> {
                                   chat: widget.chat,
                                 ),
                                 ChatBottomSpace(controller: controller),
-                                EmojisKeyboard(controller: controller)
+                                EmojisKeyboard(controller: controller),
                               ],
                             ),
                           ),
@@ -170,7 +171,7 @@ class _ChatViewState extends State<ChatView> {
                     ],
                   ),
                   RecordThumb(controller: controller),
-                  RecordingLock(controller: controller)
+                  RecordingLock(controller: controller),
                 ],
               ),
             ),

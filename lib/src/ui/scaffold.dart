@@ -7,19 +7,28 @@ import 'package:chatify/src/ui/chats/search.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:chatify/src/utils/context_provider.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
 import 'chats/recent_chats.dart';
 
 class ChatScreen extends StatefulWidget {
-  ChatScreen({Key? key})
-      : assert(
+  ChatScreen({
+    Key? key,
+    this.leading,
+    this.title,
+    this.isCenter = true,
+    this.actionButton,
+  })  : assert(
           Chatify.isInititialized,
           'initialize the chat options. use init method in the main entry.',
         ),
         super(key: key);
+
+  final Widget? leading;
+  final Widget? actionButton;
+  final String? title;
+  final bool isCenter;
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -47,10 +56,11 @@ class _ChatScreenState extends State<ChatScreen>
     return Scaffold(
       key: ContextProvider.recentChatsKey,
       appBar: AppBar(
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         backgroundColor: Colors.transparent,
         shadowColor: Colors.transparent,
         elevation: 0,
+        leading: widget.leading,
         systemOverlayStyle: theme.isRecentChatsDark
             ? SystemUiOverlayStyle.light.copyWith(
                 systemNavigationBarDividerColor: Colors.black,
@@ -62,6 +72,7 @@ class _ChatScreenState extends State<ChatScreen>
                 systemNavigationBarColor: Colors.white,
                 systemNavigationBarIconBrightness: Brightness.dark,
               ),
+        titleSpacing: 0,
         title: KrStreamBuilder<ConnectivityStatus>(
           stream: connectivity.connection,
           onLoading: SizedBox.shrink(),
@@ -113,7 +124,7 @@ class _ChatScreenState extends State<ChatScreen>
                 ],
               );
             return Text(
-              'Messages',
+              widget.title ?? 'Messages',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
@@ -122,40 +133,30 @@ class _ChatScreenState extends State<ChatScreen>
             );
           },
         ),
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          padding: EdgeInsets.all(14),
-          icon: Icon(
-            CupertinoIcons.back,
-            color: theme.recentChatsForegroundColor,
-            opticalSize: 1,
-          ),
-        ),
-        centerTitle: true,
+        centerTitle: widget.isCenter,
         actionsIconTheme: IconThemeData(
           color: theme.recentChatsForegroundColor,
           size: 24,
         ),
         actions: [
           if (Chatify.config.canCreateNewChat)
-            IconButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NewChat(),
+            widget.actionButton ??
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const NewChat(),
+                      ),
+                    );
+                  },
+                  padding: const EdgeInsets.all(14),
+                  icon: Icon(
+                    Iconsax.message_add_1,
+                    size: 24,
+                    color: theme.recentChatsForegroundColor,
                   ),
-                );
-              },
-              padding: const EdgeInsets.all(14),
-              icon: Icon(
-                Iconsax.message_add_1,
-                size: 24,
-                color: theme.recentChatsForegroundColor,
-              ),
-            ),
+                ),
           const SizedBox(
             width: 12,
           ),

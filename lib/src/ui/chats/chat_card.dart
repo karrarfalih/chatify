@@ -13,6 +13,7 @@ import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -116,9 +117,31 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                       Stack(
                         alignment: AlignmentDirectional.bottomEnd,
                         children: [
-                          ChatImage(users: users.withoutMeOrMe),
+                          if (widget.chat.title == 'Saved Messages')
+                            Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Chatify.theme.primaryColor.withOpacity(0.6),
+                                    Chatify.theme.primaryColor,
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Iconsax.save_2,
+                                color: Colors.white,
+                              ),
+                            )
+                          else
+                            ChatImage(users: users.withoutMeOrMe),
                           if (users.length == 1 &&
-                              users.first != Chatify.currentUserId)
+                              users.first != Chatify.currentUserId &&
+                              widget.chat.title != 'Saved Messages')
                             KrStreamBuilder<UserLastSeen>(
                               stream: Chatify.datasource.getUserLastSeen(
                                 users.first.id,
@@ -140,7 +163,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                   ),
                                 );
                               },
-                            )
+                            ),
                         ],
                       ),
                       Expanded(
@@ -158,9 +181,13 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        users.withoutMeOrMe
-                                            .map((e) => e.name.split(' ').first)
-                                            .join(', '),
+                                        widget.chat.title ??
+                                            users.withoutMeOrMe
+                                                .map(
+                                                  (e) =>
+                                                      e.name.split(' ').first,
+                                                )
+                                                .join(', '),
                                         style: const TextStyle(height: 1),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -201,8 +228,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                                   package: 'chatify',
                                                   height: 17,
                                                   color: Chatify
-                                                      .theme.primaryColor
-                                                      .withOpacity(.5),
+                                                      .theme.primaryColor,
                                                 ),
                                               const SizedBox(
                                                 width: 5,
@@ -240,7 +266,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                                     fontSize: 12,
                                                   ),
                                                 ),
-                                              )
+                                              ),
                                             ],
                                           ),
                                         );
@@ -314,7 +340,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                             ],
                           ),
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ],
@@ -357,7 +383,7 @@ class ChatRoomBloc extends StatelessWidget {
                 MyBlock(height: 15, width: 60, space: 5),
                 MyBlock(height: 12, width: 150),
               ],
-            )
+            ),
           ],
         ),
       ),

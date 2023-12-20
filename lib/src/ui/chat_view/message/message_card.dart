@@ -408,7 +408,7 @@ class _MessageCardState extends State<MessageCard> {
                                     ? SizedBox(
                                         width: 30,
                                       )
-                                    : UserprofileImage(
+                                    : UserProfileImage(
                                         url: sender.profileImage,
                                         firstLetter: sender.name[0],
                                         size: 30,

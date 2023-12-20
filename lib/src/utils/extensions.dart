@@ -157,3 +157,15 @@ extension UrlFormatter on String {
     return 'https://$this';
   }
 }
+
+extension UserColorFromName on String {
+  int getPositionOfFirstLetter() {
+    const String lowercaseAlphabet = "abcdefghijklmnopqrstuvwxyz";
+    int index = lowercaseAlphabet.indexOf(substring(0, 1));
+    if (index >= 0) {
+      return (index + 1) % Colors.primaries.length;
+    } else {
+      return 0;
+    }
+  }
+}

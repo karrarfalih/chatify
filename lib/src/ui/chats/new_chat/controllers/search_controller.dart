@@ -8,11 +8,12 @@ class SearchController {
   final query = ''.obs;
   final isSearching = false.obs;
   final results = <ChatifyUser>[].obs;
-  final history = <ChatifyUser>[].obs;
+
+  final List<ChatifyUser> contactsUsers;
 
   Timer? _debounceTimer;
 
-  SearchController() {
+  SearchController([this.contactsUsers = const []]) {
     _search('');
     query.addListener(() {
       if (_debounceTimer != null && _debounceTimer!.isActive) {
@@ -42,7 +43,6 @@ class SearchController {
     query.dispose();
     isSearching.dispose();
     results.dispose();
-    history.dispose();
     _debounceTimer?.cancel();
   }
 }

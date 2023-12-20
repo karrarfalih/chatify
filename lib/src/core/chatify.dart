@@ -6,6 +6,7 @@ import 'package:chatify/src/ui/chat_view/chatting_room.dart';
 import 'package:chatify/src/ui/common/swipeable_page_route.dart';
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/log.dart';
+import 'package:chatify/src/utils/uuid.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
@@ -130,6 +131,15 @@ class Chatify {
         builder: (context) => ChatView(chat: chat, users: [user, currentUser]),
       ),
     );
+  }
+
+  static Future createSavedMessages() async {
+    final chat = Chat(
+      id: Uuid.generate(),
+      members: [currentUserId],
+      title: 'Saved Messages',
+    );
+    await _datasource.addChat(chat);
   }
 
   static openChat(

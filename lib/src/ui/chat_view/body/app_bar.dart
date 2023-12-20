@@ -175,10 +175,24 @@ class ChatAppBar extends StatelessWidget {
                     child: InkWell(
                       child: Row(
                         children: [
-                          Transform.scale(
-                            scale: 44 / 50,
-                            child: ChatImage(users: users.withoutMeOrMe),
-                          ),
+                          if (chatController.chat.title == 'Saved Messages')
+                            Container(
+                              height: 44,
+                              width: 44,
+                              decoration: BoxDecoration(
+                                color: Chatify.theme.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Iconsax.save_2,
+                                color: Colors.white,
+                              ),
+                            )
+                          else
+                            Transform.scale(
+                              scale: 44 / 50,
+                              child: ChatImage(users: users.withoutMeOrMe),
+                            ),
                           SizedBox(
                             width: 10,
                           ),
@@ -189,9 +203,10 @@ class ChatAppBar extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  users.withoutMeOrMe
-                                      .map((e) => e.name.split(' ').first)
-                                      .join(', '),
+                                  chatController.chat.title ??
+                                      users.withoutMeOrMe
+                                          .map((e) => e.name.split(' ').first)
+                                          .join(', '),
                                   style: TextStyle(
                                     color: theme.chatForegroundColor,
                                     fontSize: 16,
@@ -199,14 +214,16 @@ class ChatAppBar extends StatelessWidget {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                SizedBox(
-                                  height: 15,
-                                  child: _ChatStatus(
-                                    chatController: chatController,
-                                    users: users,
-                                    connectivity: connectivity,
+                                if (chatController.chat.title !=
+                                    'Saved Messages')
+                                  SizedBox(
+                                    height: 15,
+                                    child: _ChatStatus(
+                                      chatController: chatController,
+                                      users: users,
+                                      connectivity: connectivity,
+                                    ),
                                   ),
-                                ),
                               ],
                             ),
                           ),
