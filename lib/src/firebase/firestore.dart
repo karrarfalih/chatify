@@ -159,6 +159,31 @@ class ChatifyDatasource {
     return chat;
   }
 
+  Future<Chat> findChatOrCreateSavedMessage() async {
+    bool isExist = MemoryCache.cache.entries.any(
+      (e) => e.value is Chat && (e.value as Chat).title == 'Saved Messages',
+    );
+    if (isExist) {
+      return MemoryCache.cache.entries
+          .firstWhere(
+            (e) =>
+                e.value is Chat && (e.value as Chat).title == 'Saved Messages',
+          )
+          .value as Chat;
+    }
+    final res = await _chats
+        .where('title', isEqualTo: 'Saved Messages')
+        .where('members', arrayContains: Chatify.currentUserId)
+        .get();
+    if (res.size > 0) return res.docs.first.data();
+    final chat = Chat(
+        id: 'saved_message',
+        members: [Chatify.currentUserId],
+        title: 'Saved Messages');
+    await addChat(chat);
+    return chat;
+  }
+
   Future<void> deleteChatForMe(String id) async {
     await instance.runTransaction((transaction) async {
       final chat = await transaction.get(_chats.doc(id));

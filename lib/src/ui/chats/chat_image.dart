@@ -79,8 +79,8 @@ class UserProfileImage extends StatelessWidget {
       radius: size,
       fit: BoxFit.cover,
       onError: Container(
-        width: 50,
-        height: 50,
+        width: size,
+        height: size,
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
@@ -100,7 +100,7 @@ class UserProfileImage extends StatelessWidget {
           firstLetter.substring(0, 1).toUpperCase(),
           style: TextStyle(
             color: Colors.white,
-            fontSize: 26,
+            fontSize: (size / 50) * 26,
           ),
         ),
       ),

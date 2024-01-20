@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:math';
 
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -120,8 +121,53 @@ extension DateTimeFormat on DateTime {
       count = min ~/ (60 * 24 * 7);
       text = ' weeks';
     }
-    text = text;
     return '$count$text ago';
+  }
+
+  String agoLocalized(BuildContext context) {
+    final _localization = localization(context);
+    int min = DateTime.now().difference(this).inMinutes;
+    int count = 0;
+    if (min == 0) {
+      _localization.lastSeenRecently;
+    }
+    if (min < 60) {
+      count = max(min, 0);
+      return _localization.lastSeenMinutes(count);
+    } else if (min < 60 * 24) {
+      count = min ~/ 60;
+      return _localization.lastSeenHours(count);
+    } else if (min < 60 * 24 * 7) {
+      count = min ~/ (60 * 24);
+      return _localization.lastSeenDays(count);
+    } else {
+      count = min ~/ (60 * 24 * 7);
+      return _localization.lastSeenWeeks(count);
+    }
+
+  }
+
+  String get agoArabic {
+    int min = DateTime.now().difference(this).inMinutes;
+    int count = 0;
+    String text = '';
+    if (min == 0) {
+      return 'الآن';
+    }
+    if (min < 60) {
+      count = max(min, 0);
+      text = 'دقيقة';
+    } else if (min < 60 * 24) {
+      count = min ~/ 60;
+      text = 'ساعة';
+    } else if (min < 60 * 24 * 7) {
+      count = min ~/ (60 * 24);
+      text = 'يوم';
+    } else {
+      count = min ~/ (60 * 24 * 7);
+      text = 'اسبوع';
+    }
+    return 'منذ $count $text';
   }
 
   String format(BuildContext context, String format) {

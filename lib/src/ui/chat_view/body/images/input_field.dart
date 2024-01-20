@@ -1,12 +1,12 @@
 import 'dart:ui';
 
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:photo_gallery/photo_gallery.dart';
 
 class GalleryInputField extends StatefulWidget {
   const GalleryInputField({
@@ -38,7 +38,7 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.only(bottom: 10),
-        child: ValueListenableBuilder<List<Medium>>(
+        child: ValueListenableBuilder<List>(
           valueListenable: widget.controller.selected,
           builder: (context, images, child) {
             if (images.isEmpty) return SizedBox.shrink();
@@ -90,7 +90,7 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
                                   maxLines: 8,
                                   minLines: 1,
                                   decoration: InputDecoration(
-                                    hintText: 'Add caption',
+                                    hintText: localization(context).addCaption,
                                     hintStyle: TextStyle(
                                       fontSize: 16,
                                       color: Colors.white54,
@@ -143,9 +143,12 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
                         onPressed: () {
                           if (!isSubmit.value) {
                             widget.chatController.sendImages(
-                              widget.controller.selected.value,
+                              List.from(widget.controller.selected.value),
                             );
                             Navigator.of(context).pop();
+                            if (widget.isSubmit) {
+                              Navigator.of(context).pop();
+                            }
                           }
                         },
                         child: ValueListenableBuilder<bool>(
@@ -157,7 +160,7 @@ class _GalleryInputFieldState extends State<GalleryInputField> {
                             );
                           },
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -74,7 +75,7 @@ class SendAtWidget extends StatelessWidget {
               textDirection: TextDirection.ltr,
             ),
             Text(
-              message.isEdited ? ' ${'edited'} ' : '',
+              message.isEdited ? ' ${localization(context).edited} ' : '',
               style: TextStyle(
                 fontSize: 11,
                 color: !isMine

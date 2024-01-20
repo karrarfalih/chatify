@@ -18,6 +18,7 @@ class TextMessage extends Message {
     super.emojis,
     super.replyId,
     super.replyUid,
+    super.replyMessage,
   }) : super(type: MessageType.text);
 
   @override

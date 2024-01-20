@@ -134,10 +134,14 @@ class Chatify {
   }
 
   static Future createSavedMessages() async {
+    return _datasource.findChatOrCreateSavedMessage();
+  }
+
+  static Future createAiChat() async {
     final chat = Chat(
       id: Uuid.generate(),
-      members: [currentUserId],
-      title: 'Saved Messages',
+      members: [currentUserId, 'ai'],
+      title: 'Ai',
     );
     await _datasource.addChat(chat);
   }

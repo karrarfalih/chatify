@@ -1,4 +1,5 @@
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
 import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
@@ -92,7 +93,7 @@ class _ChatScreenState extends State<ChatScreen>
                     width: 8,
                   ),
                   Text(
-                    'Waiting connection...',
+                    localization(context).waitingConnection,
                     style: TextStyle(
                       fontSize: 14,
                       color: theme.recentChatsForegroundColor,
@@ -115,7 +116,7 @@ class _ChatScreenState extends State<ChatScreen>
                     width: 8,
                   ),
                   Text(
-                    'Connecting...',
+                    localization(context).connecting,
                     style: TextStyle(
                       fontSize: 14,
                       color: theme.recentChatsForegroundColor,
@@ -124,7 +125,7 @@ class _ChatScreenState extends State<ChatScreen>
                 ],
               );
             return Text(
-              widget.title ?? 'Messages',
+              widget.title ?? localization(context).messeges,
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w500,

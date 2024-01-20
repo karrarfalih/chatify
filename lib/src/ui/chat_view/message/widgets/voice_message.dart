@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
@@ -21,7 +22,7 @@ class MyVoiceMessage extends StatelessWidget {
     return VoiceMessageWidget(
       key: ValueKey(message.id),
       onSeek: () => controller.preventEmoji = true,
-      user: message.isMine ? 'Me' : user.name,
+      user: message.isMine ? localization(context).me : user.name,
       meBgColor: Chatify.theme.primaryColor,
       contactPlayIconColor: Colors.white,
       contactBgColor: Chatify.theme.chatBrightness == Brightness.light

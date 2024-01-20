@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/bottom_sheet.dart';
@@ -89,7 +90,7 @@ class ChatInputField extends StatelessWidget {
             keyboardType: TextInputType.multiline,
             decoration: InputDecoration(
               filled: false,
-              hintText: 'Message',
+              hintText: localization(context).message,
               hintStyle: TextStyle(
                 fontWeight: FontWeight.normal,
                 color: Chatify.theme.chatForegroundColor.withOpacity(0.4),
@@ -127,6 +128,7 @@ class ChatInputField extends StatelessWidget {
                       onPressed: () {
                         controller.submitMessage(
                           controller.textController.text,
+                          contex,
                         );
                       },
                       size: 60,
@@ -134,7 +136,7 @@ class ChatInputField extends StatelessWidget {
                         padding: const EdgeInsets.all(3),
                         child: Animate(
                           effects: [
-                            ScaleEffect(duration: Duration(milliseconds: 120))
+                            ScaleEffect(duration: Duration(milliseconds: 120)),
                           ],
                           child: Icon(
                             Iconsax.send_1,
@@ -175,7 +177,7 @@ class ChatInputField extends StatelessWidget {
                               ScaleEffect(
                                 duration: Duration(milliseconds: 100),
                                 begin: Offset(0, 0),
-                              )
+                              ),
                             ],
                             child: Icon(
                               Iconsax.document_1,
@@ -208,7 +210,7 @@ class ChatInputField extends StatelessWidget {
                                 ScaleEffect(
                                   duration: Duration(milliseconds: 100),
                                   begin: Offset(0.5, 0.5),
-                                )
+                                ),
                               ],
                               child: Icon(
                                 Iconsax.microphone,
@@ -222,7 +224,7 @@ class ChatInputField extends StatelessWidget {
                     );
             },
           ),
-        )
+        ),
       ],
     );
   }

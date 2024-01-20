@@ -1,4 +1,5 @@
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +52,7 @@ class EmojisKeyboard extends StatelessWidget {
               skinToneIndicatorColor: Colors.grey,
               enableSkinTones: true,
               noRecents: Text(
-                'No Recents',
+                localization(context).noRecentsEmojis,
                 style: TextStyle(
                   fontSize: 20,
                   color: Chatify.theme.chatForegroundColor,

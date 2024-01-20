@@ -1,6 +1,6 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
-import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -68,11 +68,14 @@ class UsersInputStatus extends StatelessWidget {
   ) {
     if (statuses.every((e) => e.value == ChatStatus.none))
       return SizedBox.shrink();
-    var status = statuses.firstWhere((e) => e.value != ChatStatus.none).value;
+    var status = ChatStatus.none;
+
+    status = statuses.firstWhere((e) => e.value != ChatStatus.none).value;
     if (statuses.any((e) => e.value == ChatStatus.typing)) {
       status = ChatStatus.typing;
     }
-    final users = statuses
+
+    var users = statuses
         .where((e) => e.value != ChatStatus.none)
         .map((e) => e.key)
         .toList();
@@ -222,13 +225,10 @@ class _UsersProfile extends StatelessWidget {
         ...users.map(
           (e) => Padding(
             padding: const EdgeInsetsDirectional.only(end: 6),
-            child: CustomImage(
+            child: UserProfileImage(
               url: e.profileImage,
-              width: 30,
-              height: 30,
-              radius: 30,
-              fit: BoxFit.cover,
-              onError: const Icon(Icons.person, color: Colors.grey),
+              size: 30,
+              firstLetter: e.name.substring(0, 1),
             ),
           ),
         ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -54,10 +55,10 @@ class _TimerRefresherState extends State<TimerRefresher> {
   Widget build(BuildContext context) {
     return Text(
       widget.isActive
-          ? 'Online'
+          ? localization(context).online
           : widget.lastSeen == null
-              ? 'Last seen recently'
-              : 'Last seen ${widget.lastSeen!.ago}',
+              ? localization(context).lastSeenLongTime
+              : widget.lastSeen!.agoLocalized(context),
       style: TextStyle(
         color: Chatify.theme.chatForegroundColor.withOpacity(
               widget.isActive ? 1 : 0.5,

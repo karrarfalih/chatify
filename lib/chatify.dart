@@ -8,3 +8,4 @@ export 'src/core/chatify.dart';
 export 'src/core/config.dart';
 export 'src/enums.dart';
 export 'src/ui/chatify.dart';
+export 'src/localization/generated/chatify_localizations.dart';

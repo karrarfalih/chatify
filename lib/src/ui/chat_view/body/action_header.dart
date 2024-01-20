@@ -1,3 +1,4 @@
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
@@ -28,7 +29,7 @@ class MessageActionHeader extends StatelessWidget {
         final args = value ?? latsArgs;
         final isMine = args?.message?.isMine ?? false;
         final name = isMine
-            ? 'Me'
+            ? localization(context).me
             : users
                 .firstWhere(
                   (e) => e.id == (args?.message?.sender ?? users.first.id),
@@ -72,7 +73,7 @@ class MessageActionHeader extends StatelessWidget {
                           ),
                         ),
                         Text(
-                          message?.message ?? '',
+                          message?.message(localization(context)) ?? '',
                           style: TextStyle(
                             fontSize: 14,
                             color: theme.chatForegroundColor.withOpacity(0.5),

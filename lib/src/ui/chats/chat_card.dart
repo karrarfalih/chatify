@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/chatting_room.dart';
 import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
 import 'package:chatify/src/ui/chats/chat_image.dart';
@@ -181,13 +182,17 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        widget.chat.title ??
-                                            users.withoutMeOrMe
-                                                .map(
-                                                  (e) =>
-                                                      e.name.split(' ').first,
-                                                )
-                                                .join(', '),
+                                        widget.chat.title == 'Saved Messages'
+                                            ? localization(context)
+                                                .savedMessages
+                                            : widget.chat.title ??
+                                                users.withoutMeOrMe
+                                                    .map(
+                                                      (e) => e.name
+                                                          .split(' ')
+                                                          .first,
+                                                    )
+                                                    .join(', '),
                                         style: const TextStyle(height: 1),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -213,7 +218,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                                   fit: BoxFit.fitHeight,
                                                   height: 12,
                                                 )
-                                              else
+                                              else if (message.message != null && (lastMessageSubject.valueOrNull?.message?.isMine??false))
                                                 Image.asset(
                                                   message.message!.seenBy
                                                           .where(
@@ -292,8 +297,10 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                         ),
                                       ),
                                       builder: (message) {
+                                        if (message!.message?.message == null)
+                                          return SizedBox();
                                         return Text(
-                                          message!.message?.message ?? '',
+                                          message.message!.message(localization(context)),
                                           style: TextStyle(
                                             height: 1.4,
                                             color: Chatify.theme

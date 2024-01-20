@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -46,7 +47,7 @@ class ChatRecordDetails extends StatelessWidget {
             color: Chatify.theme.chatForegroundColor.withOpacity(0.6),
           ),
           Text(
-            'Slide to cancel',
+            localization(context).slideToCancel,
             overflow: TextOverflow.clip,
             style: TextStyle(
               fontSize: 16,

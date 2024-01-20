@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chats/search/search.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -45,7 +46,7 @@ class ChatSearch extends StatelessWidget {
                 ),
               ),
               Text(
-                'Search',
+                localization(context).search,
                 style: TextStyle(
                   color: theme.recentChatsForegroundColor.withOpacity(0.5),
                   fontWeight: FontWeight.w400,

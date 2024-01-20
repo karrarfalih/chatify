@@ -1,6 +1,7 @@
 import 'package:chatify/src/enums.dart';
 import 'package:chatify/src/models/messages/message.dart';
 import 'package:chatify/src/models/user.dart';
+import 'package:flutter/material.dart';
 
 class ChatifyConfig {
   final String messagesCollectionName;
@@ -13,6 +14,7 @@ class ChatifyConfig {
   final Future<List<ChatifyUser>> Function()? getUsersForNewChat;
   final Function(ChatifyUser user)? onUserClick;
   final Function(Message message, ChatifyUser user)? onSendMessage;
+  final Widget? onEmptyChatList;
 
   const ChatifyConfig({
     this.messagesCollectionName = 'chatify_messages',
@@ -24,6 +26,7 @@ class ChatifyConfig {
     this.onUserClick,
     this.onSendMessage,
     required this.getUserById,
+    this.onEmptyChatList,
   });
 
   bool get canSearch => getUsersBySearch != null;

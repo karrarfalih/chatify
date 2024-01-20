@@ -1,12 +1,14 @@
 import 'package:camera/camera.dart';
 import 'package:chatify/src/ui/chat_view/body/images/camera_screen.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class CameraThumnail extends StatelessWidget {
-  const CameraThumnail({super.key, required this.controller});
+  const CameraThumnail({super.key, required this.controller, required this.chatController});
   final GalleryController controller;
+  final ChatController chatController;
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +18,7 @@ class CameraThumnail extends StatelessWidget {
           MaterialPageRoute(
             builder: (context) => CameraScreen(
               controller: controller,
+              chatController: chatController,
             ),
           ),
         );
@@ -47,7 +50,7 @@ class CameraThumnail extends StatelessWidget {
                 Iconsax.camera5,
                 size: 36,
                 color: Theme.of(context).scaffoldBackgroundColor,
-              )
+              ),
             ],
           );
         },

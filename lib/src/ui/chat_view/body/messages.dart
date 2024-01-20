@@ -1,4 +1,5 @@
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/input_status.dart';
@@ -90,6 +91,8 @@ class _ChatMessagesState extends State<ChatMessages> {
     }
   }
 
+  DateTime lastDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     return NotificationListener<ScrollNotification>(
@@ -178,9 +181,11 @@ class _ChatMessagesState extends State<ChatMessages> {
                             message: msg,
                             users: widget.users,
                             controller: widget.controller,
-                            linkedWithBottom: (nextMsg?.sender == msg.sender &&
-                                    nextMsg?.sendAt?.day == msg.sendAt?.day) ||
-                                (msg.isMine && value.isNotEmpty),
+                            linkedWithBottom:
+                                (nextMsg?.sender == msg.sender &&
+                                        nextMsg?.sendAt?.day ==
+                                            msg.sendAt?.day) ||
+                                    (msg.isMine && value.isNotEmpty),
                             linkedWithTop: !showTime &&
                                 prevMsg != null &&
                                 prevMsg.sender == msg.sender,
@@ -207,7 +212,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'Say Hi',
+                      localization(context).sayHi,
                       style: TextStyle(
                         color: Chatify.theme.chatForegroundColor,
                       ),

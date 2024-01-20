@@ -1,6 +1,8 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image/controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
+import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/common/hero_dialog.dart';
 import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/common/toast.dart';
@@ -10,8 +12,9 @@ import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' hide Actions;
 import 'package:flutter/services.dart';
-import 'package:kr_pull_down_button/pull_down_button.dart';
 import 'package:zoom_widget/zoom_widget.dart';
+
+import 'pull_down_button.dart';
 
 class ChatImagePreview extends StatefulWidget {
   final ImageMessage msg;
@@ -83,7 +86,9 @@ class _ChatImagePreviewState extends State<ChatImagePreview> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                (widget.msg.isMine ? 'Me' : widget.user.name),
+                (widget.msg.isMine
+                    ? localization(context).me
+                    : widget.user.name),
                 style: const TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -104,7 +109,7 @@ class _ChatImagePreviewState extends State<ChatImagePreview> {
             offset: const Offset(0, 10),
             itemBuilder: (context) => [
               PullDownMenuItem(
-                title: 'Save',
+                title: localization(context).save,
                 icon: Icons.save,
                 iconColor: Colors.white,
                 itemTheme: const PullDownMenuItemTheme(
@@ -115,22 +120,34 @@ class _ChatImagePreviewState extends State<ChatImagePreview> {
                     widget.msg.imageUrl,
                   );
                   showToast(
-                    res ? "Saved to gallery" : 'Download failed',
+                    res
+                        ? localization(context).savedToGallery
+                        : localization(context).failedToSave,
                     Chatify.theme.primaryColor.withOpacity(0.5),
                   );
                 },
               ),
               const PullDownMenuDivider(),
               PullDownMenuItem(
-                title: 'Delete',
+                title: localization(context).delete,
                 icon: CupertinoIcons.delete,
                 itemTheme: const PullDownMenuItemTheme(
                   textStyle: TextStyle(color: Colors.white),
                 ),
                 iconColor: Colors.red,
-                onTap: () {
-                  // Chatify.datasource.deleteMessageForAll(msg!.id);
-                  Navigator.pop(context);
+                onTap: () async {
+                  final deleteForAll = await showConfirmDialog(
+                    context: context,
+                    message: localization(context).confirmDeleteMessage,
+                    textOK: localization(context).delete,
+                    textCancel: localization(context).cancel,
+                    showDeleteForAll: true,
+                  );
+                  if (deleteForAll == true) {
+                    Chatify.datasource.deleteMessageForAll(widget.msg.id);
+                  } else if (deleteForAll == false) {
+                    Chatify.datasource.deleteMessageForMe(widget.msg.id);
+                  }
                 },
               ),
             ],

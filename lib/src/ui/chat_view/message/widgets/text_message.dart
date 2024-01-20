@@ -1,5 +1,6 @@
 import 'package:any_link_preview/any_link_preview.dart';
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
 import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
@@ -23,7 +24,7 @@ class TextMessageCard extends StatefulWidget {
   final Color bkColor;
   final Color textColor;
   final bool isMine;
-  final MessageCard widget;
+  final MessageCardWidget widget;
   final ChatController controller;
   final bool isSending;
 
@@ -36,9 +37,10 @@ class _TextMessageCardState extends State<TextMessageCard> {
 
   @override
   Widget build(BuildContext context) {
-    final hasLink = widget.widget.message.message.urls.length > 1;
-    final mergeWithSendAt = widget.widget.message.message.length < 35 &&
-        !widget.widget.message.message.contains('\n') &&
+    final message = widget.widget.message.message(localization(context));
+    final hasLink = message.urls.length > 1;
+    final mergeWithSendAt = message.length < 35 &&
+        !widget.widget.message.message(localization(context)).contains('\n') &&
         !hasLink;
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -110,7 +112,10 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                     Expanded(
                                       child: repliedMsg != null
                                           ? Text(
-                                              repliedMsg?.message ?? '',
+                                              repliedMsg?.message(
+                                                    localization(context),
+                                                  ) ??
+                                                  '',
                                               style: TextStyle(
                                                 color: widget.textColor
                                                     .withOpacity(0.8),
@@ -125,7 +130,8 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                                 widget.widget.message.replyId!,
                                               ),
                                               onEmpty: Text(
-                                                'An error occured!',
+                                                localization(context)
+                                                    .deletedMessage,
                                                 style: TextStyle(
                                                   color: widget.textColor
                                                       .withOpacity(0.8),
@@ -135,7 +141,8 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                                 overflow: TextOverflow.ellipsis,
                                               ),
                                               onError: (_) => Text(
-                                                'An error occured!',
+                                                localization(context)
+                                                    .deletedMessage,
                                                 style: TextStyle(
                                                   color: widget.textColor
                                                       .withOpacity(0.8),
@@ -144,23 +151,43 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                               ),
-                                              onLoading: SizedBox(
-                                                width: 20,
-                                                child: Center(
-                                                  child: LoadingWidget(
-                                                    size: 10,
-                                                    lineWidth: 1,
-                                                    color: widget.isMine
-                                                        ? Colors.white
-                                                        : Chatify
-                                                            .theme.primaryColor,
-                                                  ),
-                                                ),
-                                              ),
+                                              onLoading: widget.widget.message
+                                                          .replyMessage !=
+                                                      null
+                                                  ? Text(
+                                                      widget.widget.message
+                                                          .replyMessage!,
+                                                      style: TextStyle(
+                                                        color: widget.textColor
+                                                            .withOpacity(0.8),
+                                                        fontSize: 12,
+                                                      ),
+                                                      maxLines: 1,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    )
+                                                  : SizedBox(
+                                                      width: 20,
+                                                      child: Center(
+                                                        child: LoadingWidget(
+                                                          size: 10,
+                                                          lineWidth: 1,
+                                                          color: widget.isMine
+                                                              ? Colors.white
+                                                              : Chatify.theme
+                                                                  .primaryColor,
+                                                        ),
+                                                      ),
+                                                    ),
                                               builder: (message) {
                                                 repliedMsg = message;
                                                 return Text(
-                                                  message?.message ?? '',
+                                                  message?.message(
+                                                        localization(
+                                                          context,
+                                                        ),
+                                                      ) ??
+                                                      '',
                                                   style: TextStyle(
                                                     color: widget.textColor
                                                         .withOpacity(0.8),
@@ -202,7 +229,9 @@ class _TextMessageCardState extends State<TextMessageCard> {
                           child: Padding(
                             padding: const EdgeInsets.only(bottom: 2),
                             child: Wrap(
-                              children: widget.widget.message.message.urls
+                              children: widget.widget.message
+                                  .message(localization(context))
+                                  .urls
                                   .map(
                                     (e) => Text(
                                       e,
@@ -250,7 +279,9 @@ class _TextMessageCardState extends State<TextMessageCard> {
                             padding:
                                 const EdgeInsetsDirectional.only(start: 10),
                             child: AnyLinkPreview(
-                              link: widget.widget.message.message.urls
+                              link: widget.widget.message
+                                  .message(localization(context))
+                                  .urls
                                   .firstWhere((e) => e.isURL)
                                   .urlFormat,
                               displayDirection: UIDirection.uiDirectionVertical,
@@ -312,7 +343,7 @@ class _TextMessageCardState extends State<TextMessageCard> {
                       .toList(),
                 ),
               ),
-            )
+            ),
         ],
       ),
     );

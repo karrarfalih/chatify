@@ -1,4 +1,5 @@
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/chat.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
@@ -34,7 +35,7 @@ class RecentChats extends StatelessWidget {
         ),
       ),
       query: Chatify.datasource.chatsQuery,
-      onEmpty: Row(
+      onEmpty: Chatify.config.onEmptyChatList ?? Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Column(
@@ -51,7 +52,7 @@ class RecentChats extends StatelessWidget {
                 height: 20,
               ),
               Text(
-                'No messages',
+                localization(context).noMessages,
                 style: TextStyle(
                   color:
                       Chatify.theme.recentChatsForegroundColor.withOpacity(0.8),

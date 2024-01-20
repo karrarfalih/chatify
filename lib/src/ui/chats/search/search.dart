@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chats/new_chat/controllers/search_controller.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -57,7 +58,7 @@ class _SearchScreenState extends State<SearchScreen> {
               textInputAction: TextInputAction.done,
               autofocus: true,
               decoration: InputDecoration(
-                hintText: 'Search',
+                hintText: localization(context).search,
                 enabled: true,
                 hintStyle: TextStyle(
                   color: theme.recentChatsForegroundColor.withOpacity(0.5),

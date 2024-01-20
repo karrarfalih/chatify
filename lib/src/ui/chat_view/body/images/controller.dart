@@ -8,11 +8,13 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_gallery/photo_gallery.dart';
 import 'package:camera/camera.dart';
 
+import 'image_mode.dart';
+
 class GalleryController {
   GalleryController();
 
-  final images = <Medium>[].obs;
-  final selected = <Medium>[].obs;
+  final images = <ImageModel>[].obs;
+  final selected = <ImageModel>[].obs;
   final canUseCameraThumnail = false.obs;
   final _cameras = <CameraDescription>[];
   Album? _allAlbums;
@@ -21,12 +23,12 @@ class GalleryController {
 
   CameraController? camera;
 
-  addImage(Medium image) {
+  addImage(ImageModel image) {
     selected.value.add(image);
     selected.refresh();
   }
 
-  removeImage(Medium image) {
+  removeImage(ImageModel image) {
     selected.value.remove(image);
     selected.refresh();
   }
@@ -47,15 +49,30 @@ class GalleryController {
         }
       }
     }
-    images.value.addAll(_initialImages);
+    images.value.addAll(
+      _initialImages.map(
+        (e) => ImageModel(
+          width: e.width ?? 1200,
+          height: e.height ?? 1200,
+          medium: e,
+        ),
+      ),
+    );
     if (imageAlbums.any((e) => e.name == 'All')) {
       _allAlbums = imageAlbums.firstWhere((e) => e.name == 'All');
       final MediaPage imagePage =
           await _allAlbums!.listMedia(take: 30, lightWeight: true);
+      final pageImages = imagePage.items.map(
+        (e) => ImageModel(
+          width: e.width ?? 1200,
+          height: e.height ?? 1200,
+          medium: e,
+        ),
+      );
       images.value.insertAll(
         0,
-        imagePage.items
-            .where((e) => !images.value.any((old) => e.id == old.id)),
+        pageImages.where(
+            (e) => !images.value.any((old) => e.medium!.id == old.medium!.id)),
       );
       _initialImages = imagePage.items.take(30).toList();
       final imagesJson = _initialImages.map((e) => _imageToJson(e));
@@ -66,7 +83,14 @@ class GalleryController {
     } else {
       for (final e in imageAlbums) {
         final MediaPage imagePage = await e.listMedia();
-        images.value.addAll(imagePage.items);
+        final pageImages = imagePage.items.map(
+          (e) => ImageModel(
+            width: e.width ?? 1200,
+            height: e.height ?? 1200,
+            medium: e,
+          ),
+        );
+        images.value.addAll(pageImages);
       }
     }
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
@@ -87,7 +111,14 @@ class GalleryController {
     if (imagePage.items.isEmpty) {
       _finished = true;
     }
-    images.value.addAll(imagePage.items);
+    final pageImages = imagePage.items.map(
+      (e) => ImageModel(
+        width: e.width ?? 1200,
+        height: e.height ?? 1200,
+        medium: e,
+      ),
+    );
+    images.value.addAll(pageImages);
     images.refresh();
     _isBusy = false;
   }

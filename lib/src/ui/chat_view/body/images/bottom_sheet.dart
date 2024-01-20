@@ -1,7 +1,9 @@
 import 'package:chatify/src/const.dart';
 import 'package:chatify/src/core/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/body/images/camera_thumnail.dart';
 import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
+import 'package:chatify/src/ui/chat_view/body/images/image_mode.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_preview.dart';
 import 'package:chatify/src/ui/chat_view/body/images/input_field.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
@@ -84,7 +86,7 @@ class _ChatImagesState extends State<_ChatImages> {
             controller: widget.scrollController,
             slivers: [
               SliverToBoxAdapter(
-                child: ValueListenableBuilder<List<Medium>>(
+                child: ValueListenableBuilder<List>(
                   valueListenable: widget.controller.selected,
                   builder: (context, selected, child) {
                     return Padding(
@@ -97,7 +99,7 @@ class _ChatImagesState extends State<_ChatImages> {
                         children: [
                           if (selected.isEmpty)
                             Text(
-                              'Select Media',
+                              localization(context).selectMedia,
                               style: TextStyle(fontSize: 16),
                             )
                           else ...[
@@ -106,11 +108,12 @@ class _ChatImagesState extends State<_ChatImages> {
                               duration: Duration(milliseconds: 300),
                               textStyle: TextStyle(fontSize: 16),
                             ),
+                            SizedBox(width: 5),
                             Text(
-                              ' photo selected',
+                              localization(context).selectedMedia,
                               style: TextStyle(fontSize: 16),
-                            )
-                          ]
+                            ),
+                          ],
                         ],
                       ),
                     );
@@ -127,7 +130,7 @@ class _ChatImagesState extends State<_ChatImages> {
                     color: Theme.of(context).scaffoldBackgroundColor,
                   ),
                   margin: EdgeInsets.symmetric(horizontal: 6),
-                  sliver: ValueListenableBuilder<List<Medium>>(
+                  sliver: ValueListenableBuilder<List<ImageModel>>(
                     valueListenable: widget.controller.images,
                     builder: (context, images, child) {
                       return SliverGrid.builder(
@@ -142,6 +145,7 @@ class _ChatImagesState extends State<_ChatImages> {
                           if (index == 0) {
                             return CameraThumnail(
                               controller: widget.controller,
+                              chatController: widget.chatController,
                             );
                           }
                           return StatefulBuilder(
@@ -195,12 +199,12 @@ class _ChatImagesState extends State<_ChatImages> {
                                                     kTransparentImage,
                                                   ),
                                                   image: ThumbnailProvider(
-                                                    mediumId: image.id,
+                                                    mediumId: image.medium!.id,
                                                     highQuality: true,
                                                   ),
                                                 ),
                                               ),
-                                              if (image.mediumType ==
+                                              if (image.medium!.mediumType ==
                                                   MediumType.video)
                                                 Align(
                                                   alignment:
@@ -231,7 +235,8 @@ class _ChatImagesState extends State<_ChatImages> {
                                                           color: Colors.white,
                                                         ),
                                                         Text(
-                                                          (image.duration ~/
+                                                          (image.medium!
+                                                                      .duration ~/
                                                                   1000)
                                                               .toDurationString,
                                                           style: TextStyle(
@@ -241,7 +246,7 @@ class _ChatImagesState extends State<_ChatImages> {
                                                       ],
                                                     ),
                                                   ),
-                                                )
+                                                ),
                                             ],
                                           ),
                                         ),
@@ -258,7 +263,7 @@ class _ChatImagesState extends State<_ChatImages> {
                                       } else {
                                         widget.controller.selected.value = [
                                           ...widget.controller.selected.value,
-                                          image
+                                          image,
                                         ];
                                       }
                                     }),
@@ -271,8 +276,7 @@ class _ChatImagesState extends State<_ChatImages> {
                                               color: theme.primaryColor,
                                             ),
                                             alignment: Alignment.center,
-                                            child: ValueListenableBuilder<
-                                                List<Medium>>(
+                                            child: ValueListenableBuilder<List>(
                                               valueListenable:
                                                   widget.controller.selected,
                                               builder:
@@ -319,7 +323,7 @@ class _ChatImagesState extends State<_ChatImages> {
         ),
         Align(
           alignment: Alignment.bottomCenter,
-          child: ValueListenableBuilder<List<Medium>>(
+          child: ValueListenableBuilder<List>(
             valueListenable: widget.controller.selected,
             builder: (context, selected, child) {
               if (selected.isEmpty) return SizedBox.shrink();
@@ -330,7 +334,7 @@ class _ChatImagesState extends State<_ChatImages> {
               );
             },
           ),
-        )
+        ),
       ],
     );
   }

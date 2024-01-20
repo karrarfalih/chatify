@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:flutter/material.dart';
 
 Future<bool?> showConfirmDialog({
@@ -64,7 +65,7 @@ class ConfirmDialog extends StatelessWidget {
           ),
         ),
         AlertDialog(
-          title: Text(title ?? 'Confirm', style: TextStyle(fontSize: 18)),
+          title: Text(title ?? localization(context).confirm, style: TextStyle(fontSize: 18)),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -103,7 +104,7 @@ class ConfirmDialog extends StatelessWidget {
                         ),
                         SizedBox(width: 8),
                         Text(
-                          'Delete for all users',
+                          localization(context).deleteForAll,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w300,
@@ -121,7 +122,7 @@ class ConfirmDialog extends StatelessWidget {
           actions: <Widget>[
             TextButton(
               child: Text(
-                (textCancel ?? 'Cancel'),
+                (textCancel ?? localization(context).cancel),
                 style: TextStyle(
                   color: Chatify.theme.chatForegroundColor.withOpacity(0.6),
                 ),
@@ -129,7 +130,7 @@ class ConfirmDialog extends StatelessWidget {
               onPressed: () => Navigator.pop(context),
             ),
             TextButton(
-              child: Text((textOK ?? 'OK'), style: TextStyle(color: okColor)),
+              child: Text((textOK ?? localization(context).ok), style: TextStyle(color: okColor)),
               onPressed: () =>
                   Navigator.pop(context, deleteForAll || !showDeleteForAll),
             ),

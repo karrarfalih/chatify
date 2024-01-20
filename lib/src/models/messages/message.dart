@@ -12,6 +12,7 @@ abstract class Message {
   final String chatId;
   final String? replyId;
   final String? replyUid;
+  final String? replyMessage;
   final DateTime? sendAt;
   final DateTime pendingTime;
   final String sender;
@@ -36,6 +37,7 @@ abstract class Message {
     this.emojis = const [],
     this.replyId,
     this.replyUid,
+    this.replyMessage,
     required this.type,
   })  : id = id ?? Uuid.generate(),
         sender = sender ?? Chatify.currentUserId,
@@ -61,6 +63,7 @@ abstract class Message {
         chatId = data['chatId'],
         replyId = data['replyId'],
         replyUid = data['replyUid'],
+        replyMessage = data['replyMessage'],
         pendingTime = DateTime.now(),
         type = getMessageTypeFromString(data['type']);
 
@@ -94,16 +97,16 @@ extension MessageTypeExt on MessageType {
 }
 
 extension MessageText on Message {
-  String get message {
+  String message(ChatifyLocalizations localizations) {
     switch (runtimeType) {
       case TextMessage:
         return (this as TextMessage).message;
       case ImageMessage:
-        return 'Image Message';
+        return localizations.imageMessage;
       case VoiceMessage:
-        return 'Voice Message';
+        return localizations.voiceMessage;
       default:
-        return 'Unsupported Message';
+        return localizations.unSuppprtedMessage;
     }
   }
 }

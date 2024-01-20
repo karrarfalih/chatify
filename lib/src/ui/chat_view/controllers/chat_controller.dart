@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
+import 'package:chatify/src/ui/chat_view/body/images/image_mode.dart';
 import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
 import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
 import 'package:chatify/src/ui/common/toast.dart';
@@ -14,7 +16,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:photo_gallery/photo_gallery.dart';
 import 'package:record/record.dart';
 import 'package:vibration/vibration.dart';
 
@@ -60,23 +61,25 @@ class ChatController {
 
   cancelEditReply() {}
 
-  edit(Message message) {
+  edit(Message message, BuildContext context) {
     messageAction.value =
         MessageActionArgs(message: message, type: MessageActionType.edit);
-    textController.text = message.message;
+    textController.text = message.message(localization(context));
+    focus.requestFocus();
   }
 
   reply(Message message) {
     messageAction.value =
         MessageActionArgs(message: message, type: MessageActionType.reply);
+    focus.requestFocus();
   }
 
-  copy(Message message) {
-    Clipboard.setData(ClipboardData(text: message.message));
+  copy(Message message, BuildContext context) {
+    Clipboard.setData(ClipboardData(text: message.message(localization(context))));
     showToast('Copied to clipboard', Colors.black45);
   }
 
-  submitMessage(String msg) {
+  submitMessage(String msg, BuildContext context) {
     msg = msg.trim();
     if (msg.isEmpty) return;
     if (messageAction.value?.type == MessageActionType.edit) {
@@ -93,6 +96,7 @@ class ChatController {
               chat.members.where((e) => e != Chatify.currentUserId).toList(),
           replyId: messageAction.value?.message?.id,
           replyUid: messageAction.value?.message?.sender,
+          replyMessage: messageAction.value?.message?.message(localization(context)),
           canReadBy: chat.members,
         );
         pending.add(message);
@@ -104,12 +108,13 @@ class ChatController {
     textController.clear();
   }
 
-  sendImages(List<Medium> images) async {
+  sendImages(List<ImageModel> images) async {
     Chatify.datasource.updateChatStaus(ChatStatus.sendingMedia, chat.id);
     final imgs = await getImages(images);
     await Future.wait(imgs.map((e) => _sendSingleImage(e)));
     Chatify.datasource.updateChatStaus(ChatStatus.none, chat.id);
     Chatify.datasource.addChat(chat);
+    selecetdMessages.value = {};
   }
 
   Future<void> _sendSingleImage(ImageAttachment img) async {

@@ -1,4 +1,5 @@
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/text_message.dart';
 import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
@@ -7,15 +8,20 @@ import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image/image.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
+import 'package:chatify/src/ui/common/pull_down_button.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_bounce/flutter_bounce.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:kr_pull_down_button/pull_down_button.dart';
+import 'package:swipeable_tile/swipeable_tile.dart';
 
 final key = GlobalKey();
 
-class MessageCard extends StatefulWidget {
+Map<String, bool> _animatedMessages = {};
+
+class MessageCard extends StatelessWidget {
   final Message message;
   final bool linkedWithBottom;
   final bool linkedWithTop;
@@ -36,12 +42,67 @@ class MessageCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  State<MessageCard> createState() => _MessageCardState();
+  Widget build(BuildContext context) {
+    bool canAnimate = (message.sendAt
+                ?.isAfter(DateTime.now().subtract(Durations.extralong4)) ??
+            true) &&
+        _animatedMessages[message.id] != true;
+    _animatedMessages[message.id] = true;
+    final child = MessageCardWidget(
+      message: message,
+      linkedWithBottom: linkedWithBottom,
+      linkedWithTop: linkedWithTop,
+      chat: chat,
+      controller: controller,
+      users: users,
+    );
+    if (canAnimate) {
+      return Animate(
+        effects: [
+          FadeEffect(),
+          ScaleEffect(
+            curve: Curves.easeOutQuart,
+            duration: Duration(milliseconds: 700),
+          ),
+          SlideEffect(
+            begin: Offset(0.5, 0.5),
+            curve: Curves.easeOutQuart,
+            duration: Duration(milliseconds: 700),
+          ),
+        ],
+        child: child,
+      );
+    }
+    return child;
+  }
 }
 
-class _MessageCardState extends State<MessageCard> {
+class MessageCardWidget extends StatefulWidget {
+  final Message message;
+  final bool linkedWithBottom;
+  final bool linkedWithTop;
+  final Chat chat;
+  final List<ChatifyUser> users;
+  final ChatController controller;
+  final bool isSending;
+
+  const MessageCardWidget({
+    Key? key,
+    required this.message,
+    required this.linkedWithBottom,
+    required this.linkedWithTop,
+    required this.chat,
+    required this.controller,
+    this.isSending = false,
+    required this.users,
+  }) : super(key: key);
+
+  @override
+  State<MessageCardWidget> createState() => _MessageCardWidgetState();
+}
+
+class _MessageCardWidgetState extends State<MessageCardWidget> {
   final messagePos = 0.0.obs;
-  double _startPos = 0;
   bool hasVibrated = false;
   late bool isSelected;
 
@@ -96,8 +157,8 @@ class _MessageCardState extends State<MessageCard> {
     );
     return ValueListenableBuilder<Map<String, Message>>(
       valueListenable: widget.controller.selecetdMessages,
-      builder: (context, value, child) {
-        isSelected = value.containsKey(widget.message.id);
+      builder: (context, selecetdMessages, child) {
+        isSelected = selecetdMessages.containsKey(widget.message.id);
         return GestureDetector(
           onTap: () {
             if (widget.controller.selecetdMessages.value.isNotEmpty) {
@@ -113,17 +174,14 @@ class _MessageCardState extends State<MessageCard> {
                 : Colors.transparent,
             child: Row(
               children: [
-                WillPopScope(
-                  onWillPop: () async {
-                    if (value.isNotEmpty) {
-                      widget.controller.selecetdMessages.value = {};
-                      return false;
-                    }
-                    return true;
+                PopScope(
+                  canPop: selecetdMessages.isEmpty,
+                  onPopInvoked: (didPop) {
+                    widget.controller.selecetdMessages.value = {};
                   },
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 100),
-                    width: value.isNotEmpty ? 40 : 0,
+                    width: selecetdMessages.isNotEmpty ? 40 : 0,
                     height: 20,
                     child: Center(
                       child: Stack(
@@ -189,7 +247,7 @@ class _MessageCardState extends State<MessageCard> {
                               color: Colors.black.withOpacity(0.05),
                               blurRadius: 15,
                               spreadRadius: 5,
-                            )
+                            ),
                           ],
                         ),
                         child: Row(
@@ -228,32 +286,32 @@ class _MessageCardState extends State<MessageCard> {
                     isMine &&
                     !widget.isSending)
                   PullDownMenuItem(
-                    title: 'Edit',
+                    title: localization(context).edit,
                     icon: Iconsax.edit,
                     itemTheme: PullDownMenuItemTheme(
                       textStyle: TextStyle(fontSize: 14),
                     ),
                     onTap: () {
-                      widget.controller.edit(widget.message);
+                      widget.controller.edit(widget.message, context);
                     },
                   ),
                 if (widget.message is TextMessage) ...[
                   const PullDownMenuDivider(),
                   PullDownMenuItem(
-                    title: 'Copy',
+                    title: localization(context).copy,
                     icon: Iconsax.copy,
                     itemTheme: PullDownMenuItemTheme(
                       textStyle: TextStyle(fontSize: 14),
                     ),
                     onTap: () {
-                      widget.controller.copy(widget.message);
+                      widget.controller.copy(widget.message, context);
                     },
                   ),
                 ],
                 if (!widget.isSending) ...[
                   const PullDownMenuDivider(),
                   PullDownMenuItem(
-                    title: 'Reply',
+                    title: localization(context).reply,
                     icon: Iconsax.undo,
                     itemTheme: PullDownMenuItemTheme(
                       textStyle: TextStyle(fontSize: 14),
@@ -266,7 +324,7 @@ class _MessageCardState extends State<MessageCard> {
                 if (!widget.isSending) ...[
                   const PullDownMenuDivider(),
                   PullDownMenuItem(
-                    title: 'Delete',
+                    title: localization(context).delete,
                     icon: Iconsax.trash,
                     iconColor: Colors.red,
                     itemTheme: PullDownMenuItemTheme(
@@ -275,10 +333,9 @@ class _MessageCardState extends State<MessageCard> {
                     onTap: () async {
                       final deleteForAll = await showConfirmDialog(
                         context: context,
-                        message:
-                            'Are you sure you want to delete this message?',
-                        textOK: 'Delete',
-                        textCancel: 'Cancel',
+                        message: localization(context).confirmDeleteMessage,
+                        textOK: localization(context).delete,
+                        textCancel: localization(context).cancel,
                         showDeleteForAll: true,
                         isKeyboardShown:
                             widget.controller.keyboardController.isKeybaordOpen,
@@ -295,7 +352,7 @@ class _MessageCardState extends State<MessageCard> {
                 ] else if (widget.message is TextMessage) ...[
                   const PullDownMenuDivider(),
                   PullDownMenuItem(
-                    title: 'Cancel',
+                    title: localization(context).cancel,
                     icon: Iconsax.trash,
                     iconColor: Colors.red,
                     itemTheme: PullDownMenuItemTheme(
@@ -306,13 +363,13 @@ class _MessageCardState extends State<MessageCard> {
                       widget.controller.pending.remove(widget.message);
                     },
                   ),
-                ]
+                ],
               ],
               position: PullDownMenuPosition.automatic,
               applyOpacity: false,
-              buttonBuilder: (context, showMenu) => GestureDetector(
-                behavior: HitTestBehavior.translucent,
-                onTap: () {
+              buttonBuilder: (context, showMenu) => Bounce(
+                duration: Duration(milliseconds: 110),
+                onPressed: () {
                   if (widget.controller.selecetdMessages.value.isNotEmpty) {
                     toggleSelect();
                     return;
@@ -320,86 +377,119 @@ class _MessageCardState extends State<MessageCard> {
                   FocusScope.of(context).unfocus();
                   showMenu();
                 },
-                onLongPress: startSwipe,
-                onLongPressEnd: (details) =>
-                    widget.controller.isSelecting.value = false,
-                onHorizontalDragStart: (x) {
-                  _startPos = x.globalPosition.dx;
-                  hasVibrated = false;
-                },
-                onHorizontalDragUpdate: (x) {
-                  if (-x.globalPosition.dx + _startPos < 0) return;
-                  if (-x.globalPosition.dx + _startPos > 100) return;
-                  messagePos.value = -x.globalPosition.dx + _startPos;
-                  if (messagePos.value > 80 && !hasVibrated) {
-                    hasVibrated = true;
-                    widget.controller.vibrate();
-                  }
-                },
-                onHorizontalDragEnd: (x) {
-                  if (messagePos.value > 80) {
-                    messagePos.value = 0;
+                child: SwipeableTile.swipeToTrigger(
+                  behavior: HitTestBehavior.translucent,
+                  isElevated: false,
+                  color: Colors.transparent,
+                  swipeThreshold: 0.2,
+                  direction: isMine
+                      ? SwipeDirection.startToEnd
+                      : SwipeDirection.endToStart,
+                  onSwiped: (direction) {
                     widget.controller.reply(widget.message);
-                    return;
-                  }
-                  messagePos.value = 0;
-                },
-                onHorizontalDragCancel: () {
-                  messagePos.value = 0;
-                },
-                child: Row(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    Flexible(
-                      child: ValueListenableBuilder<double>(
-                        valueListenable: messagePos,
-                        builder: (context, value, child) => Row(
-                          children: [
-                            if (isMine)
-                              AnimatedContainer(
-                                duration: Duration(milliseconds: 100),
-                                width: value,
-                                child: value > 20
-                                    ? Directionality(
-                                        textDirection: TextDirection.ltr,
-                                        child: Icon(Icons.reply),
-                                      )
-                                    : SizedBox.shrink(),
-                              ),
-                            child!,
-                            if (!isMine) ...[
-                              Spacer(),
-                              if (value != 0)
-                                AnimatedContainer(
-                                  duration: Duration(milliseconds: 100),
-                                  width: value.withRange(0, 100),
-                                  child: Directionality(
-                                    textDirection: TextDirection.ltr,
-                                    child: Icon(Icons.reply),
+                  },
+                  backgroundBuilder: (context, direction, progress) {
+                    bool triggered = false;
+                    return AnimatedBuilder(
+                      animation: progress,
+                      builder: (_, __) {
+                        if (progress.value > 0.9999 && !triggered) {
+                          widget.controller.vibrate();
+                          triggered = true;
+                        }
+                        if (progress.value < 0.2) {
+                          return SizedBox();
+                        }
+                        return Container(
+                          alignment: isMine
+                              ? AlignmentDirectional.centerStart
+                              : AlignmentDirectional.centerEnd,
+                          child: Padding(
+                            padding: const EdgeInsetsDirectional.only(
+                              start: 6.0,
+                              end: 6,
+                            ),
+                            child: Animate(
+                              effects: [
+                                FadeEffect(),
+                                ScaleEffect(),
+                              ],
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 2),
+                                    child: Transform.flip(
+                                      flipX: true,
+                                      child: Icon(
+                                        Icons.reply,
+                                        color: Colors.black.withOpacity(0.7),
+                                        size: 20,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                  if (progress.value < 1 && !triggered)
+                                    SizedBox(
+                                      width: 30,
+                                      height: 30,
+                                      child: CircularProgressIndicator(
+                                        value: progress.value,
+                                        strokeWidth: 2,
+                                        color: theme.chatForegroundColor
+                                            .withOpacity(0.3),
+                                      ),
+                                    )
+                                  else
+                                    Animate(
+                                      effects: [
+                                        ScaleEffect(
+                                          curve: Curves.easeOutBack,
+                                          duration: Duration(milliseconds: 400),
+                                        ),
+                                      ],
+                                      child: Container(
+                                        width: 30,
+                                        height: 30,
+                                        decoration: BoxDecoration(
+                                          color: theme.chatForegroundColor
+                                              .withOpacity(0.1),
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                  // confirmSwipe: (direction) async => false,
+                  key: ValueKey('dismissible-${widget.message.id}'),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    children: [
+                      Flexible(
+                        child: ValueListenableBuilder<double>(
+                          valueListenable: messagePos,
+                          builder: (context, value, child) => Row(
+                            children: [
+                              child!,
+                              if (!isMine) ...[
+                                Spacer(),
+                                if (value != 0)
+                                  AnimatedContainer(
+                                    duration: Duration(milliseconds: 100),
+                                    width: value.withRange(0, 100),
+                                    child: Directionality(
+                                      textDirection: TextDirection.ltr,
+                                      child: Icon(Icons.reply),
+                                    ),
+                                  ),
+                              ],
                             ],
-                          ],
-                        ),
-                        child: Dismissible(
-                          key: ValueKey('dismissible-${widget.message.id}'),
-                          direction: isMine
-                              ? DismissDirection.none
-                              : DismissDirection.endToStart,
-                          onUpdate: (details) {
-                            if (details.progress > 0.1 && !hasVibrated) {
-                              hasVibrated = true;
-                              widget.controller.vibrate();
-                            }
-                            messagePos.value = details.progress * 70;
-                          },
-                          dismissThresholds: {
-                            DismissDirection.endToStart: 0.1,
-                          },
-                          confirmDismiss: (direction) {
-                            widget.controller.reply(widget.message);
-                            return Future.value(false);
-                          },
+                          ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -457,8 +547,8 @@ class _MessageCardState extends State<MessageCard> {
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

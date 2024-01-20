@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 import 'package:chatify/chatify.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
@@ -10,11 +11,11 @@ import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/common/expanded_section.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
+import 'package:chatify/src/ui/common/pull_down_button.dart';
 import 'package:chatify/src/ui/common/timer_refresher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:kr_pull_down_button/pull_down_button.dart';
 import 'package:rxdart/rxdart.dart';
 
 class ChatAppBar extends StatelessWidget {
@@ -95,7 +96,7 @@ class ChatAppBar extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              ' selected',
+                              ' ${localization(context).selected}',
                               style: TextStyle(
                                 color: theme.chatForegroundColor,
                                 fontSize: 16,
@@ -106,12 +107,14 @@ class ChatAppBar extends StatelessWidget {
                               onPressed: () async {
                                 final deleteForAll = await showConfirmDialog(
                                   context: context,
-                                  message:
-                                      'Are you sure you want to delete these messages?',
-                                  title:
-                                      'Delete ${selecetdMessages.values.length} messages',
-                                  textOK: 'Delete',
-                                  textCancel: 'Cacnel',
+                                  message: localization(context)
+                                      .confirmDeleteMessagesTitle,
+                                  title: localization(context)
+                                      .confirmDeleteMessagesCount(
+                                    selecetdMessages.length,
+                                  ),
+                                  textOK: localization(context).delete,
+                                  textCancel: localization(context).cancel,
                                   showDeleteForAll: true,
                                   isKeyboardShown: chatController
                                       .keyboardController.isKeybaordOpen,
@@ -119,13 +122,11 @@ class ChatAppBar extends StatelessWidget {
                                 if (deleteForAll == null) return;
                                 for (final msg in selecetdMessages.values) {
                                   if (deleteForAll == true) {
-                                    Chatify.datasource.deleteMessageForMe(
-                                      msg.id,
-                                    );
+                                    Chatify.datasource
+                                        .deleteMessageForAll(msg.id);
                                   } else {
-                                    Chatify.datasource.deleteMessageForMe(
-                                      msg.id,
-                                    );
+                                    Chatify.datasource
+                                        .deleteMessageForMe(msg.id);
                                   }
                                 }
                                 chatController.selecetdMessages
@@ -203,10 +204,14 @@ class ChatAppBar extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  chatController.chat.title ??
-                                      users.withoutMeOrMe
-                                          .map((e) => e.name.split(' ').first)
-                                          .join(', '),
+                                  chatController.chat.title == 'Saved Messages'
+                                      ? localization(context).savedMessages
+                                      : chatController.chat.title ??
+                                          users.withoutMeOrMe
+                                              .map(
+                                                (e) => e.name.split(' ').first,
+                                              )
+                                              .join(', '),
                                   style: TextStyle(
                                     color: theme.chatForegroundColor,
                                     fontSize: 16,
@@ -239,7 +244,7 @@ class ChatAppBar extends StatelessWidget {
                     ),
                     itemBuilder: (context) => [
                       PullDownMenuItem(
-                        title: 'Delete',
+                        title: localization(context).delete,
                         icon: Icons.delete,
                         iconColor: Colors.red,
                         itemTheme: PullDownMenuItemTheme(
@@ -254,11 +259,10 @@ class ChatAppBar extends StatelessWidget {
                         onTap: () async {
                           final deleteForAll = await showConfirmDialog(
                             context: context,
-                            message:
-                                'Are you sure you want to delete this chat?',
-                            title: 'Delete chat',
-                            textOK: 'Delete',
-                            textCancel: 'Cacnel',
+                            message: localization(context).confirmDeleteChat,
+                            title: localization(context).deleteChat,
+                            textOK: localization(context).delete,
+                            textCancel: localization(context).cancel,
                             showDeleteForAll: true,
                             isKeyboardShown: chatController
                                 .keyboardController.isKeybaordOpen,
@@ -277,8 +281,8 @@ class ChatAppBar extends StatelessWidget {
                         },
                       ),
                     ],
-                    position: PullDownMenuPosition.automatic,
-                    applyOpacity: false,
+                    position: PullDownMenuPosition.above,
+                    applyOpacity: true,
                     buttonBuilder: (context, showMenu) => CircularButton(
                       icon: Icon(
                         Icons.more_vert,
@@ -327,7 +331,7 @@ class _ChatStatus extends StatelessWidget {
                 width: 6,
               ),
               Text(
-                'Waiting connection...',
+                localization(context).waitingConnection,
                 style: TextStyle(
                   color: Chatify.theme.chatForegroundColor.withOpacity(
                     0.5,
@@ -352,7 +356,7 @@ class _ChatStatus extends StatelessWidget {
                 width: 6,
               ),
               Text(
-                'Connecting...',
+                localization(context).connecting,
                 style: TextStyle(
                   color: Chatify.theme.chatForegroundColor.withOpacity(
                     0.5,
@@ -484,7 +488,7 @@ class _MutipleUsersLastSeenState extends State<_MutipleUsersLastSeen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
-                    '${widget.users.length} Members',
+                    '${widget.users.length} ${localization(context).member}',
                     style: TextStyle(
                       color: Chatify.theme.chatForegroundColor.withOpacity(
                         0.5,
@@ -495,7 +499,7 @@ class _MutipleUsersLastSeenState extends State<_MutipleUsersLastSeen> {
                   ),
                   if (activeUsers != 0)
                     Text(
-                      ', $activeUsers Online',
+                      ', $activeUsers ${localization(context).online}',
                       style: TextStyle(
                         color: Chatify.theme.chatForegroundColor.withOpacity(
                           0.5,

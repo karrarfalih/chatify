@@ -26,10 +26,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -59,5 +56,15 @@ class DefaultFirebaseOptions {
     projectId: 'chatify-example',
     databaseURL: 'https://chatify-example-default-rtdb.firebaseio.com',
     storageBucket: 'chatify-example.appspot.com',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBFUZsCczY7U1cjhhTTz6mrdF6xwdeK8cI',
+    appId: '1:974849459985:ios:b82d8413d91c46329ceeb0',
+    messagingSenderId: '974849459985',
+    projectId: 'chatify-example',
+    databaseURL: 'https://chatify-example-default-rtdb.firebaseio.com',
+    storageBucket: 'chatify-example.appspot.com',
+    iosBundleId: 'com.karrar.chatify',
   );
 }
