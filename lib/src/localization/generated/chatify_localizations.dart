@@ -249,6 +249,12 @@ abstract class ChatifyLocalizations {
   /// **'Last seen recently'**
   String get lastSeenRecently;
 
+  /// No description provided for @lastSeenJustNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Last seen just now'**
+  String get lastSeenJustNow;
+
   /// Last seen minutes ago
   ///
   /// In en, this message translates to:

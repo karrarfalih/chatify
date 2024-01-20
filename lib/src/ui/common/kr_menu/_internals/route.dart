@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
@@ -118,7 +119,7 @@ class PullDownMenuRoute<VoidCallback> extends PopupRoute<VoidCallback> {
       ),
     );
 
-    final mediaQuery = MediaQuery.of(context);
+    final _mediaQuery = mediaQuery(context);
 
     return MediaQuery.removePadding(
       context: context,
@@ -131,8 +132,8 @@ class PullDownMenuRoute<VoidCallback> extends PopupRoute<VoidCallback> {
           delegate: _PopupMenuRouteLayout(
             position: position,
             textDirection: Directionality.of(context),
-            padding: mediaQuery.padding,
-            avoidBounds: _avoidBounds(mediaQuery),
+            padding: _mediaQuery.padding,
+            avoidBounds: _avoidBounds(_mediaQuery),
             buttonSize: buttonSize,
             menuPosition: menuPosition,
           ),

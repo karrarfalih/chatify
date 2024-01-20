@@ -9,6 +9,7 @@ import 'package:chatify/src/ui/chat_view/body/images/input_field.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/animated_flip_counter.dart';
 import 'package:chatify/src/ui/common/bottom_sheet/flexible_bottom_sheet_route.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/ui/common/sliver/sliver_container.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -73,7 +74,7 @@ class _ChatImagesState extends State<_ChatImages> {
               final rowsCount =
                   ((widget.controller.images.value.length + 1) / 3).ceil() - 6;
               final spacing = (rowsCount ~/ 2) * 4;
-              final imageHeight = (MediaQuery.of(context).size.width - 20) / 3;
+              final imageHeight = (mediaQuery(context).size.width - 20) / 3;
               final imagesHeight = (rowsCount * imageHeight) + spacing - 50;
               if (x.metrics.pixels >= imagesHeight) {
                 widget.controller.loadMoreImages();

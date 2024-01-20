@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -221,7 +222,7 @@ class _KrPaginateFirestoreState<T> extends State<KrPaginateFirestore> {
     return SingleChildScrollView(
       child: Container(
         alignment: Alignment.center,
-        height: MediaQuery.of(context).size.height,
+        height: mediaQuery(context).size.height,
         child: child,
       ),
     );

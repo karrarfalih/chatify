@@ -5,6 +5,7 @@ import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:chatify/src/ui/common/confirm.dart';
 import 'package:chatify/src/ui/common/hero_dialog.dart';
 import 'package:chatify/src/ui/common/image.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/ui/common/toast.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/image_saver.dart';
@@ -264,7 +265,7 @@ class _ImagePreviewState extends State<ImagePreview> {
                         },
                         child: CustomImage(
                           bytes: widget.bytes,
-                          width: MediaQuery.of(context).size.width,
+                          width: mediaQuery(context).size.width,
                           fit: BoxFit.cover,
                         ),
                       ),

@@ -12,8 +12,10 @@ import 'package:chatify/src/ui/chat_view/body/voice_palyer.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/body/app_bar.dart';
 import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
+import 'package:chatify/src/ui/chat_view/input_status.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/keyboard_size.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,7 +44,10 @@ class _ChatViewState extends State<ChatView> {
   @override
   void initState() {
     controller = ChatController(
-        widget.chat, widget.pendingMessagesHandler, widget.users);
+      widget.chat,
+      widget.pendingMessagesHandler,
+      widget.users,
+    );
     connectivity = widget.connectivity ?? ChatifyConnectivity();
     super.initState();
   }
@@ -91,22 +96,21 @@ class _ChatViewState extends State<ChatView> {
                   if (Chatify.theme.backgroundImage == null) ...[
                     Positioned.fill(
                       child: ColoredBox(
-                        color: Chatify.theme.primaryColor.withOpacity(0.03),
+                        color: Chatify.theme.primaryColor.withOpacity(0.05),
                       ),
                     ),
                     Center(
                       child: Container(
-                        width: MediaQuery.of(context).size.width / 3,
-                        height: MediaQuery.of(context).size.width / 3,
+                        width: mediaQuery(context).size.width / 2,
+                        height: mediaQuery(context).size.width / 2,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           boxShadow: [
                             BoxShadow(
                               color:
                                   Chatify.theme.primaryColor.withOpacity(0.1),
-                              blurRadius: MediaQuery.of(context).size.width / 3,
-                              spreadRadius:
-                                  MediaQuery.of(context).size.width / 3,
+                              blurRadius: mediaQuery(context).size.width / 2,
+                              spreadRadius: mediaQuery(context).size.width / 3,
                             ),
                           ],
                         ),
@@ -114,6 +118,7 @@ class _ChatViewState extends State<ChatView> {
                     ),
                   ],
                   Column(
+                    mainAxisSize: MainAxisSize.max,
                     children: [
                       Expanded(
                         child: ChatMessages(
@@ -121,6 +126,13 @@ class _ChatViewState extends State<ChatView> {
                           users: widget.users,
                           controller: controller,
                         ),
+                      ),
+                      UsersInputStatus(
+                        chatId: widget.chat.id,
+                        users: widget.users,
+                      ),
+                      SizedBox(
+                        height: 5,
                       ),
                       MessageActionHeader(
                         controller: controller,

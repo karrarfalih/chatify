@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:rxdart/rxdart.dart';
 
-class UsersInputStatus extends StatelessWidget {
+class UsersInputStatus extends StatefulWidget {
   const UsersInputStatus({
     super.key,
     required this.chatId,
@@ -17,21 +17,32 @@ class UsersInputStatus extends StatelessWidget {
   final List<ChatifyUser> users;
 
   @override
+  State<UsersInputStatus> createState() => _UsersInputStatusState();
+}
+
+class _UsersInputStatusState extends State<UsersInputStatus> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: KrStreamBuilder<List<MapEntry<ChatifyUser, ChatStatus>>>(
         key: ValueKey('chat status'),
         stream: Rx.combineLatestList(
-          users.withoutMe.map(
+          widget.users.withoutMe.map(
             (user) => Chatify.datasource
-                .getChatStatus(user.id, chatId)
+                .getChatStatus(user.id, widget.chatId)
                 .map((e) => MapEntry(user, e)),
           ),
         ),
         onLoading: SizedBox.shrink(),
         builder: (statuses) {
           return KrExpandedSection(
+            key: ValueKey('chat status expanded section ${widget.chatId}'),
             expand: statuses.any((e) => e.value != ChatStatus.none),
             duration: Duration(milliseconds: 600),
             child: SizedBox(

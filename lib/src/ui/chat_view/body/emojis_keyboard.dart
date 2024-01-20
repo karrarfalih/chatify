@@ -1,6 +1,7 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -33,7 +34,7 @@ class EmojisKeyboard extends StatelessWidget {
             textEditingController: controller.textController,
             onBackspacePressed: () {},
             config: Config(
-              columns: MediaQuery.of(context).size.width ~/ 45,
+              columns: mediaQuery(context).size.width ~/ 45,
               emojiSizeMax: 24 *
                   (foundation.defaultTargetPlatform == TargetPlatform.iOS
                       ? 1.30

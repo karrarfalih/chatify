@@ -30,6 +30,8 @@ class KrStreamBuilder<T> extends StatelessWidget {
   final Color? baseColor;
   final Color? highlightColor;
 
+  final T? initialData;
+
   const KrStreamBuilder({
     Key? key,
     required this.stream,
@@ -42,12 +44,14 @@ class KrStreamBuilder<T> extends StatelessWidget {
     this.onLoading,
     this.baseColor,
     this.highlightColor,
+    this.initialData,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<T>(
       stream: stream,
+      initialData: initialData,
       builder: (context, data) {
         if (data.connectionState == ConnectionState.waiting) {
           if (shimmerSize != null) {

@@ -1,6 +1,7 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chats/new_chat/controllers/search_controller.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/ui/common/shimmer_bloc.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/cupertino.dart';
@@ -100,7 +101,7 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
         Container(
           height: 56,
           color: theme.recentChatsForegroundColor.withOpacity(0.07),
-          width: MediaQuery.of(context).size.width,
+          width: mediaQuery(context).size.width,
           margin: const EdgeInsets.only(top: 2, bottom: 12),
           alignment: Alignment.center,
           child: SizedBox(
@@ -118,7 +119,8 @@ class _SelectUserBySearchState extends State<SelectUserBySearch> {
                 prefixIcon: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(localization(context).to,
+                    Text(
+                      localization(context).to,
                       style: TextStyle(color: theme.recentChatsForegroundColor),
                     ),
                   ],

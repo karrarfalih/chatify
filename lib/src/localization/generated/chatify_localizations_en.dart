@@ -85,6 +85,9 @@ class ChatifyLocalizationsEn extends ChatifyLocalizations {
   String get lastSeenRecently => 'Last seen recently';
 
   @override
+  String get lastSeenJustNow => 'Last seen just now';
+
+  @override
   String lastSeenMinutes(int minutes) {
     return 'Last seen $minutes minutes ago';
   }

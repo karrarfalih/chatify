@@ -34,6 +34,7 @@
   "connecting": "Connecting...",
   "online": "Online",
   "lastSeenRecently": "Last seen recently",
+  "lastSeenJustNow": "Last seen just now",
   "lastSeenMinutes": "Last seen {minutes} minutes ago",
   "@lastSeenMinutes": {
     "description": "Last seen minutes ago",

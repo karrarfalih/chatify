@@ -5,6 +5,7 @@ import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/utils/colors_utils.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
@@ -44,7 +45,7 @@ class _CurrentVoicePlayerState extends State<CurrentVoicePlayer>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
+    final screenWidth = mediaQuery(context).size.width;
     return ValueListenableBuilder<VoicePlayerController?>(
       valueListenable: VoicePlayerController.currentPlayer,
       builder: (context, player, child) {

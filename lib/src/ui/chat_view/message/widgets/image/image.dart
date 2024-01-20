@@ -8,6 +8,7 @@ import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/send_at.dart';
 import 'package:chatify/src/ui/common/image_preview.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/ui/common/rotated_widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -28,7 +29,7 @@ class ImageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = ImageMessageController(url: message.imageUrl);
-    final size = MediaQuery.of(context).size;
+    final size = mediaQuery(context).size;
 
     final maxWidth = min(300.0, size.width * 0.7);
     final minWidth = min(120.0, size.width * 0.3);

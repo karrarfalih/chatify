@@ -6,6 +6,7 @@ import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/hero_dialog.dart';
 import 'package:chatify/src/ui/common/image.dart';
 import 'package:chatify/src/ui/common/kr_builder.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
@@ -39,8 +40,8 @@ class GalleryImagePreview extends StatefulWidget {
         isSelecetd: isSelecetd,
         controller: controller,
         chatController: chatController,
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
+        width: mediaQuery(context).size.width,
+        height: mediaQuery(context).size.height,
         fromCameraSource: fromCameraSource,
       ),
       context: context,

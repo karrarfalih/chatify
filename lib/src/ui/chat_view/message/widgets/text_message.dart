@@ -10,6 +10,8 @@ import 'package:chatify/src/ui/common/kr_builder.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 
+final Map<String, Message> _cache = {};
+
 class TextMessageCard extends StatefulWidget {
   const TextMessageCard({
     super.key,
@@ -33,8 +35,6 @@ class TextMessageCard extends StatefulWidget {
 }
 
 class _TextMessageCardState extends State<TextMessageCard> {
-  Message? repliedMsg;
-
   @override
   Widget build(BuildContext context) {
     final message = widget.widget.message.message(localization(context));
@@ -110,28 +110,38 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                       ),
                                     ),
                                     Expanded(
-                                      child: repliedMsg != null
-                                          ? Text(
-                                              repliedMsg?.message(
-                                                    localization(context),
-                                                  ) ??
-                                                  '',
-                                              style: TextStyle(
-                                                color: widget.textColor
-                                                    .withOpacity(0.8),
-                                                fontSize: 12,
-                                              ),
-                                              maxLines: 1,
-                                              overflow: TextOverflow.ellipsis,
-                                            )
-                                          : KrFutureBuilder<Message?>(
-                                              future: Chatify.datasource
-                                                  .readMessage(
-                                                widget.widget.message.replyId!,
-                                              ),
-                                              onEmpty: Text(
-                                                localization(context)
-                                                    .deletedMessage,
+                                      child: KrFutureBuilder<Message?>(
+                                        future: Chatify.datasource.readMessage(
+                                          widget.widget.message.replyId!,
+                                        ),
+                                        initialData: _cache[
+                                            widget.widget.message.replyId!],
+                                        onEmpty: Text(
+                                          localization(context).deletedMessage,
+                                          style: TextStyle(
+                                            color: widget.textColor
+                                                .withOpacity(0.8),
+                                            fontSize: 12,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        onError: (_) => Text(
+                                          localization(context).deletedMessage,
+                                          style: TextStyle(
+                                            color: widget.textColor
+                                                .withOpacity(0.8),
+                                            fontSize: 12,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        onLoading: widget.widget.message
+                                                    .replyMessage !=
+                                                null
+                                            ? Text(
+                                                widget.widget.message
+                                                    .replyMessage!,
                                                 style: TextStyle(
                                                   color: widget.textColor
                                                       .withOpacity(0.8),
@@ -139,66 +149,42 @@ class _TextMessageCardState extends State<TextMessageCard> {
                                                 ),
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
-                                              ),
-                                              onError: (_) => Text(
-                                                localization(context)
-                                                    .deletedMessage,
-                                                style: TextStyle(
-                                                  color: widget.textColor
-                                                      .withOpacity(0.8),
-                                                  fontSize: 12,
-                                                ),
-                                                maxLines: 1,
-                                                overflow: TextOverflow.ellipsis,
-                                              ),
-                                              onLoading: widget.widget.message
-                                                          .replyMessage !=
-                                                      null
-                                                  ? Text(
-                                                      widget.widget.message
-                                                          .replyMessage!,
-                                                      style: TextStyle(
-                                                        color: widget.textColor
-                                                            .withOpacity(0.8),
-                                                        fontSize: 12,
-                                                      ),
-                                                      maxLines: 1,
-                                                      overflow:
-                                                          TextOverflow.ellipsis,
-                                                    )
-                                                  : SizedBox(
-                                                      width: 20,
-                                                      child: Center(
-                                                        child: LoadingWidget(
-                                                          size: 10,
-                                                          lineWidth: 1,
-                                                          color: widget.isMine
-                                                              ? Colors.white
-                                                              : Chatify.theme
-                                                                  .primaryColor,
-                                                        ),
-                                                      ),
-                                                    ),
-                                              builder: (message) {
-                                                repliedMsg = message;
-                                                return Text(
-                                                  message?.message(
-                                                        localization(
-                                                          context,
-                                                        ),
-                                                      ) ??
-                                                      '',
-                                                  style: TextStyle(
-                                                    color: widget.textColor
-                                                        .withOpacity(0.8),
-                                                    fontSize: 12,
+                                              )
+                                            : SizedBox(
+                                                width: 20,
+                                                child: Center(
+                                                  child: LoadingWidget(
+                                                    size: 10,
+                                                    lineWidth: 1,
+                                                    color: widget.isMine
+                                                        ? Colors.white
+                                                        : Chatify
+                                                            .theme.primaryColor,
                                                   ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                );
-                                              },
+                                                ),
+                                              ),
+                                        builder: (message) {
+                                          _cache.putIfAbsent(
+                                            widget.widget.message.replyId!,
+                                            () => message!,
+                                          );
+                                          return Text(
+                                            message?.message(
+                                                  localization(
+                                                    context,
+                                                  ),
+                                                ) ??
+                                                '',
+                                            style: TextStyle(
+                                              color: widget.textColor
+                                                  .withOpacity(0.8),
+                                              fontSize: 12,
                                             ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),

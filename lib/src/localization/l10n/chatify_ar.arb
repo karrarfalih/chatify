@@ -34,6 +34,7 @@
   "connecting": "جاري الاتصال...",
   "online": "متصل",
   "lastSeenRecently": "آخر ظهور قبل قليل",
+  "lastSeenJustNow": "آخر ظهور قبل ثوانٍ",
   "lastSeenMinutes": "آخر ظهور منذ {minutes} دقيقة",
   "@lastSeenMinutes": {
     "description": "آخر ظهور منذ دقائق",

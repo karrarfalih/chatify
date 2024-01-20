@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/widgets.dart';
 
 class AnimatedFlipCounter extends StatelessWidget {
@@ -85,7 +86,7 @@ class AnimatedFlipCounter extends StatelessWidget {
     final prototypeDigit = TextPainter(
       text: TextSpan(text: "8", style: style),
       textDirection: TextDirection.ltr,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+      textScaleFactor: mediaQuery(context).textScaleFactor,
     )..layout();
 
     // Find the text color (or red as warning). This is so we can avoid using

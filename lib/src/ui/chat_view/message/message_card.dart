@@ -8,6 +8,7 @@ import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/image/image.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice_message.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/ui/common/pull_down_button.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
@@ -143,7 +144,7 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
         : theme.chatBrightness == Brightness.light
             ? Colors.white
             : Colors.black;
-    final width = MediaQuery.of(context).size.width - 100;
+    final width = mediaQuery(context).size.width - 100;
     final myEmoji = widget.message.emojis
         .cast<MessageEmoji?>()
         .firstWhere((e) => e?.uid == Chatify.currentUserId, orElse: () => null);

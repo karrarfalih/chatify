@@ -37,7 +37,7 @@ class ChatInputBox extends StatelessWidget {
                 ChatRecordDetails(
                   controller: controller.voiceController,
                   chat: chat,
-                )
+                ),
             ],
           );
         },

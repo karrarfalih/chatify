@@ -101,35 +101,13 @@ bool hasMatch(String? value, String pattern) {
 extension DateTimeFormat on DateTime {
   String fullDate(BuildContext context) =>
       format(context, 'MMM d, yyyy - HH:mm a');
-  String get ago {
-    int min = DateTime.now().difference(this).inMinutes;
-    int count = 0;
-    String text = '';
-    if (min == 0) {
-      return 'just now';
-    }
-    if (min < 60) {
-      count = max(min, 0);
-      text = 'm';
-    } else if (min < 60 * 24) {
-      count = min ~/ 60;
-      text = 'h';
-    } else if (min < 60 * 24 * 7) {
-      count = min ~/ (60 * 24);
-      text = ' days';
-    } else {
-      count = min ~/ (60 * 24 * 7);
-      text = ' weeks';
-    }
-    return '$count$text ago';
-  }
 
   String agoLocalized(BuildContext context) {
     final _localization = localization(context);
     int min = DateTime.now().difference(this).inMinutes;
     int count = 0;
     if (min == 0) {
-      _localization.lastSeenRecently;
+      _localization.lastSeenJustNow;
     }
     if (min < 60) {
       count = max(min, 0);
@@ -147,28 +125,6 @@ extension DateTimeFormat on DateTime {
 
   }
 
-  String get agoArabic {
-    int min = DateTime.now().difference(this).inMinutes;
-    int count = 0;
-    String text = '';
-    if (min == 0) {
-      return 'الآن';
-    }
-    if (min < 60) {
-      count = max(min, 0);
-      text = 'دقيقة';
-    } else if (min < 60 * 24) {
-      count = min ~/ 60;
-      text = 'ساعة';
-    } else if (min < 60 * 24 * 7) {
-      count = min ~/ (60 * 24);
-      text = 'يوم';
-    } else {
-      count = min ~/ (60 * 24 * 7);
-      text = 'اسبوع';
-    }
-    return 'منذ $count $text';
-  }
 
   String format(BuildContext context, String format) {
     initializeDateFormatting();

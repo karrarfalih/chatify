@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:chatify/src/utils/extensions.dart';
@@ -30,7 +31,7 @@ class RecordThumb extends StatelessWidget {
             },
           ),
           builder: (contex, radius, child) {
-            final screenSize = MediaQuery.of(context).size;
+            final screenSize = mediaQuery(context).size;
             return ValueListenableBuilder<Offset>(
               valueListenable: controller.voiceController.micPos,
               builder: (contex, micPos, _) {
@@ -45,9 +46,9 @@ class RecordThumb extends StatelessWidget {
                       (controller.keyboardController.isKeybaordOpen ||
                               controller.isEmoji.value
                           ? controller.keyboardController.keyboardHeight -
-                              MediaQuery.of(context).padding.bottom
+                              mediaQuery(context).padding.bottom
                           : 0) -
-                      MediaQuery.of(context).padding.bottom -
+                      mediaQuery(context).padding.bottom -
                       30,
                   child: GestureDetector(
                     onTap: () => controller.voiceController.stopRecord(),

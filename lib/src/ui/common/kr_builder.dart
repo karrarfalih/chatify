@@ -29,6 +29,7 @@ class KrFutureBuilder<T> extends StatelessWidget {
   ///shimmer gradiant colors.
   final Color? baseColor;
   final Color? highlightColor;
+  final T? initialData;
 
   const KrFutureBuilder({
     Key? key,
@@ -41,14 +42,18 @@ class KrFutureBuilder<T> extends StatelessWidget {
     this.blocs,
     this.onLoading,
     this.baseColor,
-    this.highlightColor,
+    this.highlightColor, this.initialData,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<T>(
       future: future,
+      initialData: initialData,
       builder: (context, data) {
+        if(data.hasData){
+          return builder(data.data!);
+        }
         if (data.connectionState == ConnectionState.waiting) {
           if (shimmerSize != null) {
             return ShimmerBloc(

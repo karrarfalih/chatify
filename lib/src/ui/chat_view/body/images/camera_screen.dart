@@ -5,6 +5,7 @@ import 'package:chatify/src/ui/chat_view/body/images/controller.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_mode.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_preview.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:iconsax/iconsax.dart';
@@ -41,7 +42,7 @@ class _CameraScreenState extends State<CameraScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
+    final size = mediaQuery(context).size;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         systemNavigationBarDividerColor: Colors.black,
@@ -54,8 +55,8 @@ class _CameraScreenState extends State<CameraScreen> {
               isSelecetd: true,
               controller: widget.controller,
               chatController: widget.chatController,
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
+              width: mediaQuery(context).size.width,
+              height: mediaQuery(context).size.height,
             )
           : Scaffold(
               body: Stack(

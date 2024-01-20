@@ -2,7 +2,7 @@ import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
-import 'package:chatify/src/ui/chat_view/input_status.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
@@ -149,7 +149,7 @@ class _ChatMessagesState extends State<ChatMessages> {
                       if (i == docs.length - 1)
                         SizedBox(
                           key: ValueKey('chat padding bottom'),
-                          height: MediaQuery.of(context).padding.top + 70,
+                          height: mediaQuery(context).padding.top + 70,
                         ),
                       if (showTime)
                         Center(
@@ -181,11 +181,9 @@ class _ChatMessagesState extends State<ChatMessages> {
                             message: msg,
                             users: widget.users,
                             controller: widget.controller,
-                            linkedWithBottom:
-                                (nextMsg?.sender == msg.sender &&
-                                        nextMsg?.sendAt?.day ==
-                                            msg.sendAt?.day) ||
-                                    (msg.isMine && value.isNotEmpty),
+                            linkedWithBottom: (nextMsg?.sender == msg.sender &&
+                                    nextMsg?.sendAt?.day == msg.sendAt?.day) ||
+                                (msg.isMine && value.isNotEmpty),
                             linkedWithTop: !showTime &&
                                 prevMsg != null &&
                                 prevMsg.sender == msg.sender,
@@ -216,19 +214,6 @@ class _ChatMessagesState extends State<ChatMessages> {
                       style: TextStyle(
                         color: Chatify.theme.chatForegroundColor,
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              header: SliverToBoxAdapter(
-                child: Column(
-                  children: [
-                    UsersInputStatus(
-                      chatId: widget.chat.id,
-                      users: widget.users,
-                    ),
-                    SizedBox(
-                      height: 5,
                     ),
                   ],
                 ),

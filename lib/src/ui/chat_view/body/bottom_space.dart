@@ -1,4 +1,3 @@
-
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/keyboard_size.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';

@@ -1,6 +1,7 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chats/search/search.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
@@ -15,18 +16,18 @@ class ChatSearch extends StatelessWidget {
     return Container(
       height: 55,
       color: Colors.transparent,
-      width: MediaQuery.of(context).size.width,
+      width: mediaQuery(context).size.width,
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 10),
       child: SizedBox(
         height: 48,
         child: TextButton(
           onPressed: () {
             Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const SearchScreen(),
-                      ),
-                    );
+              context,
+              MaterialPageRoute(
+                builder: (context) => const SearchScreen(),
+              ),
+            );
           },
           style: TextButton.styleFrom(
             shape: RoundedRectangleBorder(

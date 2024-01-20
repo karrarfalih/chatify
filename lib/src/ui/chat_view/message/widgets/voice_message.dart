@@ -3,6 +3,7 @@ import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/bubble.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/voice/voice_message.dart';
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/material.dart';
 
 class MyVoiceMessage extends StatelessWidget {
@@ -31,7 +32,7 @@ class MyVoiceMessage extends StatelessWidget {
       contactFgColor: Chatify.theme.primaryColor,
       message: message,
       chatController: controller,
-      width: MediaQuery.of(context).size.width,
+      width: mediaQuery(context).size.width,
     );
   }
 }
@@ -65,7 +66,7 @@ class MyVoiceMessageBloc extends StatelessWidget {
         user: '',
         message: message,
         chatController: controller,
-        width: MediaQuery.of(context).size.width,
+        width: mediaQuery(context).size.width,
       ),
     );
   }

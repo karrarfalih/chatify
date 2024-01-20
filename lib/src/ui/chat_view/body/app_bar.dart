@@ -281,7 +281,7 @@ class ChatAppBar extends StatelessWidget {
                         },
                       ),
                     ],
-                    position: PullDownMenuPosition.above,
+                    position: PullDownMenuPosition.under,
                     applyOpacity: true,
                     buttonBuilder: (context, showMenu) => CircularButton(
                       icon: Icon(

@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
+import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -116,7 +117,7 @@ class SwipeablePageRoute<T> extends CupertinoPageRoute<T> {
     if (fullscreenDialog) {
       return (context, animation, secondaryAnimation, isSwipeGesture, child) {
         return Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: Directionality.of(context),
           child: CupertinoFullscreenDialogTransition(
             primaryRouteAnimation: animation,
             secondaryRouteAnimation: secondaryAnimation,
@@ -128,7 +129,7 @@ class SwipeablePageRoute<T> extends CupertinoPageRoute<T> {
     } else {
       return (context, animation, secondaryAnimation, isSwipeGesture, child) {
         return Directionality(
-          textDirection: TextDirection.ltr,
+          textDirection: Directionality.of(context),
           child: CupertinoPageTransition(
             primaryRouteAnimation: animation,
             secondaryRouteAnimation: secondaryAnimation,
@@ -331,7 +332,7 @@ class _FancyBackGestureDetectorState<T>
           _gestureRecognizerConstructor,
           (instance) => instance
             ..onStart = _handleDragStart
-            ..onUpdate = _handleDragUpdate
+            ..onUpdate = ((x) => _handleDragUpdate(x, context))
             ..onEnd = _handleDragEnd
             ..onCancel = _handleDragCancel,
         ),
@@ -366,11 +367,13 @@ class _FancyBackGestureDetectorState<T>
     _backGestureController = widget.onStartPopGesture();
   }
 
-  void _handleDragUpdate(DragUpdateDetails details) {
+  void _handleDragUpdate(DragUpdateDetails details, BuildContext context) {
     assert(mounted);
     assert(_backGestureController != null);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final factor = isRtl ? -1 : 1;
     _backGestureController!.dragUpdate(
-      _convertToLogical(details.primaryDelta! / context.size!.width),
+      _convertToLogical(factor * details.primaryDelta! / context.size!.width),
     );
   }
 
@@ -403,7 +406,7 @@ class _FancyBackGestureDetectorState<T>
     // For devices with notches, the drag area needs to be larger on the side
     // that has the notch.
     final directionality = TextDirection.ltr;
-    final media = MediaQuery.of(context);
+    final media = mediaQuery(context);
     final dragAreaWidth = directionality == TextDirection.rtl
         ? media.padding.left
         : media.padding.right;
