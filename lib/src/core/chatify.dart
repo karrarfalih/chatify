@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/firebase/firestore.dart';
@@ -7,8 +8,11 @@ import 'package:chatify/src/ui/common/swipeable_page_route.dart';
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/uuid.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+
+int androidVersion = 0;
 
 class Chatify {
   static late ChatifyDatasource _datasource;
@@ -55,6 +59,16 @@ class Chatify {
     _currentUserId = value;
   }
 
+  static String? _currentOpenedChat;
+
+  // The current opened chat id for the Chatify library.
+  static String? get currentOpenedChat => _currentOpenedChat;
+
+  /// Sets the current opened chat id for the Chatify library.
+  static set currentOpenedChat(String? value) {
+    _currentOpenedChat = value;
+  }
+
   static Future<void> init({
     required ChatifyConfig config,
     required String currentUserId,
@@ -70,6 +84,10 @@ class Chatify {
       chatsCollectionName: config.chatsCollectionName,
     );
     await Cache.init();
+    if (Platform.isAndroid && androidVersion == 0) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      androidVersion = androidInfo.version.sdkInt;
+    }
     isInititialized = true;
     ChatifyLog.d('Chatify initialized.');
   }
@@ -107,15 +125,19 @@ class Chatify {
     _onMessageAddedSubscription?.cancel();
   }
 
-  static void endUserSeasion(String userId) {
-    _removeConnectionHandler(userId);
+  static void endUserSeasion() {
+    _removeConnectionHandler(currentUserId);
     ChatifyLog.d('User session ended.');
   }
 
-  static openAllChats(BuildContext context) {
+  static openChat(
+    BuildContext context, {
+    required Chat chat,
+    required ChatifyUser user,
+  }) async {
     Navigator.of(context).push(
       SwipeablePageRoute(
-        builder: (context) => ChatScreen(),
+        builder: (context) => ChatView(chat: chat, users: [user]),
       ),
     );
   }
@@ -133,8 +155,50 @@ class Chatify {
     );
   }
 
+  static openChatById(
+    BuildContext context, {
+    required String chatId,
+  }) async {
+    final chat = await datasource.findChatById(chatId);
+    if(chat == null) {
+      ChatifyLog.d('Can not find chat with id: $chatId', isError: true);
+      return;
+    }
+    final users = await Future.wait(chat.members.map(config.getUserById));
+    Navigator.of(context).push(
+      SwipeablePageRoute(
+        builder: (context) => ChatView(chat: chat, users: users),
+      ),
+    );
+  }
+
+  static openAllChats(BuildContext context) {
+    Navigator.of(context).push(
+      SwipeablePageRoute(
+        builder: (context) => ChatScreen(),
+      ),
+    );
+  }
+
   static Future createSavedMessages() async {
     return _datasource.findChatOrCreateSavedMessage();
+  }
+
+  static Future createChatSupprt() async {
+    return _datasource.findOrCreateChatSupport();
+  }
+
+  static openChatSupport(BuildContext context, [String? userId]) async {
+    final chat = await datasource.findOrCreateChatSupport(userId);
+    final users = [
+      await config.getUserById(currentUserId),
+      ChatifyUser.support(),
+    ];
+    Navigator.of(context).push(
+      SwipeablePageRoute(
+        builder: (context) => ChatView(chat: chat, users: users),
+      ),
+    );
   }
 
   static Future createAiChat() async {
@@ -144,18 +208,6 @@ class Chatify {
       title: 'Ai',
     );
     await _datasource.addChat(chat);
-  }
-
-  static openChat(
-    BuildContext context, {
-    required Chat chat,
-    required ChatifyUser user,
-  }) async {
-    Navigator.of(context).push(
-      SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, users: [user]),
-      ),
-    );
   }
 
   static Stream<int> get unreadMessagesCount {

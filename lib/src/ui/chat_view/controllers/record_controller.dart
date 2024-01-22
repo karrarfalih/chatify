@@ -30,7 +30,7 @@ class VoiceRecordingController {
     if (isRecording.value) return;
     _record = Record();
     Chatify.datasource
-        .updateChatStaus(ChatStatus.recording, controller.chat.id);
+        .updateChatStatus(ChatStatus.recording, controller.chat.id);
     isRecording.value = true;
     micPos.value = Offset.zero;
     micLockPos.value = Offset.zero;
@@ -153,8 +153,9 @@ class VoiceRecordingController {
           chatId: controller.chat.id,
           url: '',
           duration: Duration(
-              milliseconds:
-                  DateTime.now().difference(recordStart!).inMilliseconds),
+            milliseconds:
+                DateTime.now().difference(recordStart!).inMilliseconds,
+          ),
           unSeenBy: controller.chat.members
               .where((e) => e != Chatify.currentUserId)
               .toList(),
@@ -175,7 +176,7 @@ class VoiceRecordingController {
         Chatify.datasource.addChat(controller.chat);
       }
     } finally {
-      Chatify.datasource.updateChatStaus(ChatStatus.none, controller.chat.id);
+      Chatify.datasource.updateChatStatus(ChatStatus.none, controller.chat.id);
       _record.dispose();
     }
   }

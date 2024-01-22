@@ -16,6 +16,14 @@ class ChatifyUser {
     this.profileImage,
     this.data,
   });
+
+  ChatifyUser.support()
+      : id = 'support',
+        uid = null,
+        name = 'Support',
+        clientNotificationIds = null,
+        profileImage = 'https://i.imgur.com/BoN9kdC.png',
+        data = null;
 }
 
 enum ChatStatus {
@@ -43,11 +51,17 @@ class UserLastSeen {
 
 extension Users on Iterable<ChatifyUser> {
   List<ChatifyUser> get withoutMe =>
-      where((e) => e.id != Chatify.currentUserId).toList();
+      where((e) => e.id != Chatify.currentUserId && e.id != 'support').toList();
 
   List<ChatifyUser> get withoutMeOrMe {
     final users = withoutMe;
     if (users.isEmpty) return [first];
     return users;
+  }
+
+  String get usersName {
+    if(isEmpty) return '';
+    if (length == 1) return first.name;
+    return withoutMe.map((e) => e.name.split(' ').first).join(', ');
   }
 }

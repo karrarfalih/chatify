@@ -82,6 +82,7 @@
   "failedToSave": "فشل في الحفظ",
   "noMessages": "لا توجد رسائل",
   "savedMessages": "الرسائل المحفوظة",
+  "chatSupprt": "الدعم والمساعدة",
   "newMessage": "رسالة جديدة",
   "deletedMessage": "رسالة محذوفة",
   "edited": "تم التعديل",
@@ -92,5 +93,6 @@
   "to": "إلى: ",
   "imageMessage": "صورة",
   "voiceMessage": "رسالة صوتية",
-  "unSuppprtedMessage": "رسالة غير مدعومة"
+  "unSuppprtedMessage": "رسالة غير مدعومة",
+  "deletedAccount": "حساب محذوف"
 }

@@ -9,10 +9,14 @@ class SendAtWidget extends StatelessWidget {
     Key? key,
     required this.message,
     this.isSending = false,
+    this.iconColor,
+    this.textColor,
   }) : super(key: key);
 
   final Message message;
   final bool isSending;
+  final Color? iconColor;
+  final Color? textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -20,16 +24,17 @@ class SendAtWidget extends StatelessWidget {
     final isSeen =
         message.seenBy.where((e) => e != Chatify.currentUserId).isNotEmpty;
     final isTextOrVoice =
-        message.type.isTextOrUnsupported || message.type.isVoice;
+        message.type.isTextOrUnsupported || message.type.isVoice || message.emojis.isNotEmpty;
     final isVoice = message.type == MessageType.voice;
     final theme = Chatify.theme;
-    final iconColor = !isMine && isTextOrVoice
-        ? theme.chatForegroundColor.withOpacity(
-            isTextOrVoice || isVoice ? 0.7 : 1,
-          )
-        : Colors.white.withOpacity(
-            isTextOrVoice || isVoice ? 0.7 : 1,
-          );
+    final iconColor = this.iconColor ??
+        (!isMine && isTextOrVoice
+            ? theme.chatForegroundColor.withOpacity(
+                isTextOrVoice || isVoice ? 0.7 : 1,
+              )
+            : Colors.white.withOpacity(
+                isTextOrVoice || isVoice ? 0.7 : 1,
+              ));
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Padding(
@@ -67,9 +72,10 @@ class SendAtWidget extends StatelessWidget {
               (message.sendAt ?? DateTime.now()).format(context, 'h:mm a'),
               style: TextStyle(
                 fontSize: 11,
-                color: isTextOrVoice && !isMine
-                    ? theme.chatForegroundColor.withOpacity(0.3)
-                    : Colors.white.withOpacity(isTextOrVoice ? 0.5 : 1),
+                color: textColor ??
+                    (isTextOrVoice && !isMine
+                        ? theme.chatForegroundColor.withOpacity(0.3)
+                        : Colors.white.withOpacity(isTextOrVoice ? 0.5 : 1)),
                 height: 1.2,
               ),
               textDirection: TextDirection.ltr,

@@ -129,6 +129,9 @@ class ChatifyLocalizationsAr extends ChatifyLocalizations {
   String get savedMessages => 'الرسائل المحفوظة';
 
   @override
+  String get chatSupprt => 'الدعم والمساعدة';
+
+  @override
   String get newMessage => 'رسالة جديدة';
 
   @override
@@ -160,4 +163,7 @@ class ChatifyLocalizationsAr extends ChatifyLocalizations {
 
   @override
   String get unSuppprtedMessage => 'رسالة غير مدعومة';
+
+  @override
+  String get deletedAccount => 'حساب محذوف';
 }

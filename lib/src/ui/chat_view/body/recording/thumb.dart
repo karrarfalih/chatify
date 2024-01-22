@@ -60,7 +60,7 @@ class RecordThumb extends StatelessWidget {
                         color: interpolateColor(
                           primaryColor,
                           (screenSize.width -
-                              (left / screenSize.width) * screenSize.width),
+                              (left / screenSize.width) * screenSize.width) * 1.6,
                           screenSize.width,
                         ),
                         shape: BoxShape.circle,

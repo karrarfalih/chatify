@@ -30,6 +30,20 @@ class ChatAppBar extends StatelessWidget {
   final ChatController chatController;
   final ChatifyConnectivity connectivity;
 
+  String title(BuildContext context) {
+    if (chatController.chat.title == 'Support' &&
+        !Chatify.config.showSupportMessages) {
+      return localization(context).chatSupprt;
+    }
+    if (chatController.chat.title == 'Saved Messages') {
+      return localization(context).savedMessages;
+    }
+    if (chatController.chat.title == 'Support') {
+      return users.withoutMeOrMe.usersName;
+    }
+    return chatController.chat.title ?? users.withoutMeOrMe.usersName;
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Chatify.theme;
@@ -189,6 +203,20 @@ class ChatAppBar extends StatelessWidget {
                                 color: Colors.white,
                               ),
                             )
+                          else if (chatController.chat.title == 'Support' &&
+                              !Chatify.config.showSupportMessages)
+                            Container(
+                              height: 44,
+                              width: 44,
+                              decoration: BoxDecoration(
+                                color: Chatify.theme.primaryColor,
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Iconsax.message,
+                                color: Colors.white,
+                              ),
+                            )
                           else
                             Transform.scale(
                               scale: 44 / 50,
@@ -204,14 +232,7 @@ class ChatAppBar extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  chatController.chat.title == 'Saved Messages'
-                                      ? localization(context).savedMessages
-                                      : chatController.chat.title ??
-                                          users.withoutMeOrMe
-                                              .map(
-                                                (e) => e.name.split(' ').first,
-                                              )
-                                              .join(', '),
+                                  title(context),
                                   style: TextStyle(
                                     color: theme.chatForegroundColor,
                                     fontSize: 16,
@@ -220,7 +241,9 @@ class ChatAppBar extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 if (chatController.chat.title !=
-                                    'Saved Messages')
+                                        'Saved Messages' &&
+                                    (chatController.chat.title != 'Support' ||
+                                        Chatify.config.showSupportMessages))
                                   SizedBox(
                                     height: 15,
                                     child: _ChatStatus(

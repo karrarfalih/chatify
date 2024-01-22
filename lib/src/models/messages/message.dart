@@ -15,7 +15,7 @@ abstract class Message {
   final String? replyMessage;
   final DateTime? sendAt;
   final DateTime pendingTime;
-  final String sender;
+  String sender;
   final List<String> seenBy;
   final List<String> unSeenBy;
   final List<String> canReadBy;
@@ -44,7 +44,9 @@ abstract class Message {
         seenBy = seenBy ?? [Chatify.currentUserId],
         pendingTime = DateTime.now();
 
-  bool get isMine => sender == Chatify.currentUserId;
+  bool get isMine =>
+      Chatify.currentUserId == sender ||
+      (Chatify.config.showSupportMessages && sender == 'support');
 
   Message.fromJson(Map data)
       : isEdited = data['isEdited'] ?? false,

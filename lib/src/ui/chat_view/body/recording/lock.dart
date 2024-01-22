@@ -31,7 +31,7 @@ class RecordingLock extends StatelessWidget {
                 BoxShadow(
                   color: Chatify.theme.chatForegroundColor.withOpacity(0.3),
                   blurRadius: 2,
-                )
+                ),
               ],
             ),
             child: ValueListenableBuilder<bool>(

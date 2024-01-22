@@ -126,7 +126,7 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
   }
 
   startSwipe() {
-    widget.controller.isSelecting.value = true;
+    widget.controller.preventChatScroll.value = true;
     widget.controller.initialSelecetdMessages =
         Map.from(widget.controller.selecetdMessages.value);
     toggleSelect();
@@ -145,9 +145,12 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
             ? Colors.white
             : Colors.black;
     final width = mediaQuery(context).size.width - 100;
-    final myEmoji = widget.message.emojis
-        .cast<MessageEmoji?>()
-        .firstWhere((e) => e?.uid == Chatify.currentUserId, orElse: () => null);
+    final myEmoji = widget.message.emojis.cast<MessageEmoji?>().firstWhere(
+          (e) =>
+              e?.uid == Chatify.currentUserId ||
+              (Chatify.config.showSupportMessages && e?.uid == 'support'),
+          orElse: () => null,
+        );
     final sender = widget.users.firstWhere(
       (e) => e.id == widget.message.sender,
       orElse: () => ChatifyUser(
@@ -168,7 +171,7 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
           },
           onLongPress: startSwipe,
           onLongPressEnd: (details) =>
-              widget.controller.isSelecting.value = false,
+              widget.controller.preventChatScroll.value = false,
           child: Container(
             color: isSelected
                 ? theme.primaryColor.withOpacity(0.1)
@@ -266,13 +269,29 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
                                     height: 1,
                                   ),
                                 ),
-                                onPressed: () {
+                                onPressed: () async {
                                   if (myEmoji?.emoji == e) {
                                     Chatify.datasource
                                         .removeMessageEmojis(widget.message.id);
                                   } else {
-                                    Chatify.datasource
-                                        .addMessageEmojis(widget.message.id, e);
+                                    if (myEmoji != null)
+                                      Chatify.datasource
+                                          .removeMessageEmojis(
+                                            widget.message.id,
+                                          )
+                                          .then(
+                                            (value) => Chatify.datasource
+                                                .addMessageEmojis(
+                                              widget.message.id,
+                                              e,
+                                            ),
+                                          );
+                                    else {
+                                      Chatify.datasource.addMessageEmojis(
+                                        widget.message.id,
+                                        e,
+                                      );
+                                    }
                                   }
                                   Navigator.pop(context);
                                 },
@@ -534,6 +553,8 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
                                                 widget.message as ImageMessage,
                                             chatController: widget.controller,
                                             user: sender,
+                                            bkColor: bkColor,
+                                            textColor: textColor,
                                           )
                                         : TextMessageCard(
                                             widget: widget,
@@ -542,6 +563,7 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
                                             controller: widget.controller,
                                             isMine: isMine,
                                             isSending: widget.isSending,
+                                            isSelected: isSelected,
                                           ),
                               ),
                             ],

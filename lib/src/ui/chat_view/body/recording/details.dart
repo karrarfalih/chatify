@@ -16,7 +16,7 @@ class ChatRecordDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints.tightFor(width: 500, height: 55),
+      constraints: const BoxConstraints.tightFor(width: 500, height: 50),
       child: Row(
         children: [
           SizedBox(
@@ -41,19 +41,29 @@ class ChatRecordDetails extends StatelessWidget {
               },
             ),
           ),
-          Icon(
-            Icons.arrow_back_ios,
-            size: 20,
-            color: Chatify.theme.chatForegroundColor.withOpacity(0.6),
-          ),
-          Text(
-            localization(context).slideToCancel,
-            overflow: TextOverflow.clip,
-            style: TextStyle(
-              fontSize: 16,
-              color: Chatify.theme.chatForegroundColor.withOpacity(0.7),
-            ),
-            maxLines: 1,
+          ValueListenableBuilder<bool>(
+            valueListenable: controller.isLocked,
+            builder: (contex, isLocked, _) {
+              if (isLocked) return SizedBox.shrink();
+              return Row(
+                children: [
+                  Icon(
+                    Icons.arrow_back_ios,
+                    size: 20,
+                    color: Chatify.theme.chatForegroundColor.withOpacity(0.6),
+                  ),
+                  Text(
+                    localization(context).slideToCancel,
+                    overflow: TextOverflow.clip,
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Chatify.theme.chatForegroundColor.withOpacity(0.7),
+                    ),
+                    maxLines: 1,
+                  ),
+                ],
+              );
+            },
           ),
         ],
       ),

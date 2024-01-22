@@ -107,9 +107,9 @@ extension DateTimeFormat on DateTime {
     int min = DateTime.now().difference(this).inMinutes;
     int count = 0;
     if (min == 0) {
-      _localization.lastSeenJustNow;
+      return _localization.lastSeenJustNow;
     }
-    if (min < 60) {
+    else if (min < 60) {
       count = max(min, 0);
       return _localization.lastSeenMinutes(count);
     } else if (min < 60 * 24) {

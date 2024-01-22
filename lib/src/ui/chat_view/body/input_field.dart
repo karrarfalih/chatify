@@ -7,6 +7,7 @@ import 'package:chatify/src/ui/chat_view/body/images/bottom_sheet.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -154,7 +155,6 @@ class ChatInputField extends StatelessWidget {
                               final androidInfo =
                                   await DeviceInfoPlugin().androidInfo;
                               if (androidInfo.version.sdkInt <= 32) {
-                                /// use [Permissions.storage.status]
                                 var status = await Permission.storage.status;
                                 if (status.isDenied) {
                                   await Permission.storage.request();
@@ -186,36 +186,52 @@ class ChatInputField extends StatelessWidget {
                             ),
                           ),
                         ),
-                        GestureDetector(
-                          onTapDown: (details) =>
-                              controller.voiceController.record(),
-                          onTapUp: (details) =>
-                              controller.voiceController.endMicDarg(chat),
-                          onHorizontalDragStart: (_) =>
-                              controller.voiceController.record(),
-                          onHorizontalDragUpdate: (d) {
-                            controller.voiceController
-                                .setMicPos(d.localPosition);
-                          },
-                          onHorizontalDragEnd: (_) =>
-                              controller.voiceController.endMicDarg(chat),
-                          onHorizontalDragCancel: () =>
-                              controller.voiceController.endMicDarg(chat),
-                          child: Container(
-                            height: 50,
-                            width: 50,
-                            color: Colors.transparent,
-                            child: Animate(
-                              effects: [
-                                ScaleEffect(
-                                  duration: Duration(milliseconds: 100),
-                                  begin: Offset(0.5, 0.5),
+                        Focus(
+                          child: GestureDetector(
+                            onTapDown: (details) {
+                              controller.preventChatScroll.value = true;
+                              controller.voiceController.record();
+                            },
+                            onTapUp: (details) {
+                              controller.preventChatScroll.value = false;
+                              controller.voiceController.endMicDarg(chat);
+                            },
+                            onHorizontalDragStart: (_){
+                              controller.preventChatScroll.value = true;
+                              controller.voiceController.record();
+                            },
+                            onHorizontalDragUpdate: (d) {
+                              controller.preventChatScroll.value = false;
+                              controller.voiceController
+                                  .setMicPos(d.localPosition);
+                            },
+                            onHorizontalDragEnd: (_) {
+                              controller.preventChatScroll.value = false;
+                              controller.voiceController.endMicDarg(chat);
+                            },
+                            onHorizontalDragCancel: () {
+                              controller.preventChatScroll.value = false;
+                              controller.voiceController.endMicDarg(chat);
+                            },
+                            behavior: HitTestBehavior.opaque,
+                            excludeFromSemantics: true,
+                            trackpadScrollCausesScale: true,
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              color: Colors.transparent,
+                              child: Animate(
+                                effects: [
+                                  ScaleEffect(
+                                    duration: Duration(milliseconds: 100),
+                                    begin: Offset(0.5, 0.5),
+                                  ),
+                                ],
+                                child: Icon(
+                                  Iconsax.microphone,
+                                  color: iconColor,
+                                  size: 26,
                                 ),
-                              ],
-                              child: Icon(
-                                Iconsax.microphone,
-                                color: iconColor,
-                                size: 26,
                               ),
                             ),
                           ),

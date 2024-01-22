@@ -108,7 +108,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
           child: Stack(
             children: [
               Padding(
-                padding: const EdgeInsets.only(bottom: 8),
+                padding: EdgeInsets.only(bottom: message.emojis.isNotEmpty ? 29 : 8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   mainAxisSize: MainAxisSize.min,
@@ -129,14 +129,50 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                   ],
                 ),
               ),
-              Positioned(
-                bottom: 8,
+              Positioned.fill(
+                bottom: 5,
                 right: 10,
-                child: SendAtWidget(
-                  message: message,
-                  isSending: message.uploadAttachment != null,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Container(
+                      margin: const EdgeInsetsDirectional.only(
+                        end: 10,
+                        top: 6,
+                        start: 10,
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        decoration: BoxDecoration(
+                          color: message.isMine
+                              ? Colors.white
+                              : Chatify.theme.primaryColor,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: message.emojis
+                              .map(
+                                (e) => Text(
+                                  e.emoji,
+                                  style: const TextStyle(
+                                    height: 1.3,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    SendAtWidget(
+                      message: message,
+                      isSending: message.uploadAttachment != null,
+                    ),
+                  ],
                 ),
-              )
+              ),
             ],
           ),
         ),

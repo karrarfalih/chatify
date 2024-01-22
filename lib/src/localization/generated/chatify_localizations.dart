@@ -321,6 +321,12 @@ abstract class ChatifyLocalizations {
   /// **'Saved messages'**
   String get savedMessages;
 
+  /// No description provided for @chatSupprt.
+  ///
+  /// In en, this message translates to:
+  /// **'Support'**
+  String get chatSupprt;
+
   /// No description provided for @newMessage.
   ///
   /// In en, this message translates to:
@@ -386,6 +392,12 @@ abstract class ChatifyLocalizations {
   /// In en, this message translates to:
   /// **'Unsuppprted Message'**
   String get unSuppprtedMessage;
+
+  /// No description provided for @deletedAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleted Account'**
+  String get deletedAccount;
 }
 
 class _ChatifyLocalizationsDelegate extends LocalizationsDelegate<ChatifyLocalizations> {

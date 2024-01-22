@@ -76,9 +76,18 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
     super.dispose();
   }
 
-  Future<List<ChatifyUser>> getUsers() async {
+  Future<List<ChatifyUser>> getUsers(BuildContext context) async {
     return await Future.wait(
-      widget.chat.members.map((e) => Chatify.config.getUserById(e)),
+      widget.chat.members.map(
+        (e) => Chatify.config.getUserById(e).catchError(
+          (error) {
+            return ChatifyUser(
+              id: e,
+              name: localization(context).deletedAccount,
+            );
+          },
+        ),
+      ),
     );
   }
 
@@ -87,12 +96,26 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
     return ColoredBox(
       color: Colors.transparent,
       child: KrFutureBuilder<List<ChatifyUser>>(
-        future: getUsers(),
+        future: getUsers(context),
         onLoading: const ChatRoomBloc(),
         onError: (e) {
           return Text(e.toString());
         },
         builder: (users) {
+          String title(BuildContext context) {
+            if (widget.chat.title == 'Support' &&
+                !Chatify.config.showSupportMessages) {
+              return localization(context).chatSupprt;
+            }
+            if (widget.chat.title == 'Saved Messages') {
+              return localization(context).savedMessages;
+            }
+            if (widget.chat.title == 'Support') {
+              return users.withoutMeOrMe.usersName;
+            }
+            return widget.chat.title ?? users.withoutMeOrMe.usersName;
+          }
+
           return InkWell(
             highlightColor: Colors.transparent,
             onTap: () async {
@@ -138,11 +161,33 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                 color: Colors.white,
                               ),
                             )
+                          else if (widget.chat.title == 'Support' &&
+                              !Chatify.config.showSupportMessages)
+                            Container(
+                              height: 50,
+                              width: 50,
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    Chatify.theme.primaryColor.withOpacity(0.6),
+                                    Chatify.theme.primaryColor,
+                                  ],
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                ),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Iconsax.message,
+                                color: Colors.white,
+                              ),
+                            )
                           else
                             ChatImage(users: users.withoutMeOrMe),
                           if (users.length == 1 &&
                               users.first != Chatify.currentUserId &&
-                              widget.chat.title != 'Saved Messages')
+                              widget.chat.title != 'Saved Messages' &&
+                              users.first.id != 'support')
                             KrStreamBuilder<UserLastSeen>(
                               stream: Chatify.datasource.getUserLastSeen(
                                 users.first.id,
@@ -182,17 +227,7 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        widget.chat.title == 'Saved Messages'
-                                            ? localization(context)
-                                                .savedMessages
-                                            : widget.chat.title ??
-                                                users.withoutMeOrMe
-                                                    .map(
-                                                      (e) => e.name
-                                                          .split(' ')
-                                                          .first,
-                                                    )
-                                                    .join(', '),
+                                        title(context),
                                         style: const TextStyle(height: 1),
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
@@ -218,7 +253,13 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                                   fit: BoxFit.fitHeight,
                                                   height: 12,
                                                 )
-                                              else if (message.message != null && (lastMessageSubject.valueOrNull?.message?.isMine??false))
+                                              else if (message.message !=
+                                                      null &&
+                                                  (lastMessageSubject
+                                                          .valueOrNull
+                                                          ?.message
+                                                          ?.isMine ??
+                                                      false))
                                                 Image.asset(
                                                   message.message!.seenBy
                                                           .where(
@@ -300,7 +341,8 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                         if (message!.message?.message == null)
                                           return SizedBox();
                                         return Text(
-                                          message.message!.message(localization(context)),
+                                          message.message!
+                                              .message(localization(context)),
                                           style: TextStyle(
                                             height: 1.4,
                                             color: Chatify.theme

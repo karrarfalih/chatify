@@ -45,25 +45,28 @@ class _UsersInputStatusState extends State<UsersInputStatus> {
             key: ValueKey('chat status expanded section ${widget.chatId}'),
             expand: statuses.any((e) => e.value != ChatStatus.none),
             duration: Duration(milliseconds: 600),
-            child: SizedBox(
-              height: 35,
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 600),
-                switchInCurve: Curves.easeOutQuad,
-                switchOutCurve: Curves.easeInQuad,
-                transitionBuilder: (child, animation) {
-                  return FadeTransition(
-                    opacity: animation,
-                    child: ScaleTransition(
-                      scale: animation,
-                      alignment: Alignment.bottomLeft,
-                      child: child,
-                    ),
-                  );
-                },
-                child: getUserChatStatusWidget(
-                  context,
-                  statuses,
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 5),
+              child: SizedBox(
+                height: 35,
+                child: AnimatedSwitcher(
+                  duration: Duration(milliseconds: 600),
+                  switchInCurve: Curves.easeOutQuad,
+                  switchOutCurve: Curves.easeInQuad,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: animation,
+                        alignment: Alignment.bottomLeft,
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: getUserChatStatusWidget(
+                    context,
+                    statuses,
+                  ),
                 ),
               ),
             ),

@@ -21,7 +21,7 @@ class MyVoiceMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return VoiceMessageWidget(
-      key: ValueKey(message.id),
+      key: ValueKey(message.id+message.emojis.map((e) => e.emoji+e.uid).join()),
       onSeek: () => controller.preventEmoji = true,
       user: message.isMine ? localization(context).me : user.name,
       meBgColor: Chatify.theme.primaryColor,

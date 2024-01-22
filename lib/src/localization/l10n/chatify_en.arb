@@ -82,6 +82,7 @@
   "failedToSave": "Failed to save",
   "noMessages": "No messages",
   "savedMessages": "Saved messages",
+  "chatSupprt": "Support",
   "newMessage": "New message",
   "deletedMessage": "Deleted message",
   "edited": "Edited",
@@ -92,5 +93,6 @@
   "to": "To: ",
   "imageMessage": "Image Message",
   "voiceMessage": "Voice Message",
-  "unSuppprtedMessage": "Unsuppprted Message"
+  "unSuppprtedMessage": "Unsuppprted Message",
+  "deletedAccount": "Deleted Account"
 }

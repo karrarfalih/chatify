@@ -129,6 +129,9 @@ class ChatifyLocalizationsEn extends ChatifyLocalizations {
   String get savedMessages => 'Saved messages';
 
   @override
+  String get chatSupprt => 'Support';
+
+  @override
   String get newMessage => 'New message';
 
   @override
@@ -160,4 +163,7 @@ class ChatifyLocalizationsEn extends ChatifyLocalizations {
 
   @override
   String get unSuppprtedMessage => 'Unsuppprted Message';
+
+  @override
+  String get deletedAccount => 'Deleted Account';
 }

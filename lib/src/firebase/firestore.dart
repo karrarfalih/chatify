@@ -39,6 +39,11 @@ class ChatifyDatasource {
   }
 
   Future<void> addMessage(Message message, ChatifyUser? user) async {
+    final isSupport = message.chatId.contains('support') &&
+        Chatify.config.showSupportMessages;
+    if (isSupport) {
+      message.sender = 'support';
+    }
     await _messages.doc(message.id).set(message, SetOptions(merge: true));
     if (user != null) Chatify.config.onSendMessage?.call(message, user);
     ChatifyLog.d('addMessage');
@@ -58,7 +63,13 @@ class ChatifyDatasource {
         .where('chatId', isEqualTo: message.chatId)
         .where('sendAt', isGreaterThan: message.sendAt)
         .where('type', isEqualTo: MessageType.voice.name)
-        .where('canReadBy', arrayContains: Chatify.currentUserId)
+        .where(
+          'canReadBy',
+          arrayContainsAny: [
+            Chatify.currentUserId,
+            if (Chatify.config.showSupportMessages) 'support',
+          ],
+        )
         .orderBy('sendAt', descending: false)
         .startAfter([message.sendAt!.stamp])
         .limit(1)
@@ -73,7 +84,7 @@ class ChatifyDatasource {
     await _messages.doc(messageId).update({
       'emojis': FieldValue.arrayUnion(
         [MessageEmoji(emoji: emoji, uid: Chatify.currentUserId).toJson],
-      )
+      ),
     });
     ChatifyLog.d('addMessageEmojis');
   }
@@ -81,7 +92,7 @@ class ChatifyDatasource {
   Future<void> removeMessageEmojis(String messageId) async {
     ChatifyLog.d('removeMessageEmojis');
 
-    return FirebaseFirestore.instance.runTransaction((t) async {
+    return await FirebaseFirestore.instance.runTransaction((t) async {
       final msg = await t.get(_messages.doc(messageId));
       final emojis = msg.data()!.emojis;
       emojis.removeWhere((e) => e.uid == Chatify.currentUserId);
@@ -99,34 +110,44 @@ class ChatifyDatasource {
 
   Future<void> deleteMessageForMe(String id) async {
     await _messages.doc(id).update({
-      'canReadBy': FieldValue.arrayRemove([Chatify.currentUserId])
+      'canReadBy': FieldValue.arrayRemove([Chatify.currentUserId]),
     });
     ChatifyLog.d('deleteMessageForMe');
   }
 
-  Future<void> markAsSeen(String id) async {
+  Future<void> markAsSeen(Message msg) async {
+    final isSupprtAgent =
+        msg.chatId.contains('support') && Chatify.config.showSupportMessages;
+    final userId = isSupprtAgent ? 'support' : Chatify.currentUserId;
+    if (!msg.unSeenBy.contains(userId)) {
+      return;
+    }
     ChatifyLog.d('markAsSeen');
-
-    await _messages.doc(id).update({
-      'unSeenBy': FieldValue.arrayRemove([Chatify.currentUserId]),
-      'seenBy': FieldValue.arrayUnion([Chatify.currentUserId])
+    Chatify.config.onMessageRead?.call(msg);
+    await _messages.doc(msg.id).update({
+      'unSeenBy': FieldValue.arrayRemove([userId]),
+      'seenBy': FieldValue.arrayUnion([userId]),
     });
   }
 
   Future<void> markAllMessagesAsSeen(String chatId) async {
-    final unSeenMessages = await _messages
-        .where('chatId', isEqualTo: chatId)
-        .where('unSeenBy', arrayContains: Chatify.currentUserId)
-        .get();
+    final unSeenMessages =
+        await _messages.where('chatId', isEqualTo: chatId).where(
+      'unSeenBy',
+      arrayContainsAny: [
+        Chatify.currentUserId,
+        if (Chatify.config.showSupportMessages) 'support',
+      ],
+    ).get();
     for (final message in unSeenMessages.docs) {
-      await markAsSeen(message.id);
+      await markAsSeen(message.data());
     }
     ChatifyLog.d('markAllMessagesAsSeen');
   }
 
   Future<void> markAsDelivered(String id) async {
     await _messages.doc(id).update({
-      'deliveredTo': FieldValue.arrayUnion([Chatify.currentUserId])
+      'deliveredTo': FieldValue.arrayUnion([Chatify.currentUserId]),
     });
     ChatifyLog.d('markAsDelivered');
   }
@@ -177,10 +198,51 @@ class ChatifyDatasource {
         .get();
     if (res.size > 0) return res.docs.first.data();
     final chat = Chat(
-        id: 'saved_message',
-        members: [Chatify.currentUserId],
-        title: 'Saved Messages');
+      id: Uuid.generate(),
+      members: [Chatify.currentUserId],
+      title: 'Saved Messages',
+    );
     await addChat(chat);
+    return chat;
+  }
+
+  Future<Chat?> findChatById(String id) async {
+    final res = await _chats.doc(id).get();
+    return res.data();
+  }
+
+  Future<Chat> findOrCreateChatSupport([String? userId]) async {
+    bool isExist = MemoryCache.cache.entries.any(
+      (e) =>
+          e.value is Chat &&
+          (e.value as Chat)
+              .members
+              .hasSameElementsAs([userId ?? Chatify.currentUserId, 'support']),
+    );
+    if (isExist) {
+      return MemoryCache.cache.entries
+          .firstWhere(
+            (e) =>
+                e.value is Chat &&
+                (e.value as Chat)
+                    .members
+                    .hasSameElementsAs([userId ?? Chatify.currentUserId, 'support']),
+          )
+          .value as Chat;
+    }
+    final res = await _chats.where(
+      'members',
+      whereIn: [
+        [userId ?? Chatify.currentUserId, 'support'],
+        ['support', userId ?? Chatify.currentUserId],
+      ],
+    ).get();
+    if (res.size > 0) return res.docs.first.data();
+    final chat = Chat(
+      id: Uuid.generate() + 'support',
+      members: [userId ?? Chatify.currentUserId, 'support'],
+      title: 'Support',
+    );
     return chat;
   }
 
@@ -191,29 +253,29 @@ class ChatifyDatasource {
       transaction.update(_chats.doc(id), {
         'readAfter': {
           ...readAfter,
-          Chatify.currentUserId: FieldValue.serverTimestamp()
-        }
+          Chatify.currentUserId: FieldValue.serverTimestamp(),
+        },
       });
     });
   }
 
   Future<void> deleteChatForAll(String chatId) async {
-    final chat = await _chats.doc(chatId).get();
+    final chat = await _chats.doc(chatId).get().then((value) => value.data()!);
     final unSeenMessages = await _messages
         .where('chatId', isEqualTo: chatId)
         .where(
           'unSeenBy',
-          arrayContains: chat
-              .data()!
-              .members
-              .where((e) => e != Chatify.currentUserId)
+          arrayContains: chat.members
+              .where((e) =>
+                  e !=
+                  (chat.title == 'support' ? 'support' : Chatify.currentUserId))
               .first,
         )
         .get();
     for (final message in unSeenMessages.docs) {
       message.reference.update({
         'unSeenBy': [],
-        'seenBy': chat.data()!.members.toList(),
+        'seenBy': chat.members.toList(),
       });
     }
     await _chats.doc(chatId).delete();
@@ -222,7 +284,13 @@ class ChatifyDatasource {
   Query<Message> messagesQuery(Chat chat) {
     return _messages
         .where('chatId', isEqualTo: chat.id)
-        .where('canReadBy', arrayContains: Chatify.currentUserId)
+        .where(
+          'canReadBy',
+          arrayContainsAny: [
+            Chatify.currentUserId,
+            if (Chatify.config.showSupportMessages) 'support',
+          ],
+        )
         .where(
           'sendAt',
           isGreaterThan:
@@ -232,15 +300,23 @@ class ChatifyDatasource {
   }
 
   Query<Chat> get chatsQuery {
-    return _chats
-        .where('members', arrayContains: Chatify.currentUserId)
-        .orderBy('updatedAt', descending: true);
+    return _chats.where(
+      'members',
+      arrayContainsAny: [
+        Chatify.currentUserId,
+        if (Chatify.config.showSupportMessages) 'support',
+      ],
+    ).orderBy('updatedAt', descending: true);
   }
 
   Query<Message> unSeenMessages(String chatId) {
-    return _messages
-        .where('chatId', isEqualTo: chatId)
-        .where('unSeenBy', arrayContains: Chatify.currentUserId);
+    return _messages.where('chatId', isEqualTo: chatId).where(
+      'unSeenBy',
+      arrayContainsAny: [
+        Chatify.currentUserId,
+        if (Chatify.config.showSupportMessages) 'support',
+      ],
+    );
   }
 
   Stream<int> unSeenMessagesCount(String chatId) =>
@@ -248,7 +324,13 @@ class ChatifyDatasource {
 
   Stream<int> get getUnreadMessagesCount {
     return _messages
-        .where('unSeenBy', arrayContains: Chatify.currentUserId)
+        .where(
+          'unSeenBy',
+          arrayContainsAny: [
+            Chatify.currentUserId,
+            if (Chatify.config.showSupportMessages) 'support',
+          ],
+        )
         .snapshots()
         .map((e) => e.docs.map((e) => e.data().chatId).toSet().length);
   }
@@ -305,7 +387,7 @@ class ChatifyDatasource {
     });
   }
 
-  updateChatStaus(ChatStatus status, String chatId) {
+  updateChatStatus(ChatStatus status, String chatId) {
     if (status == ChatStatus.none) {
       FirebaseDatabase.instance
           .ref("users/${Chatify.currentUserId}/chats/$chatId")
@@ -317,7 +399,7 @@ class ChatifyDatasource {
         .update({'status': status.name});
   }
 
-  updateUserStaus(bool isOnline) {
+  updateUserStatus(bool isOnline) {
     FirebaseDatabase.instance
         .ref("users/${Chatify.currentUserId}")
         .runTransaction((value) {

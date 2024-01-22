@@ -27,7 +27,7 @@ class _ChatifyWraperState extends State<ChatifyWraper>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    Chatify.datasource.updateUserStaus(state == AppLifecycleState.resumed);
+    Chatify.datasource.updateUserStatus(state == AppLifecycleState.resumed);
   }
 
   @override

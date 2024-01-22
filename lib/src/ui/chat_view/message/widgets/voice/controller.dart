@@ -50,7 +50,7 @@ class VoicePlayerController {
 
   String get url => message.url;
   int get milliseconds => message.duration.inMilliseconds;
-  bool get isMe => Chatify.currentUserId == message.sender;
+  bool get isMe => message.isMine;
 
   final player = AudioPlayer();
 
@@ -169,9 +169,11 @@ class VoicePlayerController {
     if (player.speed != speed.value) {
       player.setSpeed(speed.value);
     }
-    final animationDuration = Duration(milliseconds: milliseconds ~/ speed.value);
+    final animationDuration =
+        Duration(milliseconds: milliseconds ~/ speed.value);
     if (progressController?.duration?.compareTo(animationDuration) != 0) {
-      progressController?.duration = Duration(milliseconds: milliseconds ~/ speed.value);
+      progressController?.duration =
+          Duration(milliseconds: milliseconds ~/ speed.value);
     }
     _preventAutoPause = false;
     playPauseController?.forward();
@@ -209,7 +211,7 @@ class VoicePlayerController {
     progressController?.reset();
     stopPlaying();
     player.seek(Duration.zero);
-    remainingTime?.value = (milliseconds/1000).round().toDurationString;
+    remainingTime?.value = (milliseconds / 1000).round().toDurationString;
   }
 
   void listenToRemainingTime() {
@@ -240,7 +242,8 @@ class VoicePlayerController {
       speed.value = 2;
     else if (speed.value == 2) speed.value = 1;
 
-    progressController!.duration = Duration(milliseconds: milliseconds ~/ speed.value);
+    progressController!.duration =
+        Duration(milliseconds: milliseconds ~/ speed.value);
     if (progressController!.isAnimating) progressController!.forward();
     player.setSpeed(speed.value);
     Cache.instance.setDouble('voice_player_speed', speed.value);

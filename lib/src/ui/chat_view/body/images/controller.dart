@@ -1,8 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/log.dart';
 import 'package:chatify/src/utils/value_notifiers.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_gallery/photo_gallery.dart';
@@ -34,11 +36,22 @@ class GalleryController {
   }
 
   Future<bool> init() async {
-    var photoesStatus = await Permission.photos.status;
-    if (photoesStatus.isDenied) {
-      photoesStatus = await Permission.photos.request();
+    if (Platform.isAndroid) {
+      final androidInfo = await DeviceInfoPlugin().androidInfo;
+      if (androidInfo.version.sdkInt <= 32) {
+        var status = await Permission.storage.status;
+        if (status.isDenied) {
+          status = await Permission.storage.request();
+          if (status.isDenied) return false;
+        }
+      } else {
+        var status = await Permission.photos.status;
+        if (status.isDenied) {
+          status = await Permission.photos.request();
+          if (status.isDenied) return false;
+        }
+      }
     }
-    if (photoesStatus.isDenied) return false;
     final List<Album> imageAlbums = await PhotoGallery.listAlbums();
     if (_initialImages.isEmpty) {
       final cachedImages = Cache.instance.getString('initialGalleryImages');

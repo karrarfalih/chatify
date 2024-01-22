@@ -18,7 +18,12 @@ import 'package:chatify/src/ui/common/keyboard_size.dart';
 import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/utils/context_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
+import 'package:flex_color_scheme/flex_color_scheme.dart';
+import 'package:flutter_sticky_header/flutter_sticky_header.dart';
+
+import 'message/message_card.dart';
 
 class ChatView extends StatefulWidget {
   const ChatView({
@@ -49,6 +54,7 @@ class _ChatViewState extends State<ChatView> {
       widget.users,
     );
     connectivity = widget.connectivity ?? ChatifyConnectivity();
+    Chatify.config.onOpenChat?.call(widget.chat);
     super.initState();
   }
 
@@ -59,26 +65,111 @@ class _ChatViewState extends State<ChatView> {
     super.dispose();
   }
 
+  Map<String, Message> get initialSelecetdMessages =>
+      controller.initialSelecetdMessages;
+
+  set initialSelecetdMessages(Map<String, Message> value) =>
+      controller.initialSelecetdMessages = value;
+
+  Map<int, Message> addedMessages = {};
+  Offset offset = Offset.zero;
+  bool isRemove = false;
+
+  _detectTapedItem(PointerEvent event) {
+    if (!controller.preventChatScroll.value) return;
+    if (controller.voiceController.isRecording.value) return;
+    final RenderBox box =
+        key.currentContext!.findAncestorRenderObjectOfType<RenderBox>()!;
+    final result = BoxHitTestResult();
+    Offset local = box.globalToLocal(event.position);
+    if (box.hitTest(result, position: local)) {
+      for (final hit in result.path) {
+        final target = hit.target;
+        if (target is SelectedMessage) {
+          final initialList = Map.from(controller.selecetdMessages.value);
+          final selectedMessages = controller.selecetdMessages.value;
+          bool isScrollUp = offset.dy > local.dy;
+          addedMessages.putIfAbsent(target.index, () => target.message);
+          addedMessages.removeWhere(
+            (key, value) =>
+                isScrollUp ? key > target.index : key < target.index,
+          );
+          if (isRemove) {
+            selectedMessages.addAll(initialSelecetdMessages);
+            selectedMessages.removeWhere(
+              (key, value) => addedMessages.containsValue(value),
+            );
+          } else {
+            selectedMessages.clear();
+            selectedMessages.addAll(
+              addedMessages.map((key, value) => MapEntry(value.id, value)),
+            );
+            selectedMessages.addAll(initialSelecetdMessages);
+          }
+          if (initialList.length != selectedMessages.length) {
+            controller.selecetdMessages.refresh();
+          }
+        }
+      }
+    }
+  }
+
+  _detectStart(PointerEvent event) {
+    addedMessages.clear();
+    final RenderBox box =
+        key.currentContext!.findAncestorRenderObjectOfType<RenderBox>()!;
+    offset = box.globalToLocal(event.position);
+    final result = BoxHitTestResult();
+    if (box.hitTest(result, position: offset)) {
+      for (final hit in result.path) {
+        final target = hit.target;
+        if (target is SelectedMessage) {
+          isRemove = initialSelecetdMessages.containsKey(target.message.id);
+        }
+      }
+    }
+  }
+
+  DateTime lastDate = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
+    final navBarColor = Chatify.theme.isChatDark ? Colors.black : Colors.white;
     return Directionality(
       textDirection: TextDirection.ltr,
       child: AnnotatedRegion<SystemUiOverlayStyle>(
-        value: Chatify.theme.isChatDark
-            ? SystemUiOverlayStyle.light.copyWith(
-                systemNavigationBarDividerColor: Colors.black,
-                systemNavigationBarColor: Colors.black,
-                systemNavigationBarIconBrightness: Brightness.light,
-              )
-            : SystemUiOverlayStyle.dark.copyWith(
-                systemNavigationBarDividerColor: Colors.white,
-                systemNavigationBarColor: Colors.white,
-                systemNavigationBarIconBrightness: Brightness.dark,
-              ),
+        // value: Chatify.theme.isChatDark
+        //     ? SystemUiOverlayStyle.light.copyWith(
+        //         systemNavigationBarDividerColor: Colors.black,
+        //         systemNavigationBarColor: Colors.black,
+        //         systemNavigationBarIconBrightness: Brightness.light,
+        //       )
+        //     : SystemUiOverlayStyle.dark.copyWith(
+        //         systemNavigationBarDividerColor: Colors.white,
+        //         systemNavigationBarColor: Colors.white,
+        //         systemNavigationBarIconBrightness: Brightness.dark,
+        //       ),
+        value: FlexColorScheme.themedSystemNavigationBar(
+          context,
+          opacity: androidVersion > 29 ? 0 : 1,
+          useDivider: false,
+          systemNavigationBarColor: navBarColor,
+          systemNavigationBarDividerColor: navBarColor,
+        ),
         child: KeyboardSizeProvider(
           child: Scaffold(
+            appBar: AppBar(
+              toolbarHeight: 0,
+              elevation: 0,
+              backgroundColor: Colors.transparent,
+              systemOverlayStyle: Chatify.theme.isChatDark
+                  ? SystemUiOverlayStyle.light
+                  : SystemUiOverlayStyle.dark,
+            ),
             key: ContextProvider.chatKey,
             resizeToAvoidBottomInset: false,
+            extendBody: true,
+            extendBodyBehindAppBar: true,
             body: Container(
               decoration: Chatify.theme.backgroundImage == null
                   ? null
@@ -117,59 +208,82 @@ class _ChatViewState extends State<ChatView> {
                       ),
                     ),
                   ],
-                  Column(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Expanded(
-                        child: ChatMessages(
-                          chat: widget.chat,
-                          users: widget.users,
-                          controller: controller,
-                        ),
-                      ),
-                      UsersInputStatus(
-                        chatId: widget.chat.id,
-                        users: widget.users,
-                      ),
-                      SizedBox(
-                        height: 5,
-                      ),
-                      MessageActionHeader(
-                        controller: controller,
-                        users: widget.users,
-                      ),
-                      ClipRRect(
-                        child: BackdropFilter(
-                          filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: Chatify.theme.isChatDark
-                                  ? Colors.black.withOpacity(0.4)
-                                  : Colors.white.withOpacity(0.4),
-                              border: Border(
-                                top: BorderSide(
-                                  color: (Chatify.theme.isChatDark
-                                          ? Colors.white
-                                          : Colors.black)
-                                      .withOpacity(0.07),
-                                  width: 1,
-                                ),
+                  Listener(
+                    onPointerMove: _detectTapedItem,
+                    onPointerDown: _detectStart,
+                    child: ValueListenableBuilder<bool>(
+                      key: key,
+                      valueListenable: controller.preventChatScroll,
+                      builder: (context, isPrevented, child) {
+                        return CustomScrollView(
+                          reverse: true,
+                          physics: isPrevented
+                              ? const NeverScrollableScrollPhysics()
+                              : const BouncingScrollPhysics(),
+                          slivers: [
+                            SliverStickyHeader(
+                              sticky: true,
+                              header: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  UsersInputStatus(
+                                    chatId: widget.chat.id,
+                                    users: widget.users,
+                                  ),
+                                  MessageActionHeader(
+                                    controller: controller,
+                                    users: widget.users,
+                                  ),
+                                  ClipRRect(
+                                    child: BackdropFilter(
+                                      filter: ImageFilter.blur(
+                                        sigmaX: 30,
+                                        sigmaY: 30,
+                                      ),
+                                      child: Container(
+                                        decoration: BoxDecoration(
+                                          color: Chatify.theme.isChatDark
+                                              ? Colors.black.withOpacity(0.5)
+                                              : Colors.white.withOpacity(0.5),
+                                          border: Border(
+                                            top: BorderSide(
+                                              color: (Chatify.theme.isChatDark
+                                                      ? Colors.white
+                                                      : Colors.black)
+                                                  .withOpacity(0.07),
+                                              width: 1,
+                                            ),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            ChatInputBox(
+                                              controller: controller,
+                                              chat: widget.chat,
+                                            ),
+                                            ChatBottomSpace(
+                                              controller: controller,
+                                            ),
+                                            EmojisKeyboard(
+                                              controller: controller,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              sliver: ChatMessages(
+                                chat: widget.chat,
+                                users: widget.users,
+                                controller: controller,
                               ),
                             ),
-                            child: Column(
-                              children: [
-                                ChatInputBox(
-                                  controller: controller,
-                                  chat: widget.chat,
-                                ),
-                                ChatBottomSpace(controller: controller),
-                                EmojisKeyboard(controller: controller),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                          ],
+                        );
+                      },
+                    ),
                   ),
                   Column(
                     mainAxisSize: MainAxisSize.min,

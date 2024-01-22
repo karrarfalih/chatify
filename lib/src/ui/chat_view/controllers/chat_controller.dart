@@ -32,9 +32,9 @@ class ChatController {
     textController.addListener(() {
       isTyping.value = textController.text.isNotEmpty;
       if (isTyping.value) {
-        Chatify.datasource.updateChatStaus(ChatStatus.typing, chat.id);
+        Chatify.datasource.updateChatStatus(ChatStatus.typing, chat.id);
       } else {
-        Chatify.datasource.updateChatStaus(ChatStatus.none, chat.id);
+        Chatify.datasource.updateChatStatus(ChatStatus.none, chat.id);
       }
     });
   }
@@ -49,7 +49,7 @@ class ChatController {
 
   final FocusNode focus = FocusNode();
   final isTyping = false.obs;
-  final isSelecting = false.obs;
+  final preventChatScroll = false.obs;
   final selecetdMessages = <String, Message>{}.obs;
   Map<String, Message> initialSelecetdMessages = {};
   final messageAction = Rx<MessageActionArgs?>(null);
@@ -75,7 +75,8 @@ class ChatController {
   }
 
   copy(Message message, BuildContext context) {
-    Clipboard.setData(ClipboardData(text: message.message(localization(context))));
+    Clipboard.setData(
+        ClipboardData(text: message.message(localization(context))));
     showToast('Copied to clipboard', Colors.black45);
   }
 
@@ -96,7 +97,8 @@ class ChatController {
               chat.members.where((e) => e != Chatify.currentUserId).toList(),
           replyId: messageAction.value?.message?.id,
           replyUid: messageAction.value?.message?.sender,
-          replyMessage: messageAction.value?.message?.message(localization(context)),
+          replyMessage:
+              messageAction.value?.message?.message(localization(context)),
           canReadBy: chat.members,
         );
         pending.add(message);
@@ -109,10 +111,10 @@ class ChatController {
   }
 
   sendImages(List<ImageModel> images) async {
-    Chatify.datasource.updateChatStaus(ChatStatus.sendingMedia, chat.id);
+    Chatify.datasource.updateChatStatus(ChatStatus.sendingMedia, chat.id);
     final imgs = await getImages(images);
     await Future.wait(imgs.map((e) => _sendSingleImage(e)));
-    Chatify.datasource.updateChatStaus(ChatStatus.none, chat.id);
+    Chatify.datasource.updateChatStatus(ChatStatus.none, chat.id);
     Chatify.datasource.addChat(chat);
     selecetdMessages.value = {};
   }
@@ -161,7 +163,7 @@ class ChatController {
     if (_receivedPendingHandler == null) pending.dispose();
     voiceController.dispose();
     keyboardController.dispose();
-    isSelecting.dispose();
+    preventChatScroll.dispose();
     focus.dispose();
   }
 }
