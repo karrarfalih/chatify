@@ -33,6 +33,12 @@ class MessageActionHeader extends StatelessWidget {
             : users
                 .firstWhere(
                   (e) => e.id == (args?.message?.sender ?? users.first.id),
+                  orElse: () => ChatifyUser(
+                    id: 'id',
+                    name: users.any((e) => e.id == 'support')
+                        ? localization(context).chatSupprt
+                        : localization(context).deletedAccount,
+                  ),
                 )
                 .name;
         final message = args?.message;
@@ -92,7 +98,7 @@ class MessageActionHeader extends StatelessWidget {
                         controller.textController.clear();
                       }
                     },
-                  )
+                  ),
                 ],
               ),
             ),
