@@ -38,14 +38,14 @@ class ChatifyDatasource {
     return (await _messages.doc(messageId).get()).data();
   }
 
-  Future<void> addMessage(Message message, ChatifyUser? user) async {
+  Future<void> addMessage(Message message, Iterable<ChatifyUser>? receivers) async {
     final isSupport = message.chatId.contains('support') &&
         Chatify.config.showSupportMessages;
     if (isSupport) {
       message.sender = 'support';
     }
     await _messages.doc(message.id).set(message, SetOptions(merge: true));
-    if (user != null) Chatify.config.onSendMessage?.call(message, user);
+    if (receivers != null) Chatify.config.onSendMessage?.call(message, receivers.toList());
     ChatifyLog.d('addMessage');
   }
 

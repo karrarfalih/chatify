@@ -171,7 +171,7 @@ class VoiceRecordingController {
         }
         Chatify.datasource.addMessage(
           pendingMsg.copyWith(url: url),
-          controller.receiver,
+          controller.receivers,
         );
         Chatify.datasource.addChat(controller.chat);
       }

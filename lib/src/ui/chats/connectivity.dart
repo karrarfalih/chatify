@@ -25,10 +25,10 @@ class ChatifyConnectivity {
             .onValue
             .cast<DatabaseEvent?>()
             .startWith(null), (connectivity, database) {
-      if (connectivity == ConnectivityResult.none) {
-        return ConnectivityStatus.waiting;
-      }
-      if (database?.snapshot.value == false) {
+      if (database?.snapshot.value != true) {
+        if (connectivity == ConnectivityResult.none) {
+          return ConnectivityStatus.waiting;
+        }
         return ConnectivityStatus.connecting;
       }
       return ConnectivityStatus.connected;

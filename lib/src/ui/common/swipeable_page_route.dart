@@ -333,7 +333,7 @@ class _FancyBackGestureDetectorState<T>
           (instance) => instance
             ..onStart = _handleDragStart
             ..onUpdate = ((x) => _handleDragUpdate(x, context))
-            ..onEnd = _handleDragEnd
+            ..onEnd = ((x) => _handleDragEnd(x, context))
             ..onCancel = _handleDragCancel,
         ),
       },
@@ -377,13 +377,15 @@ class _FancyBackGestureDetectorState<T>
     );
   }
 
-  void _handleDragEnd(DragEndDetails details) {
+  void _handleDragEnd(DragEndDetails details, BuildContext context) {
     assert(mounted);
     assert(_backGestureController != null);
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    final factor = isRtl ? -1 : 1;
     _backGestureController!.dragEnd(
       _convertToLogical(
         details.velocity.pixelsPerSecond.dx / context.size!.width,
-      ),
+      ) * factor,
     );
     _backGestureController = null;
   }

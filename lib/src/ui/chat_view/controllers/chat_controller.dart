@@ -39,9 +39,8 @@ class ChatController {
     });
   }
 
-  ChatifyUser? get receiver => _users
-      .cast<ChatifyUser?>()
-      .firstWhere((e) => e?.id != Chatify.currentUserId, orElse: () => null);
+  Iterable<ChatifyUser> get receivers =>
+      _users.where((e) => e.id != Chatify.currentUserId);
   late final KeyboardController keyboardController;
   late final VoiceRecordingController voiceController;
   final PendingMessagesHandler pending;
@@ -102,7 +101,7 @@ class ChatController {
           canReadBy: chat.members,
         );
         pending.add(message);
-        Chatify.datasource.addMessage(message, receiver);
+        Chatify.datasource.addMessage(message, receivers);
       }
       Chatify.datasource.addChat(chat);
     }
@@ -145,7 +144,7 @@ class ChatController {
     }
     Chatify.datasource.addMessage(
       pendingMsg.copyWith(imageUrl: imageUrl, thumbnailBytes: img.thumbnail),
-      receiver,
+      receivers,
     );
   }
 

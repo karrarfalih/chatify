@@ -20,7 +20,7 @@ class ChatifyConfig {
   final Future<List<ChatifyUser>> Function(String query)? getUsersBySearch;
   final Future<List<ChatifyUser>> Function()? getUsersForNewChat;
   final Function(ChatifyUser user)? onUserClick;
-  final Function(Message message, ChatifyUser receiver)? onSendMessage;
+  final Function(Message message, List<ChatifyUser> receivers)? onSendMessage;
   final Function(Message message)? onMessageRead;
   final Function(Chat chat)? onOpenChat;
   final Widget? onEmptyChatList;

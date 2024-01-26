@@ -96,9 +96,11 @@ class _ChatMessagesState extends State<ChatMessages>
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (i == docs.length - 1)
-                  SizedBox(
-                    key: ValueKey('chat padding bottom'),
-                    height: mediaQuery(context).padding.top + 70,
+                  SafeArea(
+                    child: SizedBox(
+                      key: ValueKey('chat padding bottom'),
+                      height: mediaQuery(context).padding.top + 70,
+                    ),
                   ),
                 if (showTime)
                   Center(
