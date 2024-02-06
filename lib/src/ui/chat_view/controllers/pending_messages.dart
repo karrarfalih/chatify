@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/utils/cache.dart';
 import 'package:chatify/src/utils/log.dart';
-import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
 
 class PendingMessagesHandler {
   PendingMessagesHandler({
@@ -36,10 +36,24 @@ class PendingMessagesHandler {
           ..value.removeWhere((e) => e.id == message.id)
           ..refresh();
       }
+      _updateCache();
     } catch (e) {
       ChatifyLog.d(e.toString(), isError: true);
-    } finally {
+    }
+  }
+
+  removeList(List<Message> ids) {
+    try {
+      ids.forEach((element) {
+        if (messages.value.any((e) => e.id == element.id)) {
+          messages
+            ..value.removeWhere((e) => e.id == element.id)
+            ..refresh();
+        }
+      });
       _updateCache();
+    } catch (e) {
+      ChatifyLog.d(e.toString(), isError: true);
     }
   }
 
@@ -50,10 +64,9 @@ class PendingMessagesHandler {
           ..value.removeWhere((e) => e.id == id)
           ..refresh();
       }
+      _updateCache();
     } catch (e) {
       ChatifyLog.d(e.toString(), isError: true);
-    } finally {
-      _updateCache();
     }
   }
 
@@ -84,7 +97,7 @@ class PendingMessagesHandler {
     final json = jsonDecode(cache);
     if (json[_chat.id] == null) return [];
     final msgs = json[_chat.id] as List;
-    return msgs.map((e) => TextMessage.fromJson(e)).toList().cast<Message>();
+    return msgs.map((e) => TextMessage.fromJson(e, true)).toList().cast<Message>();
   }
 
   dispose() {
@@ -93,6 +106,6 @@ class PendingMessagesHandler {
     } else {
       _memoryCache.remove(_chat.id);
     }
-    messages.dispose();
+    messages.close();
   }
 }

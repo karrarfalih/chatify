@@ -166,4 +166,13 @@ class ChatifyLocalizationsAr extends ChatifyLocalizations {
 
   @override
   String get deletedAccount => 'حساب محذوف';
+
+  @override
+  String get typing => 'يكتب الآن';
+
+  @override
+  String get recording => 'يسجل';
+
+  @override
+  String get sending => 'جاري الإرسال';
 }

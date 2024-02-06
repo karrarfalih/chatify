@@ -398,6 +398,24 @@ abstract class ChatifyLocalizations {
   /// In en, this message translates to:
   /// **'Deleted Account'**
   String get deletedAccount;
+
+  /// No description provided for @typing.
+  ///
+  /// In en, this message translates to:
+  /// **'Typing'**
+  String get typing;
+
+  /// No description provided for @recording.
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get recording;
+
+  /// No description provided for @sending.
+  ///
+  /// In en, this message translates to:
+  /// **'Sending media'**
+  String get sending;
 }
 
 class _ChatifyLocalizationsDelegate extends LocalizationsDelegate<ChatifyLocalizations> {

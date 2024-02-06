@@ -2,12 +2,15 @@ import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/common/circular_loading.dart';
 import 'package:chatify/src/ui/common/media_query.dart';
-import 'package:chatify/src/ui/common/paginate_firestore/paginate_firestore.dart';
+import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:chatify/src/ui/chat_view/body/date.dart';
 import 'package:chatify/src/ui/chat_view/message/message_card.dart';
 import 'package:flutter/rendering.dart';
+import 'package:diffutil_dart/diffutil.dart';
+import 'package:get/get.dart';
 
 class ChatMessages extends StatefulWidget {
   const ChatMessages({
@@ -15,11 +18,15 @@ class ChatMessages extends StatefulWidget {
     required this.chat,
     required this.users,
     required this.controller,
+    required this.messages,
+    required this.scrollController,
   });
 
   final Chat chat;
   final List<ChatifyUser> users;
   final ChatController controller;
+  final List<Message> messages;
+  final ScrollController scrollController;
 
   @override
   State<ChatMessages> createState() => _ChatMessagesState();
@@ -29,10 +36,21 @@ class _ChatMessagesState extends State<ChatMessages>
     with WidgetsBindingObserver {
   bool canSeeMessages = true;
 
+  final _listKey = GlobalKey<SliverAnimatedListState>();
+  late List<Message> _oldData = List.from(widget.messages);
+
   @override
   void initState() {
     Chatify.currentOpenedChat = widget.chat.id;
     super.initState();
+    didUpdateWidget(widget);
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatMessages oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    _calculateDiffs(oldWidget.messages);
   }
 
   @override
@@ -53,176 +71,237 @@ class _ChatMessagesState extends State<ChatMessages>
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return NotificationListener<ScrollNotification>(
-      onNotification: (x) {
-        widget.controller.preventEmoji = true;
-        return false;
+  void _calculateDiffs(List<Message> oldList) async {
+    final diffResult = calculateListDiff<Message>(
+      oldList,
+      widget.messages,
+      equalityChecker: (item1, item2) {
+        return item1.id == item2.id;
       },
-      child: KrPaginateFirestore(
-        useInsideScrollView: true,
-        itemBuilder: (context, docs, i) {
-          Message msg = docs.elementAt(i).data() as Message;
-          if (canSeeMessages) Chatify.datasource.markAsSeen(msg);
-          Message? prevMsg;
-          Message? nextMsg;
-          if (docs.length != i + 1) {
-            prevMsg = docs.elementAt(i + 1).data() as Message;
-          }
-          if (i != 0) {
-            nextMsg = docs.elementAt(i - 1).data() as Message;
-          }
-          DateTime? date = msg.sendAt;
-          DateTime? prevDate = prevMsg?.sendAt;
-          bool showTime = false;
-          if (date != null) {
-            DateTime d = DateTime(date.year, date.month, date.day);
-            DateTime prevD = prevDate == null
-                ? DateTime(19000)
-                : DateTime(
-                    prevDate.year,
-                    prevDate.month,
-                    prevDate.day,
-                  );
-            showTime = d.toString() != prevD.toString();
-          }
-          widget.controller.pending.removeById(msg.id);
-          return SelectableMessage(
-            key: ValueKey('selectable message $i ${msg.id}'),
-            index: i,
-            message: msg,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                if (i == docs.length - 1)
-                  SafeArea(
-                    child: SizedBox(
-                      key: ValueKey('chat padding bottom'),
-                      height: mediaQuery(context).padding.top + 70,
-                    ),
-                  ),
-                if (showTime)
-                  Center(
-                    key: ValueKey(msg.sendAt),
-                    child: ChatDateWidget(
-                      date: date ?? DateTime.now(),
-                    ),
-                  ),
-                if (i != 0)
-                  MessageCard(
-                    key: ValueKey(msg.id),
-                    chat: widget.chat,
-                    message: msg,
-                    users: widget.users,
-                    controller: widget.controller,
-                    linkedWithBottom: (nextMsg != null &&
-                        nextMsg.sender == msg.sender &&
-                        nextMsg.sendAt?.day == msg.sendAt?.day),
-                    linkedWithTop: !showTime &&
-                        prevMsg != null &&
-                        prevMsg.sender == msg.sender,
-                  )
-                else
-                  ValueListenableBuilder<List<Message>>(
-                    valueListenable: widget.controller.pending.messages,
-                    builder: (context, value, cild) => MessageCard(
-                      key: ValueKey(msg.id),
-                      chat: widget.chat,
-                      message: msg,
-                      users: widget.users,
-                      controller: widget.controller,
-                      linkedWithBottom: (nextMsg?.sender == msg.sender &&
-                              nextMsg?.sendAt?.day == msg.sendAt?.day) ||
-                          (msg.isMine && value.isNotEmpty),
-                      linkedWithTop: !showTime &&
-                          prevMsg != null &&
-                          prevMsg.sender == msg.sender,
-                    ),
-                  ),
-                if (i == 0)
-                  PendingMessages(
-                    key: ValueKey('pending messages'),
-                    controller: widget.controller,
-                    chat: widget.chat,
-                    firstMessage: msg,
-                    user: widget.users.firstWhere(
-                      (e) => e.id == msg.sender,
-                      orElse: () => ChatifyUser(id: 'id', name: 'name'),
-                    ),
-                  ),
-                if (i == 0) SizedBox(height: 5),
-              ],
-            ),
+    );
+
+    for (final update in diffResult.getUpdates(batch: false)) {
+      update.when(
+        insert: (pos, count) {
+          _listKey.currentState?.insertItem(pos);
+        },
+        remove: (pos, count) {
+          final item = oldList[pos];
+          _listKey.currentState?.removeItem(
+            pos,
+            (_, animation) => _removedMessageBuilder(item, pos, animation),
           );
         },
-        query: Chatify.datasource.messagesQuery(widget.chat),
-        onEmpty: SizedBox(
-          height: mediaQuery(context).size.height * 0.7,
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  localization(context).sayHi,
-                  style: TextStyle(
-                    color: Chatify.theme.chatForegroundColor,
-                  ),
-                ),
-              ],
-            ),
+        change: (pos, payload) {},
+        move: (from, to) {},
+      );
+    }
+
+    _scrollToBottomIfNeeded(oldList);
+
+    _oldData = List.from(widget.messages);
+  }
+
+  void _scrollToBottomIfNeeded(List<Message> oldList) {
+    try {
+      // Take index 1 because there is always a spacer on index 0.
+      final oldMessage = oldList[0];
+      final message = widget.messages[0];
+
+      // Compare items to fire only on newly added messages.
+      if (oldMessage.id != message.id) {
+        // Run only for sent message.
+        if (message.sender == Chatify.currentUserId) {
+          // Delay to give some time for Flutter to calculate new
+          // size after new message was added.
+          Future.delayed(const Duration(milliseconds: 100), () {
+            if (widget.scrollController.hasClients) {
+              widget.scrollController.animateTo(
+                0,
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeInQuad,
+              );
+            }
+          });
+        }
+      }
+    } catch (e) {
+      // Do nothing if there are no items.
+    }
+  }
+
+  Widget _newMessageBuilder(int i, Animation<double> animation) {
+    try {
+      Message msg = widget.messages.elementAt(i);
+      if (canSeeMessages) Chatify.datasource.markAsSeen(msg);
+      return SizeTransition(
+        key: ValueKey(msg.id),
+        axisAlignment: -1,
+        sizeFactor: msg.isMine
+            ? AlwaysStoppedAnimation(1.0)
+            : animation.drive(CurveTween(curve: Curves.easeOutQuad)),
+        child: SelectableMessage(
+          key: ValueKey('selectable message $i ${msg.id}'),
+          index: i,
+          message: msg,
+          child: _MessageBuilder(
+            chat: widget.chat,
+            controller: widget.controller,
+            messages: widget.messages,
+            index: i,
           ),
         ),
-        itemBuilderType: PaginateBuilderType.listView,
-        initialLoader: SizedBox.shrink(),
-        reverse: true,
-        isLive: true,
+      );
+    } catch (e) {
+      return const SizedBox();
+    }
+  }
+
+  Widget _removedMessageBuilder(
+    Message item,
+    int i,
+    Animation<double> animation,
+  ) {
+    return SizeTransition(
+      key: ValueKey(item),
+      axisAlignment: -1,
+      sizeFactor: animation.drive(CurveTween(curve: Curves.easeInQuad)),
+      child: FadeTransition(
+        opacity: item.isMine
+            ? AlwaysStoppedAnimation(1.0)
+            : animation.drive(CurveTween(curve: Curves.easeInQuad)),
+        child: _MessageBuilder(
+          chat: widget.chat,
+          controller: widget.controller,
+          messages: _oldData,
+          index: i,
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverPadding(
+      padding: EdgeInsets.only(
+        bottom: 5,
+        top: 200,
+      ),
+      sliver: SliverAnimatedList(
+        findChildIndexCallback: (Key key) {
+          if (key is ValueKey<Object>) {
+            final newIndex = widget.messages.indexWhere(
+              (v) => v.id == key.value,
+            );
+            if (newIndex != -1) {
+              return newIndex;
+            }
+          }
+          return null;
+        },
+        initialItemCount: widget.messages.length + 1,
+        key: _listKey,
+        itemBuilder: (_, index, animation) {
+          if (index == 0) {
+            return Obx(() {
+              if (widget.controller.messagesController.isLoaded.value &&
+                  widget.controller.messagesController.messages.isEmpty) {
+                return Container(
+                  height: mediaQuery(context).size.height,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 50.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            localization(context).sayHi,
+                            style: TextStyle(
+                              color: Chatify.theme.chatForegroundColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }
+              if (!widget.controller.messagesController.isLoaded.value)
+                return Container(
+                  height: mediaQuery(context).size.height,
+                  child: SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 50.0),
+                      child: Center(child: LoadingWidget()),
+                    ),
+                  ),
+                );
+              return _newMessageBuilder(index, animation);
+            });
+          }
+          if (index == widget.messages.length)
+            return Obx(
+              () => Visibility(
+                visible: widget.controller.messagesController.isNextPageLoading
+                        .value ||
+                    !widget.controller.messagesController.isLoaded.value,
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Center(child: LoadingWidget()),
+                ),
+              ),
+            );
+          return _newMessageBuilder(index, animation);
+        },
       ),
     );
   }
 }
 
-class PendingMessages extends StatelessWidget {
-  const PendingMessages({
-    super.key,
-    required this.controller,
+class _MessageBuilder extends StatelessWidget {
+  const _MessageBuilder({
     required this.chat,
-    required this.user,
-    required this.firstMessage,
+    required this.controller,
+    required this.messages,
+    required this.index,
   });
 
-  final ChatController controller;
   final Chat chat;
-  final ChatifyUser user;
-  final Message firstMessage;
+  final ChatController controller;
+  final List<Message> messages;
+  final int index;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<Message>>(
-      valueListenable: controller.pending.messages,
-      builder: (context, value, cild) {
-        return Directionality(
-          textDirection: TextDirection.rtl,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...value.map(
-                (e) => MessageCard(
-                  key: ValueKey(e.id),
-                  chat: chat,
-                  message: e,
-                  users: [user],
-                  controller: controller,
-                  linkedWithBottom: value.indexOf(e) != value.length - 1,
-                  linkedWithTop: firstMessage.isMine,
-                  isSending: true,
-                ),
-              ),
-            ],
+    if (index >= messages.length) return const SizedBox();
+    final msg = messages[index];
+    final nextMsg = index == 0 ? null : messages[index - 1];
+    final prevMsg = index == messages.length - 1 ? null : messages[index + 1];
+    final date = msg.sendAt ?? DateTime.now();
+    final prevDate = prevMsg?.sendAt;
+    final showTime = prevDate == null || !date.isSameDay(prevDate);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        if (showTime)
+          Center(
+            key: ValueKey(msg.sendAt),
+            child: ChatDateWidget(date: date),
           ),
-        );
-      },
+        MessageCard(
+          key: ValueKey(msg.id),
+          chat: chat,
+          message: msg,
+          users: controller.users,
+          controller: controller,
+          isSending: msg.isPending,
+          linkedWithBottom: (nextMsg != null &&
+              nextMsg.sender == msg.sender &&
+              nextMsg.sendAt?.day == msg.sendAt?.day),
+          linkedWithTop:
+              !showTime && prevMsg != null && prevMsg.sender == msg.sender,
+        ),
+      ],
     );
   }
 }

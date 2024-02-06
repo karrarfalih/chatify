@@ -1,7 +1,9 @@
 import 'dart:math';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
 import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:chatify/src/utils/extensions.dart';
 
@@ -15,6 +17,7 @@ class RecordThumb extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardController = Get.find<KeyboardController>();
     return ValueListenableBuilder<bool>(
       valueListenable: controller.voiceController.isRecording,
       builder: (contex, isRecording, child) {
@@ -43,12 +46,12 @@ class RecordThumb extends StatelessWidget {
                   top: screenSize.height -
                       (radius / 2) -
                       pow((-micPos.dy + 15).withRange(0, 1000), 1 / 1.3) -
-                      (controller.keyboardController.isKeybaordOpen ||
+                      (keyboardController.isKeybaordOpen ||
                               controller.isEmoji.value
-                          ? controller.keyboardController.keyboardHeight -
-                              mediaQuery(context).padding.bottom
+                          ? keyboardController.height -
+                              MediaQuery.of(context).padding.bottom
                           : 0) -
-                      mediaQuery(context).padding.bottom -
+                      MediaQuery.of(context).padding.bottom -
                       30,
                   child: GestureDetector(
                     onTap: () => controller.voiceController.stopRecord(),
@@ -60,7 +63,9 @@ class RecordThumb extends StatelessWidget {
                         color: interpolateColor(
                           primaryColor,
                           (screenSize.width -
-                              (left / screenSize.width) * screenSize.width) * 1.6,
+                                  (left / screenSize.width) *
+                                      screenSize.width) *
+                              1.6,
                           screenSize.width,
                         ),
                         shape: BoxShape.circle,

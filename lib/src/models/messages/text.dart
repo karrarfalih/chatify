@@ -19,6 +19,7 @@ class TextMessage extends Message {
     super.replyId,
     super.replyUid,
     super.replyMessage,
+    super.isPending,
   }) : super(type: MessageType.text);
 
   @override
@@ -29,9 +30,9 @@ class TextMessage extends Message {
     };
   }
 
-  TextMessage.fromJson(Map data)
+  TextMessage.fromJson(Map data, [bool isPending = false])
       : message = data['message'],
-        super.fromJson(data);
+        super.fromJson(data, isPending);
 
   TextMessage copyWith({String? message}) => TextMessage(
         message: message ?? this.message,

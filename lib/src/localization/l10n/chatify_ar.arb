@@ -94,5 +94,8 @@
   "imageMessage": "صورة",
   "voiceMessage": "رسالة صوتية",
   "unSuppprtedMessage": "رسالة غير مدعومة",
-  "deletedAccount": "حساب محذوف"
+  "deletedAccount": "حساب محذوف",
+  "typing": "يكتب الآن",
+  "recording": "يسجل",
+  "sending": "جاري الإرسال"
 }

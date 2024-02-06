@@ -5,17 +5,18 @@ import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/body/images/bottom_sheet.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class ChatInputField extends StatelessWidget {
-  const ChatInputField({
+  ChatInputField({
     super.key,
     required this.controller,
     required this.chat,
@@ -24,20 +25,23 @@ class ChatInputField extends StatelessWidget {
   final ChatController controller;
   final Chat chat;
 
+  final scrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     final iconColor = Chatify.theme.chatForegroundColor.withOpacity(0.5);
+    final keyboardController = Get.find<KeyboardController>();
     return Row(
       children: [
         CircularButton(
           onPressed: () {
             if (controller.isEmoji.value) {
               controller.isEmojiIcon.value = false;
-              controller.keyboardController.forceEmoji = false;
+              keyboardController.forceEmoji = false;
               controller.focus.requestFocus();
               SystemChannels.textInput.invokeMethod('TextInput.show');
             } else {
-              controller.keyboardController.forceEmoji = true;
+              keyboardController.forceEmoji = true;
               controller.isEmoji.value = true;
               controller.isEmojiIcon.value = true;
               SystemChannels.textInput.invokeMethod('TextInput.hide');
@@ -77,40 +81,44 @@ class ChatInputField extends StatelessWidget {
           ),
         ),
         Expanded(
-          child: TextField(
-            controller: controller.textController,
-            maxLines: 5,
-            minLines: 1,
-            style: TextStyle(
-              color: Chatify.theme.chatForegroundColor,
-              height: 1.1,
-              fontSize: 16,
-            ),
-            focusNode: controller.focus,
-            textInputAction: TextInputAction.newline,
-            keyboardType: TextInputType.multiline,
-            decoration: InputDecoration(
-              filled: false,
-              hintText: localization(context).message,
-              hintStyle: TextStyle(
-                fontWeight: FontWeight.normal,
-                color: Chatify.theme.chatForegroundColor.withOpacity(0.4),
+          child: NotificationListener(
+            onNotification: (notification) => true,
+            child: TextField(
+              controller: controller.textController,
+              scrollController: scrollController,
+              maxLines: 5,
+              minLines: 1,
+              style: TextStyle(
+                color: Chatify.theme.chatForegroundColor,
+                height: 1.1,
+                fontSize: 16,
               ),
-              isDense: true,
-              enabledBorder: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(30),
+              focusNode: controller.focus,
+              textInputAction: TextInputAction.newline,
+              keyboardType: TextInputType.multiline,
+              decoration: InputDecoration(
+                filled: false,
+                hintText: localization(context).message,
+                hintStyle: TextStyle(
+                  fontWeight: FontWeight.normal,
+                  color: Chatify.theme.chatForegroundColor.withOpacity(0.4),
                 ),
-                borderSide: BorderSide(
-                  color: Colors.transparent,
+                isDense: true,
+                enabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(30),
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.transparent,
+                  ),
                 ),
-              ),
-              focusedBorder: const OutlineInputBorder(
-                borderRadius: BorderRadius.all(
-                  Radius.circular(30),
-                ),
-                borderSide: BorderSide(
-                  color: Colors.transparent,
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(30),
+                  ),
+                  borderSide: BorderSide(
+                    color: Colors.transparent,
+                  ),
                 ),
               ),
             ),
@@ -196,7 +204,7 @@ class ChatInputField extends StatelessWidget {
                               controller.preventChatScroll.value = false;
                               controller.voiceController.endMicDarg(chat);
                             },
-                            onHorizontalDragStart: (_){
+                            onHorizontalDragStart: (_) {
                               controller.preventChatScroll.value = true;
                               controller.voiceController.record();
                             },

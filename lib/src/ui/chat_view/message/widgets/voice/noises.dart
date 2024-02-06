@@ -67,7 +67,7 @@ class Noises extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         for (int i = 0; i < samples.length; i++)
-          _SingleNoise(samples.elementAt(i), isMe)
+          _SingleNoise(samples.elementAt(i), isMe),
       ],
     );
   }
@@ -83,7 +83,7 @@ class _SingleNoise extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 1.2),
       width: 1.2,
-      height: height,
+      height: height.isNaN ? 10 : height,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(1000),
         color: isMe ? Colors.white : Chatify.theme.primaryColor,

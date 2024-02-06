@@ -1,6 +1,5 @@
 import 'package:chatify/chatify.dart';
-import 'package:chatify/src/ui/chats/chat_image.dart';
-import 'package:chatify/src/ui/common/expanded_section.dart';
+import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
@@ -11,10 +10,12 @@ class UsersInputStatus extends StatefulWidget {
     super.key,
     required this.chatId,
     required this.users,
+    required this.child,
   });
 
   final String chatId;
   final List<ChatifyUser> users;
+  final Widget child;
 
   @override
   State<UsersInputStatus> createState() => _UsersInputStatusState();
@@ -28,51 +29,44 @@ class _UsersInputStatusState extends State<UsersInputStatus> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: KrStreamBuilder<List<MapEntry<ChatifyUser, ChatStatus>>>(
-        key: ValueKey('chat status'),
-        stream: Rx.combineLatestList(
-          widget.users.withoutMe.map(
-            (user) => Chatify.datasource
-                .getChatStatus(user.id, widget.chatId)
-                .map((e) => MapEntry(user, e)),
-          ),
+    return KrStreamBuilder<List<MapEntry<ChatifyUser, ChatStatus>>>(
+      key: ValueKey('chat status'),
+      stream: Rx.combineLatestList(
+        widget.users.withoutMe.map(
+          (user) => Chatify.datasource
+              .getChatStatus(user.id, widget.chatId)
+              .map((e) => MapEntry(user, e)),
         ),
-        onLoading: SizedBox.shrink(),
-        builder: (statuses) {
-          return KrExpandedSection(
-            key: ValueKey('chat status expanded section ${widget.chatId}'),
-            expand: statuses.any((e) => e.value != ChatStatus.none),
-            duration: Duration(milliseconds: 600),
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 5),
-              child: SizedBox(
-                height: 35,
-                child: AnimatedSwitcher(
-                  duration: Duration(milliseconds: 600),
-                  switchInCurve: Curves.easeOutQuad,
-                  switchOutCurve: Curves.easeInQuad,
-                  transitionBuilder: (child, animation) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: ScaleTransition(
-                        scale: animation,
-                        alignment: Alignment.bottomLeft,
-                        child: child,
-                      ),
-                    );
-                  },
-                  child: getUserChatStatusWidget(
-                    context,
-                    statuses,
-                  ),
-                ),
-              ),
-            ),
-          );
-        },
       ),
+      onEmpty: widget.child,
+      onLoading: widget.child,
+      builder: (statuses) {
+        if (statuses.isEmpty ||
+            statuses.every((e) => e.value == ChatStatus.none))
+          return widget.child;
+        return SizedBox(
+          height: 25,
+          child: AnimatedSwitcher(
+            duration: Duration(milliseconds: 600),
+            switchInCurve: Curves.easeOutQuad,
+            switchOutCurve: Curves.easeInQuad,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: animation,
+                  alignment: Alignment.bottomLeft,
+                  child: child,
+                ),
+              );
+            },
+            child: getUserChatStatusWidget(
+              context,
+              statuses,
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -89,34 +83,67 @@ class _UsersInputStatusState extends State<UsersInputStatus> {
       status = ChatStatus.typing;
     }
 
-    var users = statuses
-        .where((e) => e.value != ChatStatus.none)
-        .map((e) => e.key)
-        .toList();
+    // TODO: Add users names
+    // var users = statuses
+    //     .where((e) => e.value != ChatStatus.none)
+    //     .map((e) => e.key)
+    //     .toList();
+    final theme = ChatifyTheme.of(context);
     switch (status) {
       case ChatStatus.typing:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('typing_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _UsersProfile(
-                users: users,
+        return Row(
+          key: ValueKey('typing_user_status'),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              localization(context).typing,
+              style: TextStyle(
+                color: theme.chatForegroundColor.withOpacity(0.7),
+                fontSize: 12,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.circular(20),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              alignment: Alignment.center,
+              child: Lottie.asset(
+                'assets/lottie/typing.json',
+                package: 'chatify',
+                fit: BoxFit.fitHeight,
+                height: 18,
+                delegates: LottieDelegates(
+                  values: [
+                    ValueDelegate.color(
+                      const ['**'],
+                      value: Colors.green,
+                    ),
+                  ],
                 ),
+              ),
+            ),
+          ],
+        );
+      case ChatStatus.recording:
+        return Row(
+          key: ValueKey('recording_user_status'),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              localization(context).recording,
+              style: TextStyle(
+                color: theme.chatForegroundColor.withOpacity(0.7),
+                fontSize: 12,
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8),
+              alignment: Alignment.center,
+              child: Transform.scale(
+                scale: 1.5,
                 child: Lottie.asset(
-                  'assets/lottie/typing.json',
+                  'assets/lottie/recording.json',
                   package: 'chatify',
                   fit: BoxFit.fitHeight,
-                  height: 18,
+                  height: 25,
                   delegates: LottieDelegates(
                     values: [
                       ValueDelegate.color(
@@ -127,70 +154,29 @@ class _UsersInputStatusState extends State<UsersInputStatus> {
                   ),
                 ),
               ),
-            ],
-          ),
-        );
-      case ChatStatus.recording:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('recording_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _UsersProfile(
-                users: users,
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Transform.scale(
-                  scale: 1.4,
-                  child: Lottie.asset(
-                    'assets/lottie/recording.json',
-                    package: 'chatify',
-                    fit: BoxFit.fitHeight,
-                    height: 30,
-                    delegates: LottieDelegates(
-                      values: [
-                        ValueDelegate.color(
-                          const ['**'],
-                          value: Colors.green,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         );
       case ChatStatus.sendingMedia:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('sending_media_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _UsersProfile(
-                users: users,
+        return Row(
+          key: ValueKey('sending_media_user_status'),
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Text(
+              localization(context).sending,
+              style: TextStyle(
+                color: theme.chatForegroundColor.withOpacity(0.7),
+                fontSize: 12,
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                height: 30,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              alignment: Alignment.center,
+              child: Transform.scale(
+                scale: 1.3,
                 child: Lottie.asset(
                   'assets/lottie/three_dots.json',
                   package: 'chatify',
-                  height: 30,
                   delegates: LottieDelegates(
                     values: [
                       ValueDelegate.color(
@@ -201,52 +187,13 @@ class _UsersInputStatusState extends State<UsersInputStatus> {
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         );
-      case ChatStatus.attend:
-        return Padding(
-          padding: const EdgeInsets.only(top: 5),
-          child: Row(
-            key: ValueKey('attend_user_status'),
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              _UsersProfile(
-                users: users,
-              ),
-            ],
-          ),
-        );
-      case ChatStatus.none:
+      default:
         return SizedBox(
           key: ValueKey('none_user_status'),
         );
     }
-  }
-}
-
-class _UsersProfile extends StatelessWidget {
-  const _UsersProfile({
-    required this.users,
-  });
-
-  final List<ChatifyUser> users;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        ...users.map(
-          (e) => Padding(
-            padding: const EdgeInsetsDirectional.only(end: 6),
-            child: UserProfileImage(
-              url: e.profileImage,
-              size: 30,
-              firstLetter: e.name.substring(0, 1),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 }

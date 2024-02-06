@@ -1,5 +1,6 @@
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
+import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
 import 'package:chatify/src/ui/chat_view/message/widgets/text_message.dart';
 import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/common/circular_button.dart';
@@ -15,6 +16,7 @@ import 'package:chatify/src/utils/value_notifiers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bounce/flutter_bounce.dart';
+import 'package:get/instance_manager.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
 
@@ -56,6 +58,7 @@ class MessageCard extends StatelessWidget {
       chat: chat,
       controller: controller,
       users: users,
+      isSending: isSending,
     );
     if (canAnimate) {
       return Animate(
@@ -135,6 +138,8 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardController = Get.find<KeyboardController>();
+
     final theme = Chatify.theme;
     final isMine = widget.message.isMine;
     widget.message.type == MessageType.unSupported;
@@ -357,8 +362,7 @@ class _MessageCardWidgetState extends State<MessageCardWidget> {
                         textOK: localization(context).delete,
                         textCancel: localization(context).cancel,
                         showDeleteForAll: true,
-                        isKeyboardShown:
-                            widget.controller.keyboardController.isKeybaordOpen,
+                        isKeyboardShown: keyboardController.isKeybaordOpen,
                       );
                       if (deleteForAll == true) {
                         Chatify.datasource

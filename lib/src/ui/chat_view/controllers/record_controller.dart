@@ -162,6 +162,7 @@ class VoiceRecordingController {
           uploadAttachment: attachment,
           samples: samples,
           canReadBy: controller.chat.members,
+          isPending: true,
         );
         controller.pending.add(pendingMsg);
         final url = await attachment.url;

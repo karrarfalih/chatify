@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/models/models.dart';
 import 'package:chatify/src/core/chatify.dart';
@@ -51,55 +53,64 @@ class MessageActionHeader extends StatelessWidget {
             onFinish: () {
               controller.messageAction.value = null;
             },
-            child: Container(
-              width: double.maxFinite,
-              color: theme.chatForegroundColor.withOpacity(0.1),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 10,
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    icon,
-                    color: theme.chatForegroundColor,
+            child: ClipRRect(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(
+                  sigmaX: 30,
+                  sigmaY: 30,
+                ),
+                child: Container(
+                  width: double.maxFinite,
+                  color: theme.chatForegroundColor.withOpacity(0.1),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
                   ),
-                  const SizedBox(
-                    width: 10,
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          name,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: theme.chatForegroundColor,
-                          ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        icon,
+                        color: theme.chatForegroundColor,
+                      ),
+                      const SizedBox(
+                        width: 10,
+                      ),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              name,
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: theme.chatForegroundColor,
+                              ),
+                            ),
+                            Text(
+                              message?.message(localization(context)) ?? '',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color:
+                                    theme.chatForegroundColor.withOpacity(0.5),
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
-                        Text(
-                          message?.message(localization(context)) ?? '',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: theme.chatForegroundColor.withOpacity(0.5),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ),
+                      ),
+                      CircularButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () {
+                          controller.messageAction.value = null;
+                          if (args?.type == MessageActionType.edit) {
+                            controller.textController.clear();
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                  CircularButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () {
-                      controller.messageAction.value = null;
-                      if (args?.type == MessageActionType.edit) {
-                        controller.textController.clear();
-                      }
-                    },
-                  ),
-                ],
+                ),
               ),
             ),
           ),

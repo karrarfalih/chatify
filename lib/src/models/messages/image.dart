@@ -28,6 +28,7 @@ class ImageMessage extends Message {
     super.emojis,
     super.replyId,
     super.replyUid,
+    super.isPending,
     this.attachment,
     required this.bytes,
   }) : super(type: MessageType.image);

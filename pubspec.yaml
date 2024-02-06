@@ -15,6 +15,7 @@ dependencies:
   cloud_firestore: ^4.4.3
   connectivity_plus: ^5.0.1
   device_info_plus: ^9.1.0
+  diffutil_dart: ^4.0.1
   emoji_picker_flutter: ^1.6.2
   firebase_database: ^10.2.6
   firebase_storage: ^11.0.14
@@ -29,6 +30,7 @@ dependencies:
   flutter_localizations:
    sdk: flutter
   flutter_sticky_header: ^0.6.5
+  get: ^4.6.6
   http: ^0.13.6
   iconsax: ^0.0.8
   image_picker: ^1.0.6

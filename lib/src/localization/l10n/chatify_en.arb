@@ -94,5 +94,8 @@
   "imageMessage": "Image Message",
   "voiceMessage": "Voice Message",
   "unSuppprtedMessage": "Unsuppprted Message",
-  "deletedAccount": "Deleted Account"
+  "deletedAccount": "Deleted Account",
+  "typing": "Typing",
+  "recording": "Recording",
+  "sending": "Sending media"
 }

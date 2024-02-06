@@ -26,6 +26,7 @@ class VoiceMessage extends Message {
     super.emojis,
     super.replyId,
     super.replyUid,
+    super.isPending,
     this.uploadAttachment,
   }) : super(type: MessageType.voice);
 

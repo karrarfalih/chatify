@@ -1,8 +1,10 @@
 import 'package:chatify/src/core/chatify.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
 import 'package:chatify/src/ui/common/media_query.dart';
 import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 class RecordingLock extends StatelessWidget {
@@ -15,6 +17,7 @@ class RecordingLock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardController = Get.find<KeyboardController>();
     return ValueListenableBuilder<bool>(
       valueListenable: controller.voiceController.isRecording,
       builder: (contex, isRecording, child) {
@@ -78,13 +81,13 @@ class RecordingLock extends StatelessWidget {
                   right: 25,
                   top: screenSize.height -
                       (micLockOffset.dy * 30) -
-                      (controller.keyboardController.isKeybaordOpen ||
+                      (keyboardController.isKeybaordOpen ||
                               controller.isEmoji.value
-                          ? controller.keyboardController.keyboardHeight -
-                              mediaQuery(context).padding.bottom
+                          ? keyboardController.height -
+                              MediaQuery.of(context).padding.bottom
                           : 0) -
                       ((-micOffset.dy + 15).withRange(0, 100) * 0.5) -
-                      mediaQuery(context).padding.bottom -
+                      MediaQuery.of(context).padding.bottom -
                       160,
                   child: child!,
                 );

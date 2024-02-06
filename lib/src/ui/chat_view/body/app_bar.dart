@@ -3,6 +3,8 @@ import 'dart:ui';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/controllers/chat_controller.dart';
+import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
+import 'package:chatify/src/ui/chat_view/input_status.dart';
 import 'package:chatify/src/ui/chats/chat_image.dart';
 import 'package:chatify/src/ui/chats/connectivity.dart';
 import 'package:chatify/src/ui/common/animated_flip_counter.dart';
@@ -15,6 +17,7 @@ import 'package:chatify/src/ui/common/pull_down_button.dart';
 import 'package:chatify/src/ui/common/timer_refresher.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' hide Rx;
 import 'package:iconsax/iconsax.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -47,6 +50,7 @@ class ChatAppBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Chatify.theme;
+    final keyboardController = Get.find<KeyboardController>();
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
@@ -130,8 +134,7 @@ class ChatAppBar extends StatelessWidget {
                                   textOK: localization(context).delete,
                                   textCancel: localization(context).cancel,
                                   showDeleteForAll: true,
-                                  isKeyboardShown: chatController
-                                      .keyboardController.isKeybaordOpen,
+                                  isKeyboardShown: keyboardController.isKeybaordOpen,
                                 );
                                 if (deleteForAll == null) return;
                                 for (final msg in selecetdMessages.values) {
@@ -229,7 +232,7 @@ class ChatAppBar extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               mainAxisSize: MainAxisSize.max,
-                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.end,
                               children: [
                                 Text(
                                   title(context),
@@ -245,12 +248,16 @@ class ChatAppBar extends StatelessWidget {
                                     (chatController.chat.title != 'Support' ||
                                         Chatify.config.showSupportMessages))
                                   SizedBox(
-                                    height: 15,
+                                    height: 25,
                                     child: _ChatStatus(
                                       chatController: chatController,
                                       users: users,
                                       connectivity: connectivity,
                                     ),
+                                  )
+                                else
+                                  SizedBox(
+                                    height: 18,
                                   ),
                               ],
                             ),
@@ -287,8 +294,7 @@ class ChatAppBar extends StatelessWidget {
                             textOK: localization(context).delete,
                             textCancel: localization(context).cancel,
                             showDeleteForAll: true,
-                            isKeyboardShown: chatController
-                                .keyboardController.isKeybaordOpen,
+                            isKeyboardShown: keyboardController.isKeybaordOpen,
                           );
                           if (deleteForAll == null) return;
                           if (deleteForAll == true) {
@@ -336,71 +342,75 @@ class _ChatStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KrStreamBuilder<ConnectivityStatus>(
-      stream: connectivity.connection,
-      onLoading: SizedBox.shrink(),
-      builder: (connectionStatus) {
-        if (connectionStatus == ConnectivityStatus.waiting) {
-          return Row(
-            children: [
-              LoadingWidget(
-                size: 10,
-                lineWidth: 1,
-                color: Chatify.theme.chatForegroundColor.withOpacity(
-                  0.5,
-                ),
-              ),
-              SizedBox(
-                width: 6,
-              ),
-              Text(
-                localization(context).waitingConnection,
-                style: TextStyle(
+    return UsersInputStatus(
+      chatId: chatController.chat.id,
+      users: users,
+      child: KrStreamBuilder<ConnectivityStatus>(
+        stream: connectivity.connection,
+        onLoading: SizedBox.shrink(),
+        builder: (connectionStatus) {
+          if (connectionStatus == ConnectivityStatus.waiting) {
+            return Row(
+              children: [
+                LoadingWidget(
+                  size: 10,
+                  lineWidth: 1,
                   color: Chatify.theme.chatForegroundColor.withOpacity(
                     0.5,
                   ),
-                  fontSize: 11,
-                  height: 1,
                 ),
-              ),
-            ],
-          );
-        } else if (connectionStatus == ConnectivityStatus.connecting)
-          return Row(
-            children: [
-              LoadingWidget(
-                size: 10,
-                lineWidth: 1,
-                color: Chatify.theme.chatForegroundColor.withOpacity(
-                  0.5,
+                SizedBox(
+                  width: 6,
                 ),
-              ),
-              SizedBox(
-                width: 6,
-              ),
-              Text(
-                localization(context).connecting,
-                style: TextStyle(
+                Text(
+                  localization(context).waitingConnection,
+                  style: TextStyle(
+                    color: Chatify.theme.chatForegroundColor.withOpacity(
+                      0.5,
+                    ),
+                    fontSize: 11,
+                    height: 1,
+                  ),
+                ),
+              ],
+            );
+          } else if (connectionStatus == ConnectivityStatus.connecting)
+            return Row(
+              children: [
+                LoadingWidget(
+                  size: 10,
+                  lineWidth: 1,
                   color: Chatify.theme.chatForegroundColor.withOpacity(
                     0.5,
                   ),
-                  fontSize: 11,
-                  height: 1,
                 ),
-              ),
-            ],
-          );
-        if (users.length > 2) {
-          return _MutipleUsersLastSeen(
+                SizedBox(
+                  width: 6,
+                ),
+                Text(
+                  localization(context).connecting,
+                  style: TextStyle(
+                    color: Chatify.theme.chatForegroundColor.withOpacity(
+                      0.5,
+                    ),
+                    fontSize: 11,
+                    height: 1,
+                  ),
+                ),
+              ],
+            );
+          if (users.length > 2) {
+            return _MutipleUsersLastSeen(
+              chatController: chatController,
+              users: users,
+            );
+          }
+          return _SingleUserLastSeen(
             chatController: chatController,
-            users: users,
+            user: users.withoutMeOrMe.first,
           );
-        }
-        return _SingleUserLastSeen(
-          chatController: chatController,
-          user: users.withoutMeOrMe.first,
-        );
-      },
+        },
+      ),
     );
   }
 }
@@ -416,44 +426,47 @@ class _SingleUserLastSeen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return KrStreamBuilder<UserLastSeen>(
-      stream: Chatify.datasource.getUserLastSeen(
-        user.id,
-        chatController.chat.id,
-      ),
-      onLoading: SizedBox.shrink(),
-      builder: (user) {
-        return KrExpandedSection(
-          key: ValueKey(user.isActive),
-          expand: true,
-          child: Column(
-            key: ValueKey('none_user_status'),
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  if (user.isActive)
-                    Container(
-                      height: 8,
-                      width: 8,
-                      margin: EdgeInsetsDirectional.only(
-                        end: 5,
+    return Padding(
+      padding: EdgeInsets.only(top: 5),
+      child: KrStreamBuilder<UserLastSeen>(
+        stream: Chatify.datasource.getUserLastSeen(
+          user.id,
+          chatController.chat.id,
+        ),
+        onLoading: SizedBox.shrink(),
+        builder: (user) {
+          return KrExpandedSection(
+            key: ValueKey(user.isActive),
+            expand: true,
+            child: Column(
+              key: ValueKey('none_user_status'),
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    if (user.isActive)
+                      Container(
+                        height: 8,
+                        width: 8,
+                        margin: EdgeInsetsDirectional.only(
+                          end: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.green,
+                        ),
                       ),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.green,
-                      ),
+                    TimerRefresher(
+                      lastSeen: user.lastSeen,
+                      isActive: user.isActive,
                     ),
-                  TimerRefresher(
-                    lastSeen: user.lastSeen,
-                    isActive: user.isActive,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -498,31 +511,22 @@ class _MutipleUsersLastSeenState extends State<_MutipleUsersLastSeen> {
 
   @override
   Widget build(BuildContext context) {
-    return KrStreamBuilder<int>(
-      stream: activeUserCount,
-      onLoading: SizedBox.shrink(),
-      builder: (activeUsers) {
-        return KrExpandedSection(
-          expand: true,
-          child: Column(
-            key: ValueKey('none_user_status'),
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    '${widget.users.length} ${localization(context).member}',
-                    style: TextStyle(
-                      color: Chatify.theme.chatForegroundColor.withOpacity(
-                        0.5,
-                      ),
-                      fontSize: 11,
-                      height: 1,
-                    ),
-                  ),
-                  if (activeUsers != 0)
+    return Padding(
+      padding: EdgeInsets.only(top: 5),
+      child: KrStreamBuilder<int>(
+        stream: activeUserCount,
+        onLoading: SizedBox.shrink(),
+        builder: (activeUsers) {
+          return KrExpandedSection(
+            expand: true,
+            child: Column(
+              key: ValueKey('none_user_status'),
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
                     Text(
-                      ', $activeUsers ${localization(context).online}',
+                      '${widget.users.length} ${localization(context).member}',
                       style: TextStyle(
                         color: Chatify.theme.chatForegroundColor.withOpacity(
                           0.5,
@@ -531,12 +535,24 @@ class _MutipleUsersLastSeenState extends State<_MutipleUsersLastSeen> {
                         height: 1,
                       ),
                     ),
-                ],
-              ),
-            ],
-          ),
-        );
-      },
+                    if (activeUsers != 0)
+                      Text(
+                        ', $activeUsers ${localization(context).online}',
+                        style: TextStyle(
+                          color: Chatify.theme.chatForegroundColor.withOpacity(
+                            0.5,
+                          ),
+                          fontSize: 11,
+                          height: 1,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

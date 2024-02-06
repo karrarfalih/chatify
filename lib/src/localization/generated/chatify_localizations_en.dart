@@ -166,4 +166,13 @@ class ChatifyLocalizationsEn extends ChatifyLocalizations {
 
   @override
   String get deletedAccount => 'Deleted Account';
+
+  @override
+  String get typing => 'Typing';
+
+  @override
+  String get recording => 'Recording';
+
+  @override
+  String get sending => 'Sending media';
 }

@@ -14,9 +14,9 @@ import 'package:chatify/src/utils/extensions.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:chatify/src/ui/common/kr_stream_builder.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:lottie/lottie.dart';
-import 'package:rxdart/rxdart.dart';
 
 class ChatRoomCard extends StatefulWidget {
   final Chat chat;
@@ -35,45 +35,15 @@ class ChatRoomCard extends StatefulWidget {
 
 class _ChatRoomCardState extends State<ChatRoomCard> {
   late final PendingMessagesHandler pendingMessages;
-  final BehaviorSubject<Message?> pendingMessagesSubject =
-      BehaviorSubject.seeded(null);
 
-  final BehaviorSubject<_PendingMessage?> lastMessageSubject =
-      BehaviorSubject.seeded(null);
-  late final StreamSubscription<_PendingMessage?> lastMessageSubscription;
+  Message? get lastMessage => pendingMessages.messages.value.lastOrNull;
 
   @override
   void initState() {
     pendingMessages = ChatScreen.pendingMessagesHandlers[widget.chat.id] ??
         PendingMessagesHandler(chat: widget.chat);
     ChatScreen.pendingMessagesHandlers[widget.chat.id] = pendingMessages;
-    pendingMessages.messages.addListener(_listenToPendingMessages);
-    var lastMessage = Rx.combineLatest2<Message?, Message?, _PendingMessage?>(
-        Chatify.datasource.lastMessageStream(widget.chat),
-        pendingMessagesSubject, (actual, pending) {
-      if (pending == null || pending.id == actual?.id) {
-        return _PendingMessage(actual, true);
-      }
-      return _PendingMessage(pending, false);
-    });
-    lastMessageSubscription = lastMessage.listen((event) {
-      lastMessageSubject.add(event);
-    });
     super.initState();
-  }
-
-  void _listenToPendingMessages() {
-    if (pendingMessages.messages.value.isEmpty)
-      return pendingMessagesSubject.add(null);
-    pendingMessagesSubject.add(pendingMessages.messages.value.last);
-  }
-
-  @override
-  void dispose() {
-    pendingMessages.messages.removeListener(_listenToPendingMessages);
-    lastMessageSubscription.cancel();
-    pendingMessagesSubject.close();
-    super.dispose();
   }
 
   Future<List<ChatifyUser>> getUsers(BuildContext context) async {
@@ -234,87 +204,86 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                       ),
                                     ),
                                     const SizedBox(width: 5),
-                                    KrStreamBuilder<_PendingMessage?>(
-                                      stream: lastMessageSubject,
+                                    KrStreamBuilder<Message?>(
+                                      stream: Chatify.datasource
+                                          .lastMessageStream(widget.chat),
                                       onLoading: const SizedBox.shrink(),
-                                      builder: (message) {
-                                        return ConstrainedBox(
-                                          constraints: BoxConstraints(
-                                            maxHeight: 20,
-                                            maxWidth: 120,
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              if (!message!.isSent)
-                                                Lottie.asset(
-                                                  'assets/lottie/sending${Chatify.theme.isRecentChatsDark ? '' : '_black'}.json',
-                                                  package: 'chatify',
-                                                  fit: BoxFit.fitHeight,
-                                                  height: 12,
-                                                )
-                                              else if (message.message !=
-                                                      null &&
-                                                  (lastMessageSubject
-                                                          .valueOrNull
-                                                          ?.message
-                                                          ?.isMine ??
-                                                      false))
-                                                Image.asset(
-                                                  message.message!.seenBy
-                                                          .where(
-                                                            (e) =>
-                                                                e !=
-                                                                Chatify
-                                                                    .currentUserId,
-                                                          )
-                                                          .isNotEmpty
-                                                      ? 'assets/icons/seen.png'
-                                                      : 'assets/icons/sent.png',
-                                                  package: 'chatify',
-                                                  height: 17,
-                                                  color: Chatify
-                                                      .theme.primaryColor,
-                                                ),
-                                              const SizedBox(
-                                                width: 5,
+                                      builder: (lastRemoteMessage) {
+                                        return Obx(
+                                          () {
+                                            final message = lastMessage ??
+                                                lastRemoteMessage;
+                                            if (message == null)
+                                              return const SizedBox();
+                                            return ConstrainedBox(
+                                              constraints: BoxConstraints(
+                                                maxHeight: 20,
+                                                maxWidth: 120,
                                               ),
-                                              ConstrainedBox(
-                                                constraints: BoxConstraints(
-                                                  maxHeight: 20,
-                                                  maxWidth: 70,
-                                                ),
-                                                child: Text(
-                                                  (message.message?.sendAt ??
-                                                              message.message
-                                                                  ?.pendingTime)
-                                                          ?.format(
-                                                        context,
-                                                        DateTime.now()
-                                                                    .difference(
-                                                                      (message.message
-                                                                              ?.sendAt ??
-                                                                          message
-                                                                              .message
-                                                                              ?.pendingTime)!,
-                                                                    )
-                                                                    .inHours <
-                                                                24
-                                                            ? 'h:mm a'
-                                                            : 'd MMM',
-                                                      ) ??
-                                                      '',
-                                                  style: TextStyle(
-                                                    height: 1,
-                                                    color: Chatify.theme
-                                                        .recentChatsForegroundColor
-                                                        .withOpacity(.5),
-                                                    fontSize: 12,
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  if (lastMessage != null)
+                                                    Lottie.asset(
+                                                      'assets/lottie/sending${Chatify.theme.isRecentChatsDark ? '' : '_black'}.json',
+                                                      package: 'chatify',
+                                                      fit: BoxFit.fitHeight,
+                                                      height: 12,
+                                                    )
+                                                  else if (message.isMine)
+                                                    Image.asset(
+                                                      message.seenBy
+                                                              .where(
+                                                                (e) =>
+                                                                    e !=
+                                                                    Chatify
+                                                                        .currentUserId,
+                                                              )
+                                                              .isNotEmpty
+                                                          ? 'assets/icons/seen.png'
+                                                          : 'assets/icons/sent.png',
+                                                      package: 'chatify',
+                                                      height: 17,
+                                                      color: Chatify
+                                                          .theme.primaryColor,
+                                                    ),
+                                                  const SizedBox(
+                                                    width: 5,
                                                   ),
-                                                ),
+                                                  ConstrainedBox(
+                                                    constraints: BoxConstraints(
+                                                      maxHeight: 20,
+                                                      maxWidth: 70,
+                                                    ),
+                                                    child: Text(
+                                                      (message.sendAt ??
+                                                                  message
+                                                                      .pendingTime)
+                                                              .format(
+                                                            context,
+                                                            DateTime.now()
+                                                                        .difference(
+                                                                          (message.sendAt ??
+                                                                              message.pendingTime),
+                                                                        )
+                                                                        .inHours <
+                                                                    24
+                                                                ? 'h:mm a'
+                                                                : 'd MMM',
+                                                          ),
+                                                      style: TextStyle(
+                                                        height: 1,
+                                                        color: Chatify.theme
+                                                            .recentChatsForegroundColor
+                                                            .withOpacity(.5),
+                                                        fontSize: 12,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                            ],
-                                          ),
+                                            );
+                                          },
                                         );
                                       },
                                     ),
@@ -324,8 +293,9 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                               Row(
                                 children: [
                                   Expanded(
-                                    child: KrStreamBuilder<_PendingMessage?>(
-                                      stream: lastMessageSubject,
+                                    child: KrStreamBuilder<Message?>(
+                                      stream: Chatify.datasource
+                                          .lastMessageStream(widget.chat),
                                       onLoading: Align(
                                         alignment:
                                             AlignmentDirectional.centerStart,
@@ -338,10 +308,9 @@ class _ChatRoomCardState extends State<ChatRoomCard> {
                                         ),
                                       ),
                                       builder: (message) {
-                                        if (message!.message?.message == null)
-                                          return SizedBox();
+                                        if (message == null) return SizedBox();
                                         return Text(
-                                          message.message!
+                                          message
                                               .message(localization(context)),
                                           style: TextStyle(
                                             height: 1.4,

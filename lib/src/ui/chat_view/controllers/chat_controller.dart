@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:chatify/chatify.dart';
 import 'package:chatify/src/localization/get_string.dart';
 import 'package:chatify/src/ui/chat_view/body/images/image_mode.dart';
-import 'package:chatify/src/ui/chat_view/controllers/keyboard_controller.dart';
 import 'package:chatify/src/ui/chat_view/controllers/pending_messages.dart';
 import 'package:chatify/src/ui/common/toast.dart';
 import 'package:chatify/src/utils/extensions.dart';
@@ -19,15 +18,16 @@ import 'package:path_provider/path_provider.dart';
 import 'package:record/record.dart';
 import 'package:vibration/vibration.dart';
 
+import 'messages_controller.dart';
+
 part 'record_controller.dart';
 
 class ChatController {
   final Chat chat;
-  final List<ChatifyUser> _users;
-  ChatController(this.chat, this._receivedPendingHandler, this._users)
+  final List<ChatifyUser> users;
+  ChatController(this.chat, this._receivedPendingHandler, this.users)
       : pending =
             _receivedPendingHandler ?? PendingMessagesHandler(chat: chat) {
-    keyboardController = KeyboardController(this);
     voiceController = VoiceRecordingController(this);
     textController.addListener(() {
       isTyping.value = textController.text.isNotEmpty;
@@ -40,13 +40,12 @@ class ChatController {
   }
 
   Iterable<ChatifyUser> get receivers =>
-      _users.where((e) => e.id != Chatify.currentUserId);
-  late final KeyboardController keyboardController;
+      users.where((e) => e.id != Chatify.currentUserId);
   late final VoiceRecordingController voiceController;
   final PendingMessagesHandler pending;
   final PendingMessagesHandler? _receivedPendingHandler;
 
-  final FocusNode focus = FocusNode();
+  final focus = FocusNode();
   final isTyping = false.obs;
   final preventChatScroll = false.obs;
   final selecetdMessages = <String, Message>{}.obs;
@@ -56,9 +55,9 @@ class ChatController {
   final isEmojiIcon = false.obs;
   bool preventEmoji = false;
 
-  final TextEditingController textController = TextEditingController();
+  final textController = TextEditingController();
 
-  cancelEditReply() {}
+  late final messagesController = MessagesController(chat, pending);
 
   edit(Message message, BuildContext context) {
     messageAction.value =
@@ -75,11 +74,12 @@ class ChatController {
 
   copy(Message message, BuildContext context) {
     Clipboard.setData(
-        ClipboardData(text: message.message(localization(context))));
+      ClipboardData(text: message.message(localization(context))),
+    );
     showToast('Copied to clipboard', Colors.black45);
   }
 
-  submitMessage(String msg, BuildContext context) {
+  submitMessage(String msg, BuildContext context) async {
     msg = msg.trim();
     if (msg.isEmpty) return;
     if (messageAction.value?.type == MessageActionType.edit) {
@@ -100,7 +100,20 @@ class ChatController {
               messageAction.value?.message?.message(localization(context)),
           canReadBy: chat.members,
         );
-        pending.add(message);
+        final pendingMsg = TextMessage(
+          id: message.id,
+          message: msg.substring(i * 1000, min(msg.length, (i + 1) * 1000)),
+          chatId: chat.id,
+          unSeenBy:
+              chat.members.where((e) => e != Chatify.currentUserId).toList(),
+          replyId: messageAction.value?.message?.id,
+          replyUid: messageAction.value?.message?.sender,
+          replyMessage:
+              messageAction.value?.message?.message(localization(context)),
+          canReadBy: chat.members,
+          isPending: true,
+        );
+        pending.add(pendingMsg);
         Chatify.datasource.addMessage(message, receivers);
       }
       Chatify.datasource.addChat(chat);
@@ -135,6 +148,7 @@ class ChatController {
       unSeenBy: chat.members.where((e) => e != Chatify.currentUserId).toList(),
       attachment: attachment,
       canReadBy: chat.members,
+      isPending: true,
     );
     pending.add(pendingMsg);
     final imageUrl = await attachment.url;
@@ -161,8 +175,13 @@ class ChatController {
     textController.dispose();
     if (_receivedPendingHandler == null) pending.dispose();
     voiceController.dispose();
-    keyboardController.dispose();
     preventChatScroll.dispose();
+    messagesController.dispose();
+    isTyping.dispose();
+    selecetdMessages.dispose();
+    messageAction.dispose();
+    isEmoji.dispose();
+    isEmojiIcon.dispose();
     focus.dispose();
   }
 }

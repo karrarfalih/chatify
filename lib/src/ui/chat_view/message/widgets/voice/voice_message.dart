@@ -119,10 +119,7 @@ class _VoiceMessageWidgetState extends State<VoiceMessageWidget>
                       children: [
                         _playButton(context),
                         const SizedBox(width: 6),
-                        Align(
-                          alignment: AlignmentDirectional.bottomEnd,
-                          child: _durationWithNoise(context),
-                        ),
+                        _durationWithNoise(context),
                         const SizedBox(width: 8),
                       ],
                     ),

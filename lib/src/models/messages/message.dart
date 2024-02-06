@@ -23,6 +23,7 @@ abstract class Message {
   final List<MessageEmoji> emojis;
   final bool isEdited;
   final MessageType type;
+  final bool isPending;
 
   Message({
     String? id,
@@ -39,6 +40,7 @@ abstract class Message {
     this.replyUid,
     this.replyMessage,
     required this.type,
+    this.isPending = false,
   })  : id = id ?? Uuid.generate(),
         sender = sender ?? Chatify.currentUserId,
         seenBy = seenBy ?? [Chatify.currentUserId],
@@ -48,7 +50,7 @@ abstract class Message {
       Chatify.currentUserId == sender ||
       (Chatify.config.showSupportMessages && sender == 'support');
 
-  Message.fromJson(Map data)
+  Message.fromJson(Map data, [bool isPending = false])
       : isEdited = data['isEdited'] ?? false,
         sendAt = (data['sendAt'] ?? Timestamp.now()).toDate(),
         seenBy = List.from(data['seenBy'] ?? []),
@@ -67,6 +69,7 @@ abstract class Message {
         replyUid = data['replyUid'],
         replyMessage = data['replyMessage'],
         pendingTime = DateTime.now(),
+        isPending = isPending,
         type = getMessageTypeFromString(data['type']);
 
   @mustCallSuper

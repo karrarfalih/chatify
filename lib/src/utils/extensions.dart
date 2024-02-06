@@ -108,8 +108,7 @@ extension DateTimeFormat on DateTime {
     int count = 0;
     if (min == 0) {
       return _localization.lastSeenJustNow;
-    }
-    else if (min < 60) {
+    } else if (min < 60) {
       count = max(min, 0);
       return _localization.lastSeenMinutes(count);
     } else if (min < 60 * 24) {
@@ -122,9 +121,7 @@ extension DateTimeFormat on DateTime {
       count = min ~/ (60 * 24 * 7);
       return _localization.lastSeenWeeks(count);
     }
-
   }
-
 
   String format(BuildContext context, String format) {
     initializeDateFormatting();
@@ -137,6 +134,14 @@ extension DateTimeFormat on DateTime {
   DateTime get withoutTime => DateTime(year, month, day);
   DateTime get onlyMonth => DateTime(year, month);
   Timestamp get stamp => Timestamp.fromDate(this);
+}
+
+extension IsSameDay on DateTime? {
+  bool isSameDay(DateTime? other) =>
+      this != null &&
+      this!.year == other?.year &&
+      this!.month == other?.month &&
+      this!.day == other?.day;
 }
 
 extension Range on double {

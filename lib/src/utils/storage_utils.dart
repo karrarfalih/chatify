@@ -21,7 +21,6 @@ class UploadAttachment {
 
   _complete() async {
     await task;
-    await Future.delayed(Duration(seconds: 5));
     _urlCompleter.complete(await _reference.getDownloadURL());
   }
 
