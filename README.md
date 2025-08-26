@@ -1,148 +1,333 @@
-# Chatify
+## Chatify
 
-Chatify is a Flutter package that provides a chat screen and functionality for starting conversations between users in your Flutter applications. It allows users to send text messages, audio recordings, images, and supports customization for additional message types such as videos. The package integrates with Firestore, Firebase Storage, and Firebase Messaging to enable real-time updates, storage, and notifications.
-<div align="center">
-  <img src="https://hackmd.io/_uploads/SJV6bF7dh.png" alt="Image 1" style="margin: 10px;" width="300" />
-  <img src="https://hackmd.io/_uploads/B1fTbtX_h.png" alt="Image 2" style="margin: 10px;" width="300" />
-  <img src="https://hackmd.io/_uploads/S1Ba-FXuh.png" alt="Image 3" style="margin: 10px;" width="300" />
-<img src="https://hackmd.io/_uploads/rJ2KNFmd2.jpg" alt="Image 3" style="margin: 10px;" width="300" />
-</div>
+Composable Flutter chat UI toolkit. Bring your own data layer and storage; Chatify renders chats, messages, input, selection, and statuses with minimal glue code.
 
+### Features
+- **Chats list**: paginated list with last message, time, unseen count
+- **Messages view**: animated list, pending/failed queues, day separators
+- **Interactions**: swipe-to-reply, edit, copy, delete, selection mode
+- **Input**: text, recording UI, pluggable attachments (composer actions)
+- **Statuses**: typing, recording, sending media
+- **Extensible**: custom `MessageProvider`s and `AttachmentUploader`
+- **Localization**: EN/AR maps included (GetX `.tr` ready)
+- **Platforms**: mobile, web, desktop (uses `universal_html` defensively)
 
+### Requirements
+- Dart SDK: >=3.2.3 <4.0.0
+- Flutter: >=3.27.0
 
-## Features
-- User-friendly chat screen with a familiar interface similar to popular messaging apps.
-- Send and receive text messages, audio recordings, and images.
-- Customizable support for additional message types like videos (requires manual configuration).
-- User suggestions based on the strength of connections between users.
-- Caching mechanism for audio messages and images.
-- View and download images to the gallery.
-- Integration with Firebase for sending notifications (requires Firebase Messaging configuration).
-- Essential message management features: delete, forward, and reply to messages.
-
-## Dependencies
-
-Chatify relies on the following dependencies:
-
-- Firestore: Provides real-time database functionality for storing and retrieving user data and chat messages.
-- Firebase Storage: Enables storing and retrieving audio recordings, images, and other media files.
-- Firebase Messaging: Supports sending push notifications to users (requires configuration in your app).
-
-## Installation
-
-To use Chatify in your Flutter application, follow these steps:
-
-1. Add the following dependency to your `pubspec.yaml` file:
-
-   ```yaml
-   dependencies:
-     Chatify: ^0.0.1
-     ```
-2. Run the following command to install the package:
-```bash
-flutter pub get
+### Install
+```yaml
+dependencies:
+  chatify: ^0.1.3
 ```
-3. Import the package in your Dart file:
+
+### Quick start
+
+1) Implement your repositories
+
+Chatify is UI-only; you plug in your own data layer by implementing `ChatRepo` and `MessageRepo`.
 
 ```dart
 import 'package:chatify/chatify.dart';
-```
-4. Configure Firebase in your application by following the Firebase setup documentation for Flutter.
 
-## Usage
-### Initializing the Chatify
-Before using Chatify functionality, you need to initialize it with the appropriate options. Use the init method to initialize the chat with the desired options:
-```dart
-ChatifyController.init(ChatifyOptions(
-  // Provide the necessary options here
-));
-```
-The init method initializes the chat functionality by providing the necessary options. Let's go through each field in the ChatifyOptions example and explain its purpose:
-```dart
-ChatifyController.init(ChatifyOptions(
-  usersCollectionName: 'users'
-  userData: UserData(
-    id: 'id', //required
-    name: 'name', //required
-    clientNotificationId: 'clientNotificationId', //optional
-    profileImage: 'profileImage', //optional
-    uid: 'uid', //optional
-    searchTerms: 'searchTerms' //optional
-  ),
-  chatBackground: 'assets/png/chat.png',
-  notificationKey: 'notificationKeyFromFirebase',
-  onUserClick: (user) {
-    Get.to(UserProfile(user: Account.fromJson(user.data)));
-  },
-  customMessages: [
-    MessageWidget(
-      key: 'reel',
-      builder: (ctx, msg) => ReelCard(message: msg, width: 300),
-    ),
-  ],
-));
-```
-Let's go through each field and its purpose:
-1. **usersCollectionName (required)**: The firestore collection of your users data.
-2. **userData (required)**: It represents the mapping model for user data in Firestore collection. In this example, the UserData class is used, which has properties like id, name, clientNotificationId, profileImage, searchTerms, and uid. You need to provide appropriate values for these properties based on your Firestore user data model. If you have searchTerms in your model you can specify to add the ablity to search for users.
-3. **chatBackground**: It specifies the chat background image. In this example, the path to the chat background image is set to 'assets/png/chat.png'. You can provide the path to your own image asset or leave it as null if you don't want to set a custom background. 
-4. **notificationKey**: It is used to send notifications using Firebase Messaging. In this example, the value 'notificationKeyFromFirebase' is provided. You need to configure Firebase Messaging in your app and obtain the appropriate notification key to use here. If you don't want to send notifications, you can leave this field as null.
-5. **onUserClick**: It is a callback function that is invoked when a user's image is clicked. In this example, it navigates to a user profile screen using the Get.to method from the GetX package. You can customize this callback function to perform any action you want when a user is clicked.
+class MyChatRepo extends ChatRepo {
+  MyChatRepo({required super.userId});
 
-6. **customMessages**: It allows you to add custom message types to the chat. In this example, a custom message widget is added with the key 'reel' and a builder function that returns a ReelCard widget. You can add your own custom message types by providing a unique key and a builder function that returns the widget for that message type.
+  final _controller = StreamController<PaginatedResult<Chat>>.broadcast();
 
-By providing the appropriate values for each field in the ChatifyOptions object, you can customize and configure the chat functionality according to your specific requirements.
-### Implement the recent chats screen
-To implement the recent chat screen in your Flutter application, follow the example below:
-
-```dart
-import 'package:flutter/material.dart';
-import 'package:chatify/chatify.dart';
-
-void main() {
-  ChatifyController.init(ChatifyOptions(
-      usersCollectionName: 'users'
-      userData: UserData(
-          id: 'id',
-          name: 'name',
-          clientNotificationId: 'clientNotificationId',
-          profileImage: 'profileImage',
-          uid: 'uid'),
-    ));
-  runApp(MyApp());
-}
-
-class MyApp extends StatelessWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Chat App',
-      home: ChatScreen(),
-    );
+  Stream<PaginatedResult<Chat>> chatsStream() => _controller.stream;
+
+  @override
+  void loadMore() {
+    // Fetch next page and emit:
+    // _controller.add(PaginatedResult.success([...], hasReachedEnd));
+  }
+
+  @override
+  FutureResult<Chat> create(List<User> members) async {
+    // Create a chat and return Result.success(chat)
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<Chat> findById(String id) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<Chat?> findByUser(String receiverId) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> delete(String id) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<int> get unreadCountStream => const Stream.empty();
+
+  @override
+  void dispose() {
+    _controller.close();
   }
 }
 
+class MyMessageRepo extends MessageRepo {
+  MyMessageRepo({required super.chat});
+
+  final _controller = StreamController<PaginatedResult<Message>>.broadcast();
+
+  @override
+  Stream<PaginatedResult<Message>> messagesStream() => _controller.stream;
+
+  @override
+  void loadMore() {
+    // Fetch next page and emit:
+    // _controller.add(PaginatedResult.success([...], hasReachedEnd));
+  }
+
+  @override
+  FutureResult<bool> add(
+    MessageContent message,
+    ReplyMessage? reply, {
+    String? attachmentUrl,
+  }) async {
+    // Persist message; return Result.success(true/false)
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> update(String content, String messageId) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<Message> getById(String messageId) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> addReaction(String messageId, String emoji) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> removeReaction(String messageId, String emoji) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> delete(String id, bool forMe) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> markAsSeen(String id) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> markAsDelivered(String id) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  FutureResult<bool> updateStatus(ChatStatus status) async {
+    throw UnimplementedError();
+  }
+
+  @override
+  Stream<ChatStatus> getStatus() => const Stream.empty();
+
+  @override
+  void dispose() {
+    _controller.close();
+  }
+}
 ```
 
-or you can simply navigate to the recent chat screen by calling this method:
+2) Provide an attachment uploader
+
+Upload bytes and report progress via a stream.
+
 ```dart
-ChatifyController.showRecentChats(currentUser);
+import 'package:chatify/chatify.dart';
+
+class MyUploader extends AttachmentUploader {
+  MyUploader({required super.attachment});
+
+  final _progress = StreamController<TaskProgress>.broadcast();
+
+  @override
+  Stream<TaskProgress> get getTaskStream => _progress.stream;
+
+  @override
+  Future<UploadResult> upload() async {
+    // Upload attachment.bytes → storage, emit progress with _progress.add(...)
+    // Return final public URL
+    return UploadResult(url: 'https://example.com/file.jpg', isCanceled: false);
+  }
+
+  @override
+  void cancel() {
+    _progress.add(TaskProgress(state: TaskStatus.canceled, progress: null));
+  }
+}
 ```
 
-### Additional Functionality
-Chatify package provides more functionality such as sending messages manually, adding scores, stream unread message counts, and more.
+3) Register message providers
+
+Define a `MessageContent` and a matching `MessageProvider` that renders it and optionally integrates with the composer.
 
 ```dart
-// To start a chat with a user and add them to recent chats, use the startChat method
-ChatifyController.startChat(user);
+import 'package:chatify/chatify.dart';
+import 'package:flutter/material.dart';
 
-///to manually send messasges
-ChatifyController.sendTo(user, message, type);
+class TextMessage extends MessageContent {
+  TextMessage({required String text}) : super(content: text);
 
-///To add a score to a user, you can use the addScore method:
-ChatifyController.addScore(value: 5, user: user);
+  TextMessage.fromJson(Map<String, dynamic> json, String id)
+      : super.fromJson(json, id);
 
-//To get the stream of unread messages count, use the unReadMessagesCount method:
-Stream<int> unreadCountStream = ChatifyController.unReadMessagesCount(currentUser);
+  @override
+  Map<String, dynamic> toJson() => super.toJson();
+}
+
+class TextMessageProvider extends BasicMessageProvider<TextMessage> {
+  @override
+  bool get supportsTextInput => true;
+
+  @override
+  TextMessage fromJson(Map<String, dynamic> data, String id) =>
+      TextMessage.fromJson(data, id);
+
+  @override
+  TextMessage? createFromText(String text) => TextMessage(text: text);
+
+  @override
+  Widget build(BuildContext context, MessageState state) {
+    return Text(
+      state.message.content.content,
+      style: Theme.of(context).textTheme.bodyLarge,
+      textDirection: TextDirection.ltr,
+      softWrap: true,
+    );
+  }
+}
 ```
 
+- Your repos should create `Message` objects that include your `MessageContent` instances.
+- For media, extend `MediaMessageProvider` and return `MediaComposerResult` from `composerActions`. Chatify uploads via your `AttachmentUploader` then calls `MessageRepo.add(...)` with the resulting URL.
+
+4) Initialize Chatify
+
+```dart
+import 'package:chatify/chatify.dart';
+import 'package:flutter/material.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  final me = const User(id: 'u1', name: 'Me', imageUrl: '');
+
+  await Chatify.init(
+    currentUser: me,
+    chatRepo: MyChatRepo(userId: me.id),
+    messageRepoFactory: (chat) => MyMessageRepo(chat: chat),
+    uploaderFactory: (attachment) => MyUploader(attachment: attachment),
+    messageProviders: [
+      TextMessageProvider(),
+      // ImageMessageProvider(), VoiceMessageProvider(), ...
+    ],
+  );
+
+  runApp(const MyApp());
+}
+```
+
+### Use the UI
+
+- Chats list with built-in navigation to a messages page:
+
+```dart
+import 'package:chatify/chatify.dart';
+import 'package:flutter/material.dart';
+
+class ChatsScreen extends StatelessWidget {
+  const ChatsScreen({super.key, required this.currentUserId});
+  final String currentUserId;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChatsPage(
+      userId: currentUserId,
+      chatsLayout: ChatsLayout(
+        bodyBuilder: (context, body) => Scaffold(body: SafeArea(child: body)),
+        chatBuilder: (context, chat) => ListTile(
+          title: Text(chat.receiver.name),
+          subtitle: Text(chat.lastMessage ?? 'Say hi!'),
+          onTap: () => MessagesPage.showWithNavigator(context: context, chat: chat),
+        ),
+      ),
+      chatConfig: ChatLayout(
+        bodyBuilder: (context, body, chat) => Scaffold(
+          appBar: AppBar(title: Text(chat.receiver.name)),
+          body: SafeArea(child: body),
+        ),
+      ),
+    );
+  }
+}
+```
+
+- Open a chat programmatically
+
+```dart
+await Chatify().openChatById(context, chatId: 'chat_123');
+// or
+await Chatify().openChatByUser(context, receiverUser: someUser);
+```
+
+Tip: If you’re pushing from outside `ChatsPage`, pass a `navigatorKey` that points to its nested `Navigator`.
+
+### Composer and attachments
+
+- The “+” attachment menu is populated from `MessageProviderRegistry.instance.composerActions`, which aggregates `composerActions` from all registered providers.
+- To add media, return `MediaComposerResult` with bytes; Chatify’s flow uploads via your `AttachmentUploader` and then calls `MessageRepo.add(...)` with the resulting URL.
+
+### Localization (optional)
+
+Default strings are English; `.tr` is used throughout. If you use GetX, you can merge the provided maps:
+
+```dart
+import 'package:get/get.dart';
+import 'package:chatify/src/localization/en.dart' as chatify_en;
+import 'package:chatify/src/localization/ar.dart' as chatify_ar;
+
+class AppTranslations extends Translations {
+  @override
+  Map<String, Map<String, String>> get keys => {
+    'en': chatify_en.chatifyEn,
+    'ar': chatify_ar.chatifyAr,
+  };
+}
+```
+
+### Models and helpers
+- `Chat`, `User`, `Message`, `MessageContent`
+- `Result<T>` and `PaginatedResult<T>` helpers for async/results
+- `ChatStatus`: `typing`, `recording`, `sendingMedia`, etc.
+
+### Assets
+
+Package-bundled assets are used by the UI (e.g., sent/seen icons). No extra app-level pubspec entries are needed.
+
+### License
+
+BSD-3-Clause. See LICENSE.
+
+### Links
+- Homepage: `https://github.com/karrarfalih/chatify`

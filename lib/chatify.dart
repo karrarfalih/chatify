@@ -1,11 +1,17 @@
-library chatify;
-
-export 'src/ui/scaffold.dart';
-export 'src/models/models.dart';
-export 'src/theme/theme.dart';
-export 'src/theme/theme_widget.dart';
+export 'src/core/provider.dart';
+export 'src/view/chats/view/chats.dart';
+export 'src/view/chat/view/message/widgets/send_at.dart';
+export 'src/core/composer.dart';
+export 'src/core/registery.dart';
+export 'src/core/task.dart';
 export 'src/core/chatify.dart';
-export 'src/core/config.dart';
-export 'src/enums.dart';
-export 'src/ui/chatify.dart';
-export 'src/localization/generated/chatify_localizations.dart';
+export 'src/domain/chat_repo.dart';
+export 'src/domain/message_repo.dart';
+export 'src/domain/models/chat.dart';
+export 'src/domain/models/messages/message.dart';
+export 'src/domain/models/messages/content.dart';
+export 'src/domain/models/emoji.dart';
+export 'src/helpers/paginated_result.dart';
+export 'src/helpers/result.dart';
+export 'src/helpers/extensions.dart';
+export 'src/core/uploader.dart';

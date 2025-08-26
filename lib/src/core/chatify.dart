@@ -1,220 +1,126 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:chatify/chatify.dart';
-import 'package:chatify/src/firebase/firestore.dart';
-import 'package:chatify/src/ui/chat_view/chatting_room.dart';
-import 'package:chatify/src/ui/common/swipeable_page_route.dart';
-import 'package:chatify/src/utils/cache.dart';
-import 'package:chatify/src/utils/log.dart';
-import 'package:chatify/src/utils/uuid.dart';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:chatify/src/core/provider.dart';
+import 'package:chatify/src/core/uploader.dart';
+import 'package:chatify/src/domain/chat_repo.dart';
+import 'package:chatify/src/domain/message_repo.dart';
+import 'package:chatify/src/domain/models/chat.dart';
 import 'package:flutter/material.dart';
 
-int androidVersion = 0;
-
 class Chatify {
-  static late ChatifyDatasource _datasource;
-  static late ChatifyThemeData theme;
+  Chatify._();
 
-  /// The current datasource for the Chatify library.
-  static ChatifyDatasource get datasource {
-    if (!isInititialized) {
-      throw Exception('Chatify is not initialized.');
+  static bool isInitialized = false;
+
+  static late ChatRepo _chatRepo;
+  static late MessageRepo Function(Chat chat) _messageRepoFactory;
+  static late AttachmentUploader Function(Attachment attachment) _uploaderFactory;
+  static late List<MessageProvider> _messageProviders;
+  static late User _currentUser;
+
+  static ChatRepo get chatRepo {
+    if (!isInitialized) {
+      throw Exception(
+          'Chatify is not initialized. Did you forget to call Chatify.init()?');
     }
-    return _datasource;
+    return _chatRepo;
   }
 
-  /// Sets the datasource for the Chatify library.
-  static set datasource(ChatifyDatasource value) {
-    _datasource = value;
+  static set chatRepo(ChatRepo value) {
+    _chatRepo = value;
   }
 
-  static late ChatifyConfig _config;
-  static bool isInititialized = false;
-
-  /// The current configuration for the Chatify library.
-  static ChatifyConfig get config {
-    if (!isInititialized) {
-      throw Exception('Chatify is not initialized.');
+  static MessageRepo messageRepo(Chat chat) {
+    if (!isInitialized) {
+      throw Exception(
+          'Chatify is not initialized. Did you forget to call Chatify.init()?');
     }
-    return _config;
+    return _messageRepoFactory(chat);
   }
 
-  /// Sets the configuration for the Chatify library.
-  static set config(ChatifyConfig value) {
-    ChatifyLog.d('Configs added.');
-    _config = value;
+  static set messageRepoFactory(MessageRepo Function(Chat chat) value) {
+    _messageRepoFactory = value;
   }
 
-  static late String _currentUserId;
-
-  /// The current user id for the Chatify library.
-  static String get currentUserId => _currentUserId;
-
-  /// Sets the current user id for the Chatify library.
-  static set currentUserId(String value) {
-    ChatifyLog.d('Current user id added: $value');
-    _currentUserId = value;
+  static AttachmentUploader uploader(Attachment attachment) {
+    if (!isInitialized) {
+      throw Exception(
+          'Chatify is not initialized. Did you forget to call Chatify.init()?');
+    }
+    return _uploaderFactory(attachment);
   }
 
-  static String? _currentOpenedChat;
+  static set uploaderFactory(AttachmentUploader Function(Attachment attachment) value) {
+    _uploaderFactory = value;
+  }
 
-  // The current opened chat id for the Chatify library.
-  static String? get currentOpenedChat => _currentOpenedChat;
+  static List<MessageProvider> get messageProviders {
+    if (!isInitialized) {
+      throw Exception(
+          'Chatify is not initialized. Did you forget to call Chatify.init()?');
+    }
+    return _messageProviders;
+  }
 
-  /// Sets the current opened chat id for the Chatify library.
-  static set currentOpenedChat(String? value) {
-    _currentOpenedChat = value;
+  static set messageProviders(List<MessageProvider> value) {
+    _messageProviders = value;
+  }
+
+  static User get currentUser {
+    if (!isInitialized) {
+      throw Exception(
+          'Chatify is not initialized. Did you forget to call Chatify.init()?');
+    }
+    return _currentUser;
   }
 
   static Future<void> init({
-    required ChatifyConfig config,
-    required String currentUserId,
+    required User currentUser,
+    required ChatRepo chatRepo,
+    required MessageRepo Function(Chat chat) messageRepoFactory,
+    required AttachmentUploader Function(Attachment attachment) uploaderFactory,
+    required List<MessageProvider> messageProviders,
   }) async {
-    _config = config;
-    if (isInititialized) {
-      _removeConnectionHandler(_currentUserId);
-    }
-    _currentUserId = currentUserId;
-    _setConnectionHandler(currentUserId);
-    datasource = ChatifyDatasource(
-      messagesCollectionName: config.messagesCollectionName,
-      chatsCollectionName: config.chatsCollectionName,
-    );
-    await Cache.init();
-    if (Platform.isAndroid && androidVersion == 0) {
-      final androidInfo = await DeviceInfoPlugin().androidInfo;
-      androidVersion = androidInfo.version.sdkInt;
-    }
-    isInititialized = true;
-    ChatifyLog.d('Chatify initialized.');
+    _currentUser = currentUser;
+    _chatRepo = chatRepo;
+    _messageRepoFactory = messageRepoFactory;
+    _uploaderFactory = uploaderFactory;
+    _messageProviders = messageProviders;
+    isInitialized = true;
   }
 
-  static StreamSubscription<DatabaseEvent>? _onMessageAddedSubscription;
-
-  static void _setConnectionHandler(String userId) {
-    final ref = FirebaseDatabase.instance.ref("users/$userId");
-    ref.onDisconnect().set({
-      'isActive': false,
-      'lastConnection': ServerValue.timestamp,
-      'chats': null,
-    });
-    _onMessageAddedSubscription =
-        FirebaseDatabase.instance.ref('.info/connected').onValue.listen(
-      (event) {
-        final isConnected = event.snapshot.value == true;
-        ref.set({
-          'isActive': isConnected,
-          'lastConnection': ServerValue.timestamp,
-          if (!isConnected) 'chats': null,
-        });
-        ChatifyLog.d('User ${isConnected ? 'connected' : 'disconnected'}.');
-      },
-    );
+  static Future<void> dispose() async {
+    isInitialized = false;
   }
 
-  static void _removeConnectionHandler(String userId) {
-    final ref = FirebaseDatabase.instance.ref("users/$userId");
-    ref.set({
-      'online': false,
-      'lastSeen': ServerValue.timestamp,
-    });
-    ref.onDisconnect().cancel();
-    _onMessageAddedSubscription?.cancel();
-  }
-
-  static void endUserSeasion() {
-    _removeConnectionHandler(currentUserId);
-    ChatifyLog.d('User session ended.');
-  }
-
-  static openChat(
-    BuildContext context, {
-    required Chat chat,
-    required ChatifyUser user,
-  }) async {
-    Navigator.of(context).push(
-      SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, users: [user]),
-      ),
-    );
-  }
-
-  static openChatByUser(
-    BuildContext context, {
-    required ChatifyUser user,
-  }) async {
-    final chat = await datasource.findChatOrCreate([user.id, currentUserId]);
-    final currentUser = await config.getUserById(currentUserId);
-    Navigator.of(context).push(
-      SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, users: [user, currentUser]),
-      ),
-    );
-  }
-
-  static openChatById(
+  Future<void> openChatById(
     BuildContext context, {
     required String chatId,
+    GlobalKey<NavigatorState>? navigatorKey,
   }) async {
-    final chat = await datasource.findChatById(chatId);
-    if(chat == null) {
-      ChatifyLog.d('Can not find chat with id: $chatId', isError: true);
-      return;
+    final result = await chatRepo.findById(chatId);
+    if (!result.isSuccess || result.data == null || !context.mounted) return;
+    final chat = result.data!;
+    final navigator = navigatorKey != null
+        ? navigatorKey.currentState
+        : Navigator.of(context);
+    if (navigator == null) return;
+    await navigator.pushNamed('/chat', arguments: {'chat': chat});
+  }
+
+  Future<void> openChatByUser(
+    BuildContext context, {
+    required User receiverUser,
+    GlobalKey<NavigatorState>? navigatorKey,
+  }) async {
+    var chat = await chatRepo.findByUser(receiverUser.id);
+    if (chat.data == null) {
+      chat = await chatRepo.create([currentUser, receiverUser]);
     }
-    final users = await Future.wait(chat.members.map(config.getUserById));
-    Navigator.of(context).push(
-      SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, users: users),
-      ),
-    );
-  }
-
-  static openAllChats(BuildContext context) {
-    Navigator.of(context).push(
-      SwipeablePageRoute(
-        builder: (context) => ChatScreen(),
-      ),
-    );
-  }
-
-  static Future createSavedMessages() async {
-    return _datasource.findChatOrCreateSavedMessage();
-  }
-
-  static Future createChatSupprt() async {
-    return _datasource.findOrCreateChatSupport();
-  }
-
-  static openChatSupport(BuildContext context, [String? userId]) async {
-    final chat = await datasource.findOrCreateChatSupport(userId);
-    final users = [
-      await config.getUserById(currentUserId),
-      ChatifyUser.support(),
-    ];
-    Navigator.of(context).push(
-      SwipeablePageRoute(
-        builder: (context) => ChatView(chat: chat, users: users),
-      ),
-    );
-  }
-
-  static Future createAiChat() async {
-    final chat = Chat(
-      id: Uuid.generate(),
-      members: [currentUserId, 'ai'],
-      title: 'Ai',
-    );
-    await _datasource.addChat(chat);
-  }
-
-  static Stream<int> get unreadMessagesCount {
-    return datasource.getUnreadMessagesCount;
-  }
-
-  static testQueries() {
-    datasource.testAllQueries();
+    if (!context.mounted) return;
+    if (!chat.isSuccess || chat.data == null) return;
+    final navigator = navigatorKey != null
+        ? navigatorKey.currentState
+        : Navigator.of(context);
+    if (navigator == null) return;
+    await navigator.pushNamed('/chat', arguments: {'chat': chat});
   }
 }

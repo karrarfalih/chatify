@@ -1,6 +1,0 @@
-arb-dir: lib/src/localization/l10n
-template-arb-file: chatify_en.arb
-synthetic-package: false
-output-localization-file: ../generated/chatify_localizations.dart
-output-dir: lib/src/localization/generated
-output-class: ChatifyLocalizations
