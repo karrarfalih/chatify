@@ -1,12 +1,12 @@
+import 'package:chatify/chatify.dart';
+
 import 'chat.dart';
-import 'package:chatify/src/domain/models/emoji.dart';
-import 'package:chatify/src/domain/models/messages/message.dart';
-import 'package:chatify/src/domain/models/messages/content.dart';
-import 'package:chatify/src/core/registery.dart';
-import 'package:get/get.dart';
 
 Message messageFromJson(
-    Map<String, dynamic> data, String id, String currentUserId) {
+  Map<String, dynamic> data,
+  String id,
+  String currentUserId,
+) {
   try {
     final emojis = emojiFromJson(data['emojis']);
     return Message(
@@ -14,7 +14,10 @@ Message messageFromJson(
       sender: userFromJson(data['sender'], ''),
       reply: replyMessageFromJson(data['reply'], currentUserId),
       sentAt: data['sentAt'].toDate(),
-      myEmoji: emojis.firstWhereOrNull((e) => e.userId == currentUserId)?.emoji,
+      myEmoji: emojis
+          .map((e) => e as MessageEmoji?)
+          .firstWhere((e) => e?.userId == currentUserId, orElse: () => null)
+          ?.emoji,
       emojis: emojis,
       isEdited: data['isEdited'] ?? false,
       isSeen: List.from(data['seenBy'] ?? []).length > 1,
@@ -33,7 +36,9 @@ Message messageFromJson(
 }
 
 MessageContent _getMessageFromJsonWithProvider(
-    Map<String, dynamic> data, String id) {
+  Map<String, dynamic> data,
+  String id,
+) {
   final type = data['type'] as String?;
   final provider = MessageProviderRegistry.instance.getByType(type);
   if (provider != null) {
@@ -48,7 +53,9 @@ MessageContent _getMessageFromJsonWithProvider(
 }
 
 ReplyMessage? replyMessageFromJson(
-    Map<String, dynamic>? data, String currentUserId) {
+  Map<String, dynamic>? data,
+  String currentUserId,
+) {
   if (data == null) return null;
   return ReplyMessage(
     id: data['id'],
@@ -62,9 +69,6 @@ ReplyMessage? replyMessageFromJson(
 List<MessageEmoji> emojiFromJson(List<dynamic>? data) {
   if (data == null) return [];
   return data
-      .map((e) => MessageEmoji(
-            emoji: e['emoji'],
-            userId: e['userId'],
-          ))
+      .map((e) => MessageEmoji(emoji: e['emoji'], userId: e['userId']))
       .toList();
 }
