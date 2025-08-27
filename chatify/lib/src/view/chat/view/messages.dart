@@ -7,7 +7,7 @@ import 'package:universal_html/html.dart' hide Animation;
 import '../../../domain/models/messages/message.dart';
 import '../bloc/bloc.dart';
 import 'message/message.dart';
-import 'message/selection/listener.dart';
+import '../../../core/addons_registry.dart';
 import 'message/widgets/chat_date.dart';
 import '../../common/paginated_builder.dart';
 
@@ -46,85 +46,89 @@ class _ChatMessagesState extends State<ChatMessages> {
 
   @override
   Widget build(BuildContext context) {
-    return MessagesSelectionListener(
-      child: BlocBuilder<MessagesBloc, MessagesState>(
-        buildWhen: (previous, current) =>
-            previous.pendingMessages != current.pendingMessages ||
-            previous.failedMessages != current.failedMessages ||
-            previous.messages != current.messages,
-        builder: (context, data) {
-          final receivedMessages = data.messages;
-          final pendingMessages = data.pendingMessages;
-          final failedMessages = data.failedMessages;
-          if (receivedMessages.isInitialLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (receivedMessages.hasError) {
-            return ErrorResultBuilder(
-              error: receivedMessages.error ?? 'Something went wrong',
-            );
-          }
-          final otherMessages = [
-            ...failedMessages,
-            ...pendingMessages,
-          ];
-          otherMessages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
-          final messages = [
-            ...otherMessages,
-            ...receivedMessages.items,
-          ];
-          if (messages.isEmpty) {
-            return EmptyResultBuilder(
-              title: 'No messages'.tr,
-              description: 'Start a conversation'.tr,
-            );
-          }
-          return CustomScrollView(
-            reverse: true,
-            shrinkWrap: true,
-            controller: scrollController,
-            slivers: [
-              SliverPadding(
-                padding: const EdgeInsetsGeometry.only(bottom: 4, top: 120),
-                sliver: _AnimatedMessagesList(
-                  messages: messages,
-                  scrollController: scrollController,
-                  builder: (index, msg) {
-                    final message = msg ?? messages[index];
-                    final nextMessage =
-                        index == 0 ? null : messages.elementAtOrNull(index - 1);
-                    final previousMessage = messages.elementAtOrNull(index + 1);
-                    final date = message.sentAt;
-                    final prevDate = previousMessage?.sentAt;
-                    final showTime = prevDate == null ||
-                        date.day != prevDate.day ||
-                        date.month != prevDate.month ||
-                        date.year != prevDate.year;
-                    return Column(
-                      key: ValueKey(message.content.id),
-                      crossAxisAlignment: message.isMine
-                          ? CrossAxisAlignment.end
-                          : CrossAxisAlignment.start,
-                      children: [
-                        if (showTime) NewDataMessage(date: message.sentAt),
-                        MessageWidget(
-                          index: index,
-                          message: message,
-                          isLast: nextMessage?.isMine != message.isMine,
-                          isFirst: previousMessage?.isMine != message.isMine,
-                          isPending: pendingMessages.contains(message),
-                          isFailed: failedMessages.contains(message),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              )
-            ],
+    final listBuilder = BlocBuilder<MessagesBloc, MessagesState>(
+      buildWhen: (previous, current) =>
+          previous.pendingMessages != current.pendingMessages ||
+          previous.failedMessages != current.failedMessages ||
+          previous.messages != current.messages,
+      builder: (context, data) {
+        final receivedMessages = data.messages;
+        final pendingMessages = data.pendingMessages;
+        final failedMessages = data.failedMessages;
+        if (receivedMessages.isInitialLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (receivedMessages.hasError) {
+          return ErrorResultBuilder(
+            error: receivedMessages.error ?? 'Something went wrong',
           );
-        },
-      ),
+        }
+        final otherMessages = [
+          ...failedMessages,
+          ...pendingMessages,
+        ];
+        otherMessages.sort((a, b) => a.sentAt.compareTo(b.sentAt));
+        final messages = [
+          ...otherMessages,
+          ...receivedMessages.items,
+        ];
+        if (messages.isEmpty) {
+          return EmptyResultBuilder(
+            title: 'No messages'.tr,
+            description: 'Start a conversation'.tr,
+          );
+        }
+        final list = CustomScrollView(
+          reverse: true,
+          shrinkWrap: true,
+          controller: scrollController,
+          slivers: [
+            SliverPadding(
+              padding: const EdgeInsetsGeometry.only(bottom: 4, top: 120),
+              sliver: _AnimatedMessagesList(
+                messages: messages,
+                scrollController: scrollController,
+                builder: (index, msg) {
+                  final message = msg ?? messages[index];
+                  final nextMessage =
+                      index == 0 ? null : messages.elementAtOrNull(index - 1);
+                  final previousMessage = messages.elementAtOrNull(index + 1);
+                  final date = message.sentAt;
+                  final prevDate = previousMessage?.sentAt;
+                  final showTime = prevDate == null ||
+                      date.day != prevDate.day ||
+                      date.month != prevDate.month ||
+                      date.year != prevDate.year;
+                  return Column(
+                    key: ValueKey(message.content.id),
+                    crossAxisAlignment: message.isMine
+                        ? CrossAxisAlignment.end
+                        : CrossAxisAlignment.start,
+                    children: [
+                      if (showTime) NewDataMessage(date: message.sentAt),
+                      MessageWidget(
+                        index: index,
+                        message: message,
+                        isLast: nextMessage?.isMine != message.isMine,
+                        isFirst: previousMessage?.isMine != message.isMine,
+                        isPending: pendingMessages.contains(message),
+                        isFailed: failedMessages.contains(message),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            )
+          ],
+        );
+        return ChatAddonsRegistry.instance.chatAddons.fold<Widget>(
+          list,
+          (w, a) =>
+              a.wrapMessagesList(context, context.read<MessagesBloc>().chat, w),
+        );
+      },
     );
+    return listBuilder;
   }
 }
 

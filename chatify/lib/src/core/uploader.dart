@@ -48,9 +48,7 @@ class Attachment {
 abstract class AttachmentUploader {
   final Attachment attachment;
 
-  AttachmentUploader({
-    required this.attachment,
-  });
+  AttachmentUploader(this.attachment);
 
   Future<UploadResult> upload();
 

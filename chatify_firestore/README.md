@@ -6,10 +6,8 @@ Firestore implementation of Chatify's `ChatRepo` and `MessageRepo`. Plug it into
 
 Add dependencies:
 
-```yaml
-dependencies:
-  chatify: ^0.1.3
-  chatify_firestore: ^0.0.1
+```bash
+flutter pub add chatify_firestore
 ```
 
 Initialize Firebase in your app before using.

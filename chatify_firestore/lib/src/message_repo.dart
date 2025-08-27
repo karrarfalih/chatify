@@ -8,7 +8,7 @@ import 'to_json/reply.dart';
 import 'paginated_stream.dart';
 
 class FirestoreMessageRepo extends MessageRepo with FirestoreHelper {
-  FirestoreMessageRepo({required super.chat});
+  FirestoreMessageRepo(super.chat);
 
   User get sender => chat.sender;
   User get receiver => chat.receiver;

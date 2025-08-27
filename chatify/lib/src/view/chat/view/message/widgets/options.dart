@@ -6,6 +6,7 @@ import 'package:iconsax/iconsax.dart';
 import '../../../bloc/bloc.dart';
 import '../../../../common/options_builder.dart';
 import '../../../../../domain/models/messages/message.dart';
+import '../../../../../core/addons_registry.dart';
 
 class MessageOptions extends StatelessWidget {
   const MessageOptions({
@@ -110,6 +111,14 @@ class MessageOptions extends StatelessWidget {
           ),
           // Provider options
           ..._buildProviderOptions(context, message),
+          // Addon options
+          ...ChatAddonsRegistry.instance.chatAddons
+              .expand((a) => a.buildMessageOptions(
+                    context,
+                    context.read<MessagesBloc>().chat,
+                    message,
+                  ))
+              .toList(),
         ]
       ],
       applyOpacity: false,

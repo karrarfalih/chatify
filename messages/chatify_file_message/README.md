@@ -4,10 +4,8 @@ File message provider for Chatify. Defines `FileMessage` content and a `FileMess
 
 ### Installation
 
-```yaml
-dependencies:
-  chatify: ^0.1.3
-  chatify_file_message: ^0.0.1
+```bash
+flutter pub add chatify_file_message
 ```
 
 ### Usage

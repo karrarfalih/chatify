@@ -4,10 +4,8 @@ Voice message provider for Chatify. Defines `VoiceMessage` content and a `VoiceM
 
 ### Installation
 
-```yaml
-dependencies:
-  chatify: ^0.1.3
-  chatify_voice_message: ^0.0.1
+```bash
+flutter pub add chatify_voice_message
 ```
 
 ### Usage

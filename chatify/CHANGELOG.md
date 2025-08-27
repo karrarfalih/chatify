@@ -1,3 +1,9 @@
+## 0.1.4
+
+### Addons
+- Introduced addon system (`ChatAddon`, `ChatAddonsRegistry`) to plug optional features into the chat UI (headers, list wrappers, per-message wrappers, input wrappers, options, composer actions).
+- Selection moved out of core into first-party addon: `chatify_selection` (provides selection header, drag-to-select listener, and per-message selection UI).
+
 ## 0.1.3
 
 Massive refactor and new architecture. This release is a ground-up rewrite that decouples the UI from any specific backend. It is not drop-in compatible with 0.1.2.

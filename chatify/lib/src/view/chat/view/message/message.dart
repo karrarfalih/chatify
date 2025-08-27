@@ -1,4 +1,8 @@
-import '../../../../../chatify.dart';
+import 'package:chatify/src/core/provider.dart';
+import 'package:chatify/src/core/registery.dart';
+import 'package:chatify/src/domain/models/messages/content.dart';
+import 'package:chatify/src/domain/models/messages/message.dart';
+
 import 'widgets/constraints.dart';
 import 'messages/deleted.dart';
 import 'messages/error.dart';
@@ -6,9 +10,11 @@ import 'messages/unsupported.dart';
 import 'widgets/bubble.dart';
 import 'widgets/options.dart';
 import 'widgets/reply.dart';
-import 'selection/message.dart';
 import 'widgets/swipe_to_reply.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/addons_registry.dart';
+import '../../bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MessageWidget extends StatelessWidget {
   const MessageWidget({
@@ -32,10 +38,8 @@ class MessageWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Directionality(
       textDirection: message.isMine ? TextDirection.rtl : TextDirection.ltr,
-      child: MessageSelectionWidget(
-        index: index,
-        message: message,
-        child: SwipeToReply(
+      child: ChatAddonsRegistry.instance.chatAddons.fold<Widget>(
+        SwipeToReply(
           message: message,
           child: MessageOptions(
             message: message,
@@ -76,6 +80,13 @@ class MessageWidget extends StatelessWidget {
               ),
             ),
           ),
+        ),
+        (w, a) => a.wrapMessage(
+          context,
+          context.read<MessagesBloc>().chat,
+          message,
+          index,
+          w,
         ),
       ),
     );

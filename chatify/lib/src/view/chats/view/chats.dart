@@ -1,11 +1,11 @@
-import '../../../domain/models/chat.dart';
-import 'card.dart';
+import 'package:chatify/src/domain/models/chat.dart';
+import 'package:chatify/src/view/chat/view/chat.dart';
+import 'package:chatify/src/view/chats/bloc/bloc.dart';
+import 'package:chatify/src/view/chats/view/card.dart';
+import 'package:chatify/src/view/common/paginated_builder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import '../bloc/bloc.dart';
-import '../../chat/view/chat.dart';
-import '../../common/paginated_builder.dart';
 
 class ChatsLayout {
   final Widget Function(BuildContext context, Widget body)? bodyBuilder;

@@ -4,6 +4,8 @@ import '../domain/chat_repo.dart';
 import '../domain/message_repo.dart';
 import '../domain/models/chat.dart';
 import 'package:flutter/material.dart';
+import 'addons.dart';
+import 'addons_registry.dart';
 
 class Chatify {
   Chatify._();
@@ -12,7 +14,8 @@ class Chatify {
 
   static late ChatRepo _chatRepo;
   static late MessageRepo Function(Chat chat) _messageRepoFactory;
-  static late AttachmentUploader Function(Attachment attachment) _uploaderFactory;
+  static late AttachmentUploader Function(Attachment attachment)
+      _uploaderFactory;
   static late List<MessageProvider> _messageProviders;
   static late User _currentUser;
 
@@ -48,7 +51,8 @@ class Chatify {
     return _uploaderFactory(attachment);
   }
 
-  static set uploaderFactory(AttachmentUploader Function(Attachment attachment) value) {
+  static set uploaderFactory(
+      AttachmentUploader Function(Attachment attachment) value) {
     _uploaderFactory = value;
   }
 
@@ -78,12 +82,20 @@ class Chatify {
     required MessageRepo Function(Chat chat) messageRepoFactory,
     required AttachmentUploader Function(Attachment attachment) uploaderFactory,
     required List<MessageProvider> messageProviders,
+    List<ChatAddon> chatAddons = const [],
+    List<ChatsAddon> chatsAddons = const [],
   }) async {
     _currentUser = currentUser;
     _chatRepo = chatRepo;
     _messageRepoFactory = messageRepoFactory;
     _uploaderFactory = uploaderFactory;
     _messageProviders = messageProviders;
+    if (chatAddons.isNotEmpty) {
+      ChatAddonsRegistry.instance.registerChatAddons(chatAddons);
+    }
+    if (chatsAddons.isNotEmpty) {
+      ChatAddonsRegistry.instance.registerChatsAddons(chatsAddons);
+    }
     isInitialized = true;
   }
 
@@ -91,7 +103,7 @@ class Chatify {
     isInitialized = false;
   }
 
-  Future<void> openChatById(
+  static Future<void> openChatById(
     BuildContext context, {
     required String chatId,
     GlobalKey<NavigatorState>? navigatorKey,
@@ -106,14 +118,14 @@ class Chatify {
     await navigator.pushNamed('/chat', arguments: {'chat': chat});
   }
 
-  Future<void> openChatByUser(
+  static Future<void> openChatByUser(
     BuildContext context, {
-    required User receiverUser,
+    required User user,
     GlobalKey<NavigatorState>? navigatorKey,
   }) async {
-    var chat = await chatRepo.findByUser(receiverUser.id);
+    var chat = await chatRepo.findByUser(user.id);
     if (chat.data == null) {
-      chat = await chatRepo.create([currentUser, receiverUser]);
+      chat = await chatRepo.create([currentUser, user]);
     }
     if (!context.mounted) return;
     if (!chat.isSuccess || chat.data == null) return;

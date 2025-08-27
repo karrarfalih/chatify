@@ -95,23 +95,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           MessageTaskRegistry.instance.cancelUpload(event.message.content.id);
           add(MessagesRemoveMessageFromQueue(event.message.content.id));
           break;
-        case MessagesSelectionModeChanged():
-          emit(state.copyWith(isSelectionMode: event.isSelectionMode));
-        case MessageSelectionChanged():
-          emit(state.copyWith(selectedMessages: event.selectedMessages));
-        case MessageToggleSelection():
-          final selectedMessages =
-              Map<String, Message>.from(state.selectedMessages);
-          if (selectedMessages.containsKey(event.message.content.id)) {
-            selectedMessages.remove(event.message.content.id);
-          } else {
-            selectedMessages[event.message.content.id] = event.message;
-          }
-          emit(state.copyWith(selectedMessages: selectedMessages));
-        case MessageDeselectAll():
-          emit(state.copyWith(selectedMessages: {}));
-        case MessagesDeleteSelected():
-          await delete(state.selectedMessages.values.toList());
+
         case MessagesSendMessage():
           if (state.editingMessage.value != null) {
             messageRepo.update(
@@ -275,7 +259,6 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
     for (final msg in messages) {
       messageRepo.delete(msg.content.id, deleteForAll == false);
     }
-    add(MessageDeselectAll());
   }
 
   String _cleanMessage(String message) {

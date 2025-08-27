@@ -6,12 +6,8 @@ Firebase Storage implementation of Chatify's `AttachmentUploader` for uploading 
 
 Add the dependency:
 
-```yaml
-dependencies:
-  chatify: ^0.1.3
-  chatify_uploader_firebase_storage: ^0.0.1
-  firebase_storage: ^13.0.0
-  firebase_core: ^3.0.0
+```bash
+flutter pub add chatify_uploader_firebase_storage
 ```
 
 Then configure Firebase in your app (GoogleService-Info.plist / google-services.json) and initialize Firebase before using Chatify.

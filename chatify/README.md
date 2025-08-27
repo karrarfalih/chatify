@@ -8,7 +8,7 @@ Composable Flutter chat UI toolkit. Bring your own data layer and storage; Chati
 - **Interactions**: swipe-to-reply, edit, copy, delete, selection mode
 - **Input**: text, recording UI, pluggable attachments (composer actions)
 - **Statuses**: typing, recording, sending media
-- **Extensible**: custom `MessageProvider`s and `AttachmentUploader`
+- **Extensible**: custom `MessageProvider`s, `AttachmentUploader`, and addons
 - **Localization**: EN/AR maps included (GetX `.tr` ready)
 - **Platforms**: mobile, web, desktop (uses `universal_html` defensively)
 
@@ -17,9 +17,8 @@ Composable Flutter chat UI toolkit. Bring your own data layer and storage; Chati
 - Flutter: >=3.27.0
 
 ### Install
-```yaml
-dependencies:
-  chatify: ^0.1.3
+```bash
+flutter pub add chatify
 ```
 
 ### Quick start
@@ -247,6 +246,31 @@ void main() async {
   runApp(const MyApp());
 }
 ```
+
+### Addons (new)
+
+Chatify supports optional addons that hook into the chat UI without forking the core package. Addons can provide headers, wrap the messages list, inject per-message behavior, extend the input bar, and add custom options.
+
+- Addon API: see `ChatAddon` in `src/core/addons.dart`
+- Registry: `ChatAddonsRegistry` for registering chat-level addons
+- First-party addon: `chatify_selection` (multi-select header, drag-to-select, per-message highlight)
+
+Usage example:
+
+```dart
+import 'package:chatify_selection/chatify_selection.dart';
+
+await Chatify.init(
+  currentUser: me,
+  chatRepo: MyChatRepo(userId: me.id),
+  messageRepoFactory: (chat) => MyMessageRepo(chat: chat),
+  uploaderFactory: (att) => MyUploader(attachment: att),
+  messageProviders: [TextMessageProvider()],
+  chatAddons: const [SelectionAddon()],
+);
+```
+
+Selection has been extracted from core into the separate `chatify_selection` package to keep the core lean and enable opt-in usage.
 
 ### Use the UI
 

@@ -4,10 +4,8 @@ Text message provider for Chatify. Implements a `TextMessage` content model and 
 
 ### Installation
 
-```yaml
-dependencies:
-  chatify: ^0.1.3
-  chatify_text_message: ^0.0.1
+```bash
+flutter pub add chatify_text_message
 ```
 
 ### Usage

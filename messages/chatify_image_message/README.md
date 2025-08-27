@@ -4,10 +4,8 @@ Image message provider for Chatify. Defines `ImageMessage` content and an `Image
 
 ### Installation
 
-```yaml
-dependencies:
-  chatify: ^0.1.3
-  chatify_image_message: ^0.0.1
+```bash
+flutter pub add chatify_image_message
 ```
 
 ### Usage

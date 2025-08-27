@@ -1,5 +1,5 @@
-import '../../../../../domain/models/messages/content.dart';
-import '../../../../../helpers/extensions.dart';
+import 'package:chatify/src/domain/models/messages/content.dart';
+import 'package:chatify/src/helpers/extensions.dart';
 import 'package:flutter/material.dart';
 
 class ReplyedMessageWidget extends StatelessWidget {

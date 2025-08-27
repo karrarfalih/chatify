@@ -55,28 +55,6 @@ final class MessageCancel extends MessagesEvent {
   MessageCancel(this.message);
 }
 
-final class MessagesSelectionModeChanged extends MessagesEvent {
-  final bool isSelectionMode;
-
-  MessagesSelectionModeChanged(this.isSelectionMode);
-}
-
-final class MessageSelectionChanged extends MessagesEvent {
-  final Map<String, Message> selectedMessages;
-
-  MessageSelectionChanged(this.selectedMessages);
-}
-
-final class MessageToggleSelection extends MessagesEvent {
-  final Message message;
-
-  MessageToggleSelection(this.message);
-}
-
-final class MessageDeselectAll extends MessagesEvent {}
-
-final class MessagesDeleteSelected extends MessagesEvent {}
-
 final class MessagesSendMessage extends MessagesEvent {
   final MessageContent message;
 

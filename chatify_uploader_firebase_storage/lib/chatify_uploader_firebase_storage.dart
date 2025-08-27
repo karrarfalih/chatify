@@ -4,7 +4,7 @@ import 'package:chatify/chatify.dart';
 import 'package:firebase_storage/firebase_storage.dart' as storage;
 
 class FirebaseStorageUploader extends AttachmentUploader {
-  FirebaseStorageUploader({required super.attachment});
+  FirebaseStorageUploader(super.attachment);
 
   late final _task = storage.FirebaseStorage.instance
       .ref(

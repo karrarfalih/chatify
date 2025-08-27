@@ -1,5 +1,6 @@
 import '../../../../core/composer.dart';
 import '../../../../core/registery.dart';
+import '../../../../core/addons_registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:iconsax/iconsax.dart';
@@ -12,7 +13,12 @@ class AddAttachmentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actions = MessageProviderRegistry.instance.composerActions;
+    final actions = [
+      ...MessageProviderRegistry.instance.composerActions,
+      ...ChatAddonsRegistry.instance.chatAddons
+          .expand((a) => a.composerActions)
+          .toList(),
+    ];
     return PopupMenuButton<ComposerAction>(
       padding: EdgeInsets.zero,
       offset: const Offset(0, -120),

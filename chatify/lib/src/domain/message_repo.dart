@@ -7,7 +7,7 @@ import '../helpers/result.dart';
 abstract class MessageRepo {
   final Chat chat;
 
-  MessageRepo({required this.chat});
+  MessageRepo(this.chat);
 
   Stream<PaginatedResult<Message>> messagesStream();
 
