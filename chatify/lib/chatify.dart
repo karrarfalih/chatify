@@ -9,6 +9,7 @@ export 'src/core/addons.dart';
 export 'src/core/addons_registry.dart';
 export 'src/view/common/confirm.dart';
 export 'src/view/common/animated_flip_counter.dart';
+export 'src/view/common/options_builder.dart';
 export 'src/domain/chat_repo.dart';
 export 'src/domain/message_repo.dart';
 export 'src/domain/models/chat.dart';

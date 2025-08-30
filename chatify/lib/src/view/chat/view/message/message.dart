@@ -9,8 +9,6 @@ import 'messages/error.dart';
 import 'messages/unsupported.dart';
 import 'widgets/bubble.dart';
 import 'widgets/options.dart';
-import 'widgets/reply.dart';
-import 'widgets/swipe_to_reply.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/addons_registry.dart';
 import '../../bloc/bloc.dart';
@@ -39,44 +37,50 @@ class MessageWidget extends StatelessWidget {
     return Directionality(
       textDirection: message.isMine ? TextDirection.rtl : TextDirection.ltr,
       child: ChatAddonsRegistry.instance.chatAddons.fold<Widget>(
-        SwipeToReply(
+        MessageOptions(
           message: message,
-          child: MessageOptions(
+          isSending: isPending,
+          isFailed: isFailed,
+          child: MessageConstraints(
             message: message,
-            isSending: isPending,
-            isFailed: isFailed,
-            child: MessageConstraints(
-              message: message,
-              child: MessageBubble(
-                isFirst: isFirst,
-                isLast: isLast,
-                isMine: message.isMine,
-                isError: message.content is ErrorMessage,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    ReplyedMessageWidget(reply: message.reply),
-                    Flexible(
-                      child: switch (message.content) {
-                        DeletedMessage() => DeletedMessageWidget(message),
-                        UnsupportedMessage() =>
+            child: MessageBubble(
+              isFirst: isFirst,
+              isLast: isLast,
+              isMine: message.isMine,
+              isError: message.content is ErrorMessage,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Allow addons to inject leading UI (e.g., replied-to preview)
+                  ...ChatAddonsRegistry.instance.chatAddons
+                      .map((a) => a.buildMessageLeading(
+                            context,
+                            context.read<MessagesBloc>().chat,
+                            message,
+                            index,
+                          ))
+                      .whereType<Widget>()
+                      .toList(),
+                  Flexible(
+                    child: switch (message.content) {
+                      DeletedMessage() => DeletedMessageWidget(message),
+                      UnsupportedMessage() =>
+                        UnsupportedMessageWidget(message),
+                      ErrorMessage() => ErrorMessageWidget(message),
+                      _ => MessageProviderRegistry.instance
+                              .getByMessage(message.content)
+                              ?.build(
+                                  context,
+                                  MessageState(
+                                    message: message,
+                                    isPending: isPending,
+                                    isFailed: isFailed,
+                                  )) ??
                           UnsupportedMessageWidget(message),
-                        ErrorMessage() => ErrorMessageWidget(message),
-                        _ => MessageProviderRegistry.instance
-                                .getByMessage(message.content)
-                                ?.build(
-                                    context,
-                                    MessageState(
-                                      message: message,
-                                      isPending: isPending,
-                                      isFailed: isFailed,
-                                    )) ??
-                            UnsupportedMessageWidget(message),
-                      },
-                    ),
-                  ],
-                ),
+                    },
+                  ),
+                ],
               ),
             ),
           ),

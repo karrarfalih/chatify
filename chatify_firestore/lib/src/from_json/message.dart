@@ -9,10 +9,14 @@ Message messageFromJson(
 ) {
   try {
     final emojis = emojiFromJson(data['emojis']);
+    // Extract addon metadata (currently supporting reply)
+    final Map<String, dynamic> metadata = {};
+    if (data.containsKey('reply')) {
+      metadata['reply'] = data['reply'];
+    }
     return Message(
       isMine: data['sender']?['id'] == currentUserId,
       sender: userFromJson(data['sender'], ''),
-      reply: replyMessageFromJson(data['reply'], currentUserId),
       sentAt: data['sentAt'].toDate(),
       myEmoji: emojis
           .map((e) => e as MessageEmoji?)
@@ -24,6 +28,7 @@ Message messageFromJson(
       content: data['isDeleted'] == true
           ? DeletedMessage(id: id)
           : _getMessageFromJsonWithProvider(data, id),
+      metadata: metadata,
     );
   } catch (e) {
     return Message(
@@ -50,20 +55,6 @@ MessageContent _getMessageFromJsonWithProvider(
   }
   if (type == 'DeletedMessage') return DeletedMessage(id: id);
   return UnsupportedMessage(id: id);
-}
-
-ReplyMessage? replyMessageFromJson(
-  Map<String, dynamic>? data,
-  String currentUserId,
-) {
-  if (data == null) return null;
-  return ReplyMessage(
-    id: data['id'],
-    message: data['message'],
-    sender: userFromJson(data['sender'], ''),
-    sentAt: data['sentAt'].toDate(),
-    isMine: data['sender']?['id'] == currentUserId,
-  );
 }
 
 List<MessageEmoji> emojiFromJson(List<dynamic>? data) {

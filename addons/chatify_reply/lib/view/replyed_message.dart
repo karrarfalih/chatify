@@ -1,11 +1,11 @@
-import 'package:chatify/src/domain/models/messages/content.dart';
-import 'package:chatify/src/helpers/extensions.dart';
+import 'package:chatify/chatify.dart';
+import 'package:chatify_reply/chatify_reply.dart';
 import 'package:flutter/material.dart';
 
 class ReplyedMessageWidget extends StatelessWidget {
   const ReplyedMessageWidget({super.key, required this.reply});
 
-  final ReplyMessage? reply;
+  final ReplyData? reply;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,7 @@ class ReplyedMessageWidget extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    reply!.isMine ? 'You' : reply!.sender.name,
+                    reply!.isMine ? 'You' : reply!.senderName,
                     style: const TextStyle(fontSize: 14),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

@@ -14,9 +14,9 @@ abstract class MessageRepo {
   void loadMore();
 
   FutureResult<bool> add(
-    MessageContent message,
-    ReplyMessage? reply, {
+    MessageContent message, {
     String? attachmentUrl,
+    Map<String, dynamic> metadata = const {},
   });
 
   FutureResult<bool> update(String content, String messageId);

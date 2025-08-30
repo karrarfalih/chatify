@@ -92,14 +92,6 @@ class MessageOptions extends StatelessWidget {
             },
           )
         else ...[
-          // Base core options
-          OptionsItem(
-            title: 'Reply',
-            icon: Iconsax.undo,
-            onSelect: () {
-              context.read<MessagesBloc>().add(MessageReply(message));
-            },
-          ),
           OptionsItem(
             title: 'Delete',
             icon: Iconsax.trash,

@@ -1,5 +1,6 @@
 import 'dart:async';
 import '../../../core/chatify.dart';
+import '../../../core/addons_registry.dart';
 import '../../../helpers/nullable.dart';
 import '../../../core/composer.dart';
 import '../../../core/registery.dart';
@@ -37,23 +38,14 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       switch (event) {
         case MessagesComposerResultsPicked():
           for (final r in event.results) {
-            add(MessagesAddMessageToPending(
-              r.message,
-              r is MediaComposerResult ? r : null,
-            ));
             if (r is MediaComposerResult) {
-              final url = await sendMessageWithAttachment(r);
-              if (url != null) {
-                await messageRepo.add(r.message, null, attachmentUrl: url);
-              }
+              add(MessagesSendMessage(r.message, composerResult: r));
             } else {
               add(MessagesSendMessage(r.message));
             }
           }
-
         case MessagesStatusUpdated():
           emit(state.copyWith(status: event.status));
-
         case MessagesUpdated():
           final unseenMessages =
               event.messages.items.where((message) => !message.isSeen).toList();
@@ -71,25 +63,12 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
           ));
         case MessageCopy():
           Clipboard.setData(ClipboardData(text: event.message.content.content));
-        case MessageReply():
-          emit(state.copyWith(
-            replyingMessage: event.message.nl,
-            editingMessage: const Nullable.nl(),
-            textMessage: '',
-          ));
         case MessageDelete():
           await delete([event.message]);
         case MessageEdit():
           emit(state.copyWith(
             editingMessage: event.message.nl,
-            replyingMessage: const Nullable.nl(),
             textMessage: event.message.content.content,
-          ));
-        case MessageCancelEditReply():
-          emit(state.copyWith(
-            editingMessage: const Nullable.nl(),
-            replyingMessage: const Nullable.nl(),
-            textMessage: state.editingMessage.isNotNull ? '' : null,
           ));
         case MessageCancel():
           MessageTaskRegistry.instance.cancelUpload(event.message.content.id);
@@ -102,26 +81,37 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
                 event.message.content, state.editingMessage.value!.content.id);
             emit(state.copyWith(
               editingMessage: const Nullable.nl(),
-              replyingMessage: const Nullable.nl(),
               textMessage: '',
             ));
             return;
           }
-          add(MessagesAddMessageToPending(event.message, null));
+          add(MessagesAddMessageToPending(event.message));
+          String? url;
+          if (event.composerResult != null) {
+            url = await sendMessageWithAttachment(event.composerResult!);
+            if (url == null) {
+              return;
+            }
+          }
+          final metadata = ChatAddonsRegistry.instance.chatAddons
+              .fold<Map<String, dynamic>>(<String, dynamic>{}, (acc, addon) {
+            return {
+              ...acc,
+              ...addon.buildOutgoingMetadata(chat),
+            };
+          });
           final result = await messageRepo.add(
             event.message,
-            state.replyingMessage.isNull
-                ? null
-                : ReplyMessage(
-                    id: event.message.id,
-                    message: state.replyingMessage.value!.content.content,
-                    sender: state.replyingMessage.value!.sender,
-                    sentAt: DateTime.now(),
-                    isMine: true,
-                  ),
+            attachmentUrl: url,
+            metadata: metadata,
           );
           if (result.hasError) {
             add(MessagesAddMessageToFailed(event.message.id));
+          }
+          if (!result.hasError) {
+            for (final addon in ChatAddonsRegistry.instance.chatAddons) {
+              addon.onMessageSent(chat);
+            }
           }
         case MessagesTextChanged():
           emit(state.copyWith(textMessage: event.text));
@@ -231,7 +221,7 @@ class MessagesBloc extends Bloc<MessagesEvent, MessagesState> {
       storageFolder: result.storageFolder ?? 'media',
       fileName: result.fileName ?? result.message.id,
     );
-    if (!res.isCanceled && res.url != null) {
+    if (!res.isCanceled && res.url == null) {
       add(MessagesAddMessageToFailed(result.message.id));
     } else if (res.isCanceled) {
       add(MessagesRemoveMessageFromQueue(result.message.id));

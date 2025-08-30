@@ -1,4 +1,3 @@
-import '../chat.dart';
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:uuid/uuid.dart';
@@ -6,7 +5,6 @@ import 'package:uuid/uuid.dart';
 part 'unsupported.dart';
 part 'deleted.dart';
 part 'error.dart';
-part 'reply.dart';
 
 abstract class MessageContent extends Equatable {
   final String id;

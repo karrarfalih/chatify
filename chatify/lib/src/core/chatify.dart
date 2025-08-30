@@ -115,7 +115,7 @@ class Chatify {
         ? navigatorKey.currentState
         : Navigator.of(context);
     if (navigator == null) return;
-    await navigator.pushNamed('/chat', arguments: {'chat': chat});
+    await navigator.pushReplacementNamed('/chat', arguments: {'chat': chat});
   }
 
   static Future<void> openChatByUser(
@@ -133,6 +133,7 @@ class Chatify {
         ? navigatorKey.currentState
         : Navigator.of(context);
     if (navigator == null) return;
-    await navigator.pushNamed('/chat', arguments: {'chat': chat});
+    await navigator
+        .pushReplacementNamed('/chat', arguments: {'chat': chat.data});
   }
 }

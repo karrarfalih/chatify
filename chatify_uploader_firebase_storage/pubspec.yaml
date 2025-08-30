@@ -1,6 +1,6 @@
 name: chatify_uploader_firebase_storage
 description: "Chatify's firebase storage implementation for uploading files and messages."
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  chatify: ^0.1.3
+  chatify: ^0.1.5
   firebase_storage: ^13.0.0
 
 dev_dependencies:

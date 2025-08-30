@@ -1,6 +1,6 @@
 name: chatify
 description: Chat package for flutter
-version: 0.1.4
+version: 0.1.5
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -23,7 +23,6 @@ dependencies:
   lottie: ^3.3.1
   meta: ^1.16.0
   rxdart: ^0.28.0
-  swipeable_tile: ^2.0.1
   universal_html: ^2.2.4
   uuid: ^4.5.1
 

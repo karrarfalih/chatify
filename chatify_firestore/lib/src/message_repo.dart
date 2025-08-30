@@ -4,7 +4,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'from_json/message.dart';
 import 'helper.dart';
 import 'to_json/chat.dart';
-import 'to_json/reply.dart';
 import 'paginated_stream.dart';
 
 class FirestoreMessageRepo extends MessageRepo with FirestoreHelper {
@@ -35,8 +34,9 @@ class FirestoreMessageRepo extends MessageRepo with FirestoreHelper {
   @override
   FutureResult<bool> add(
     MessageContent message,
-    ReplyMessage? reply, {
+    {
     String? attachmentUrl,
+    Map<String, dynamic> metadata = const {},
   }) async {
     return instance.runTransaction<Result<bool>>((transaction) async {
       final messageDoc = messagesCollection.doc(message.id);
@@ -44,7 +44,6 @@ class FirestoreMessageRepo extends MessageRepo with FirestoreHelper {
       transaction.set(messageDoc, {
         ...message.toJson(),
         if (attachmentUrl != null) 'attachmentUrl': attachmentUrl,
-        'reply': replyMessageToJson(reply),
         'chatId': chatId,
         'sender': userToJson(sender),
         'receiver': userToJson(receiver),
@@ -56,6 +55,7 @@ class FirestoreMessageRepo extends MessageRepo with FirestoreHelper {
         'type': message.runtimeType.toString(),
         'isEdited': false,
         'isDeleted': false,
+        ...metadata,
       });
       transaction.update(chatDoc, {
         'lastMessage': message.content,

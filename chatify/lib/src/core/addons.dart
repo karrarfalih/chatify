@@ -25,36 +25,33 @@ class HeaderContribution {
 abstract class ChatAddon {
   const ChatAddon();
 
-  // Header
   List<HeaderContribution> buildHeaders(BuildContext c, Chat chat) => const [];
 
-  // Messages area
   Widget wrapMessagesList(BuildContext c, Chat chat, Widget child) => child;
+
   List<Widget> buildMessagesOverlays(BuildContext c, Chat chat) => const [];
 
-  // Per-message
   Widget wrapMessage(
           BuildContext c, Chat chat, Message m, int i, Widget child) =>
       child;
+
   Widget? buildMessageLeading(BuildContext c, Chat chat, Message m, int i) =>
       null;
-  Widget? buildMessageTrailing(BuildContext c, Chat chat, Message m, int i) =>
-      null;
+
   List<OptionsItem> buildMessageOptions(BuildContext c, Chat chat, Message m) =>
       const [];
-  Widget? buildDateSeparator(BuildContext c, DateTime date) => null;
-  Widget? buildStatusStrip(BuildContext c, Chat chat) => null;
 
-  // Input/composer
-  Widget wrapInput(BuildContext c, Chat chat, Widget child) => child;
+  Widget wrapInputBox(BuildContext c, Chat chat, Widget child) => child;
+
+  Widget wrapInputField(BuildContext c, Chat chat, Widget child) => child;
+
   Widget wrapChat(BuildContext c, Chat chat, Widget child) => child;
-  List<ComposerAction> get composerActions => const [];
-  Widget? buildInputPrefix(BuildContext c, Chat chat) => null;
-  Widget? buildInputSuffix(BuildContext c, Chat chat) => null;
 
-  // Lifecycle/events
-  void onOpen(BuildContext c, Chat chat) {}
-  void onDispose(BuildContext c, Chat chat) {}
+  List<ComposerAction> get composerActions => const [];
+
+  Map<String, dynamic> buildOutgoingMetadata(Chat chat) => const {};
+
+  void onMessageSent(Chat chat) {}
 }
 
 abstract class ChatsAddon {

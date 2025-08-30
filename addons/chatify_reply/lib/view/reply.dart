@@ -1,25 +1,24 @@
-import '../../../common/expanded_section.dart';
+import 'package:chatify/chatify.dart';
+import 'package:chatify_reply/bloc/bloc.dart';
+import 'package:chatify_reply/view/expanded_section.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../bloc/bloc.dart';
-import '../../../../helpers/extensions.dart';
 
-class ChatReplyEdit extends StatelessWidget {
-  const ChatReplyEdit({super.key});
+
+class ReplyPreview extends StatelessWidget {
+  const ReplyPreview({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<MessagesBloc, MessagesState>(
+    return BlocBuilder<ReplyBloc, ReplyState>(
       buildWhen: (previous, current) =>
-          previous.replyingMessage != current.replyingMessage ||
-          previous.editingMessage != current.editingMessage,
+          previous.replying != current.replying,
       builder: (context, state) {
-        final reply = state.replyingMessage.value;
-        final edit = state.editingMessage.value;
-        final isMine = reply?.isMine ?? edit?.isMine ?? false;
-        final sender = reply?.sender ?? edit?.sender;
-        final hasAction = reply != null || edit != null;
-        final content = reply?.content.content ?? edit?.content.content ?? '';
+        final reply = state.replying;
+        final isMine = reply?.isMine ?? false;
+        final sender = reply?.sender;
+        final hasAction = reply != null;
+        final content = reply?.content.content ?? '';
         return ExpandedSection(
           expand: hasAction,
           child: Padding(
@@ -65,7 +64,7 @@ class ChatReplyEdit extends StatelessWidget {
                 IconButton(
                   icon: const Icon(Icons.close, size: 16),
                   onPressed: () {
-                    context.read<MessagesBloc>().add(MessageCancelEditReply());
+                    context.read<ReplyBloc>().add(ReplyCancel());
                   },
                 ),
               ],

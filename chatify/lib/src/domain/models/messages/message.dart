@@ -5,7 +5,6 @@ import 'package:equatable/equatable.dart';
 
 class Message extends Equatable {
   final User sender;
-  final ReplyMessage? reply;
   final DateTime sentAt;
   final String? myEmoji;
   final List<MessageEmoji> emojis;
@@ -13,10 +12,10 @@ class Message extends Equatable {
   final bool isSeen;
   final bool isMine;
   final MessageContent content;
+  final Map<String, dynamic> metadata;
 
   const Message({
     required this.sender,
-    this.reply,
     required this.sentAt,
     this.myEmoji,
     this.emojis = const [],
@@ -24,17 +23,18 @@ class Message extends Equatable {
     this.isSeen = false,
     this.isMine = true,
     required this.content,
+    this.metadata = const {},
   });
 
   @override
   List<Object?> get props => [
         sender,
-        reply,
         sentAt,
         emojis,
         isEdited,
         isSeen,
         isMine,
         content,
+        metadata,
       ];
 }

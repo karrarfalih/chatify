@@ -1,16 +1,12 @@
+import 'package:chatify/chatify.dart';
+import 'package:chatify_reply/bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:swipeable_tile/swipeable_tile.dart';
-import '../../../bloc/bloc.dart';
-import '../../../../../domain/models/messages/message.dart';
 
 class SwipeToReply extends StatelessWidget {
-  const SwipeToReply({
-    super.key,
-    required this.message,
-    required this.child,
-  });
+  const SwipeToReply({super.key, required this.message, required this.child});
 
   final Message message;
   final Widget child;
@@ -26,7 +22,7 @@ class SwipeToReply extends StatelessWidget {
           ? SwipeDirection.startToEnd
           : SwipeDirection.endToStart,
       onSwiped: (direction) {
-        context.read<MessagesBloc>().add(MessageReply(message));
+        context.read<ReplyBloc>().add(ReplyStart(message));
       },
       backgroundBuilder: (context, direction, progress) {
         bool triggered = false;
@@ -44,15 +40,9 @@ class SwipeToReply extends StatelessWidget {
                   ? AlignmentDirectional.centerStart
                   : AlignmentDirectional.centerEnd,
               child: Padding(
-                padding: const EdgeInsetsDirectional.only(
-                  start: 6.0,
-                  end: 6,
-                ),
+                padding: const EdgeInsetsDirectional.only(start: 6.0, end: 6),
                 child: Animate(
-                  effects: const [
-                    FadeEffect(),
-                    ScaleEffect(),
-                  ],
+                  effects: const [FadeEffect(), ScaleEffect()],
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
@@ -64,10 +54,9 @@ class SwipeToReply extends StatelessWidget {
                             flipX: true,
                             child: Icon(
                               Icons.reply,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.7),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
                               size: 20,
                             ),
                           ),
@@ -80,10 +69,9 @@ class SwipeToReply extends StatelessWidget {
                           child: CircularProgressIndicator(
                             value: progress.value,
                             strokeWidth: 2,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withValues(alpha: 0.3),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
                           ),
                         )
                       else
@@ -98,10 +86,9 @@ class SwipeToReply extends StatelessWidget {
                             width: 30,
                             height: 30,
                             decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withValues(alpha: 0.1),
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
                             ),
                           ),

@@ -7,7 +7,6 @@ final class MessagesState extends Equatable {
   final String textMessage;
   final Nullable<String> focusedMessage;
   final Nullable<Message> editingMessage;
-  final Nullable<Message> replyingMessage;
   final Map<String, Message> selectedMessages;
   final ChatStatus status;
   final bool isSelectionMode;
@@ -20,7 +19,6 @@ final class MessagesState extends Equatable {
     required this.textMessage,
     required this.focusedMessage,
     required this.editingMessage,
-    required this.replyingMessage,
     required this.selectedMessages,
     required this.isSelectionMode,
     required this.status,
@@ -35,7 +33,6 @@ final class MessagesState extends Equatable {
           textMessage: '',
           focusedMessage: const Nullable.nl(),
           editingMessage: const Nullable.nl(),
-          replyingMessage: const Nullable.nl(),
           selectedMessages: const {},
           isSelectionMode: false,
           status: ChatStatus.none,
@@ -49,7 +46,6 @@ final class MessagesState extends Equatable {
     String? textMessage,
     Nullable<String>? focusedMessage,
     Nullable<Message>? editingMessage,
-    Nullable<Message>? replyingMessage,
     Map<String, Message>? selectedMessages,
     bool? isSelectionMode,
     ChatStatus? status,
@@ -62,7 +58,6 @@ final class MessagesState extends Equatable {
       textMessage: textMessage ?? this.textMessage,
       focusedMessage: focusedMessage ?? this.focusedMessage,
       editingMessage: editingMessage ?? this.editingMessage,
-      replyingMessage: replyingMessage ?? this.replyingMessage,
       selectedMessages: selectedMessages ?? this.selectedMessages,
       isSelectionMode: isSelectionMode ?? this.isSelectionMode,
       status: status ?? this.status,
@@ -78,7 +73,6 @@ final class MessagesState extends Equatable {
         textMessage,
         focusedMessage,
         editingMessage,
-        replyingMessage,
         selectedMessages,
         isSelectionMode,
         status,

@@ -266,7 +266,7 @@ await Chatify.init(
   messageRepoFactory: (chat) => MyMessageRepo(chat: chat),
   uploaderFactory: (att) => MyUploader(attachment: att),
   messageProviders: [TextMessageProvider()],
-  chatAddons: const [SelectionAddon()],
+  chatAddons: const [SelectionAddon(), ReplyAddon()],
 );
 ```
 

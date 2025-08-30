@@ -43,35 +43,37 @@ class MessageTransfer {
   late final stream = _subject.stream;
 
   AttachmentUploader? _uploader;
+  Attachment? _attachment;
   StreamSubscription? _downloadSub;
 
   Future<UploadResult> startUpload({
     required String id,
-    required AttachmentUploader uploader,
+    required Attachment attachment,
   }) async {
     cancel();
-    _uploader = uploader;
+    _attachment = attachment;
+    _uploader = Chatify.uploader(attachment);
     _subject.add(
       MessageTask(
         progress: TaskProgress(
           state: TaskStatus.running,
           progress: null,
         ),
-        bytes: uploader.attachment.bytes,
+        bytes: _uploader!.attachment.bytes,
       ),
     );
 
-    final subscription = uploader.getTaskStream.listen(
+    final subscription = _uploader!.getTaskStream.listen(
       (progress) => _subject.add(_subject.value.copyWith(progress: progress)),
       onError: (error) => _subject.add(_subject.value.copyWith(error: error)),
     );
 
     try {
-      final result = await uploader.upload();
+      final result = await _uploader!.upload();
       final currentState = _subject.value.progress?.state;
-      if (currentState == TaskStatus.completed) {
+      if (currentState == TaskStatus.completed && result.url != null) {
         await MessageTaskRegistry.cache
-            .putFile(result.url!, uploader.attachment.bytes, key: id);
+            .putFile(result.url!, _uploader!.attachment.bytes, key: id);
         _subject.add(
           _subject.value.copyWith(
             progress: TaskProgress(
@@ -86,6 +88,12 @@ class MessageTransfer {
       await subscription.cancel();
       _uploader = null;
     }
+  }
+
+  void retryUpload(String id) {
+    cancelUpload();
+    if (_attachment == null) return;
+    startUpload(id: id, attachment: _attachment!);
   }
 
   void startDownload({
@@ -192,15 +200,14 @@ class MessageTaskRegistry {
     required String fileName,
   }) async {
     final transfer = _ensure(id);
-    final uploader = Chatify.uploader(
-      Attachment(
-        chatId: chatId,
-        storageFolder: storageFolder,
-        fileName: fileName,
-        bytes: bytes,
-      ),
-    );
-    return transfer.startUpload(id: id, uploader: uploader);
+    return transfer.startUpload(
+        id: id,
+        attachment: Attachment(
+          chatId: chatId,
+          storageFolder: storageFolder,
+          fileName: fileName,
+          bytes: bytes,
+        ));
   }
 
   static final Config config =
@@ -213,6 +220,11 @@ class MessageTaskRegistry {
   }) {
     if (url.isEmpty) return;
     _ensure(id).startDownload(id: id, url: url);
+  }
+
+  void retryUpload(String id) {
+    _transfers[id]?.cancelUpload();
+    _transfers[id]?.retryUpload(id);
   }
 
   void cancelUpload(String id) {

@@ -1,6 +1,6 @@
 name: chatify_selection
 description: "Optional message selection service for Chatify"
-version: 0.0.1
+version: 0.0.2
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  chatify: ^0.1.4
+  chatify: ^0.1.5
   flutter_bloc: ^9.1.1
   iconsax: ^0.0.8
   get: ^4.7.2

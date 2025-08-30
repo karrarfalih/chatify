@@ -71,7 +71,7 @@ class MessagesPage extends StatelessWidget {
               const ChatStatusWidget(),
               ChatAddonsRegistry.instance.chatAddons.fold<Widget>(
                 const ChatInputBox(),
-                (w, a) => a.wrapInput(context, chat, w),
+                (w, a) => a.wrapInputBox(context, chat, w),
               ),
             ],
           );

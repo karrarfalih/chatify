@@ -29,12 +29,6 @@ final class MessageCopy extends MessagesEvent {
   MessageCopy(this.message);
 }
 
-final class MessageReply extends MessagesEvent {
-  final Message message;
-
-  MessageReply(this.message);
-}
-
 final class MessageDelete extends MessagesEvent {
   final Message message;
 
@@ -47,8 +41,6 @@ final class MessageEdit extends MessagesEvent {
   MessageEdit(this.message);
 }
 
-final class MessageCancelEditReply extends MessagesEvent {}
-
 final class MessageCancel extends MessagesEvent {
   final Message message;
 
@@ -57,8 +49,9 @@ final class MessageCancel extends MessagesEvent {
 
 final class MessagesSendMessage extends MessagesEvent {
   final MessageContent message;
+  final MediaComposerResult? composerResult;
 
-  MessagesSendMessage(this.message);
+  MessagesSendMessage(this.message, {this.composerResult});
 }
 
 final class MessagesRetrySendingMessage extends MessagesEvent {
@@ -73,7 +66,9 @@ final class MessagesTextChanged extends MessagesEvent {
   MessagesTextChanged(this.text);
 }
 
-final class MessagesSendText extends MessagesEvent {}
+final class MessagesSendText extends MessagesEvent {
+  MessagesSendText();
+}
 
 final class MessagesCancelSendingMessage extends MessagesEvent {
   final Message message;
@@ -83,9 +78,8 @@ final class MessagesCancelSendingMessage extends MessagesEvent {
 
 final class MessagesAddMessageToPending extends MessagesEvent {
   final MessageContent message;
-  final MediaComposerResult? result;
 
-  MessagesAddMessageToPending(this.message, this.result);
+  MessagesAddMessageToPending(this.message);
 }
 
 final class MessagesComposerResultsPicked extends MessagesEvent {
