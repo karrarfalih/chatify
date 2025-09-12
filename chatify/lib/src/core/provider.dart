@@ -7,7 +7,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart';
 
 abstract class MessageProvider<T extends MessageContent> {
-  String get type => T.toString();
+  String get type;
   bool get isMedia => false;
 
   T fromJson(Map<String, dynamic> data, String id);

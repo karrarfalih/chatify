@@ -10,13 +10,13 @@ final class FileMessage extends MessageContent {
     required this.name,
     required this.extension,
     required this.size,
-  }) : super(content: 'File message', url: url);
+  }) : super(content: 'File message', url: url, type: 'FileMessage');
 
   FileMessage.fromJson(super.json, super.id)
-      : name = json['name'] ?? 'unknown',
-        extension = json['extension'] ?? '',
-        size = json['size'] ?? 0,
-        super.fromJson();
+    : name = json['name'] ?? 'unknown',
+      extension = json['extension'] ?? '',
+      size = json['size'] ?? 0,
+      super.fromJson();
 
   @override
   Map<String, dynamic> toJson() {
@@ -29,11 +29,5 @@ final class FileMessage extends MessageContent {
   }
 
   @override
-  List<Object?> get props => [
-        url,
-        name,
-        extension,
-        size,
-        ...super.props,
-      ];
+  List<Object?> get props => [url, name, extension, size, ...super.props];
 }

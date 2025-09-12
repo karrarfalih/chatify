@@ -10,13 +10,15 @@ abstract class MessageContent extends Equatable {
   final String id;
   final String content;
   final String? url;
+  final String type;
 
-  MessageContent({required this.content, this.url, String? id})
+  MessageContent({required this.content, this.url, String? id, required this.type})
       : id = id ?? const Uuid().v4();
 
   MessageContent.fromJson(Map<String, dynamic> json, this.id)
       : content = json['content'],
-        url = json['attachmentUrl'];
+        url = json['attachmentUrl'],
+        type = json['type'];
 
   @mustCallSuper
   @mustBeOverridden
@@ -25,6 +27,7 @@ abstract class MessageContent extends Equatable {
       'id': id,
       'content': content,
       'attachmentUrl': url,
+      'type': type,
     };
   }
 

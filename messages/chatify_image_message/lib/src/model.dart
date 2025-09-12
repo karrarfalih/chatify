@@ -11,7 +11,7 @@ final class ImageMessage extends MessageContent {
     required this.thumbnail,
     required this.width,
     required this.height,
-  }) : super(content: 'Image message', url: url);
+  }) : super(content: 'Image message', url: url, type: 'ImageMessage');
 
   ImageMessage.fromJson(super.json, super.id)
       : thumbnail =

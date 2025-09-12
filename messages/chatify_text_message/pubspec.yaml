@@ -1,6 +1,6 @@
 name: chatify_text_message
 description: "Chatify's text message implementation."
-version: 0.0.2
+version: 0.0.3
 homepage: https://github.com/karrarfalih/chatify
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  chatify: ^0.1.5
+  chatify: ^0.1.6
   readmore: ^3.0.0
 
 dev_dependencies:

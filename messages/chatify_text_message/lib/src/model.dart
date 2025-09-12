@@ -4,18 +4,15 @@ final class TextMessage extends MessageContent {
   final String message;
 
   TextMessage({required this.message})
-      : super(content: message);
+    : super(content: message, type: 'TextMessage');
 
   TextMessage.fromJson(super.json, super.id)
-      : message = json['message'],
-        super.fromJson();
+    : message = json['message'],
+      super.fromJson();
 
   @override
   Map<String, dynamic> toJson() {
-    return {
-      'message': message,
-      ...super.toJson(),
-    };
+    return {'message': message, ...super.toJson()};
   }
 
   @override

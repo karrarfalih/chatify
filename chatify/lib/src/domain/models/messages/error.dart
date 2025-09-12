@@ -1,7 +1,8 @@
 part of 'content.dart';
 
 final class ErrorMessage extends MessageContent {
-  ErrorMessage({required super.id}) : super(content: 'Failed to load message data');
+  ErrorMessage({required super.id})
+      : super(content: 'Failed to load message data', type: 'TextMessage');
 
   @override
   Map<String, dynamic> toJson() {

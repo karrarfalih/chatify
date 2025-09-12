@@ -10,7 +10,7 @@ final class VoiceMessage extends MessageContent {
     required this.duration,
     required this.isPlayed,
     required this.samples,
-  }) : super(content: 'Voice message', url: url);
+  }) : super(content: 'Voice message', url: url, type: 'VoiceMessage');
 
   VoiceMessage.fromJson(super.json, super.id)
       : duration = json['duration'],
@@ -21,7 +21,6 @@ final class VoiceMessage extends MessageContent {
   @override
   Map<String, dynamic> toJson() {
     return {
-      // URL is stored at root key 'attachmentUrl' by the repo layer
       'duration': duration,
       'isPlayed': isPlayed,
       'samples': samples,

@@ -9,6 +9,9 @@ import 'get_image.dart';
 
 class ImageMessageProvider extends MediaMessageProvider<ImageMessage> {
   @override
+  String get type => 'ImageMessage';
+
+  @override
   ImageMessage fromJson(Map<String, dynamic> data, String id) {
     return ImageMessage.fromJson(data, id);
   }
@@ -27,25 +30,27 @@ class ImageMessageProvider extends MediaMessageProvider<ImageMessage> {
 
   @override
   List<ComposerAction<MediaComposerResult>> get composerActions => [
-        ComposerAction(
-          title: 'Image',
-          icon: Iconsax.image,
-          onPick: (context) async {
-            final picker = await pickImages();
-            return picker
-                .map((e) => MediaComposerResult(
-                      message: ImageMessage(
-                        url: '',
-                        thumbnail: e.thumbnail,
-                        width: e.width,
-                        height: e.height,
-                      ),
-                      bytes: e.image,
-                      storageFolder: 'images',
-                      fileName: const Uuid().v4(),
-                    ))
-                .toList();
-          },
-        ),
-      ];
+    ComposerAction(
+      title: 'Image',
+      icon: Iconsax.image,
+      onPick: (context) async {
+        final picker = await pickImages();
+        return picker
+            .map(
+              (e) => MediaComposerResult(
+                message: ImageMessage(
+                  url: '',
+                  thumbnail: e.thumbnail,
+                  width: e.width,
+                  height: e.height,
+                ),
+                bytes: e.image,
+                storageFolder: 'images',
+                fileName: const Uuid().v4(),
+              ),
+            )
+            .toList();
+      },
+    ),
+  ];
 }

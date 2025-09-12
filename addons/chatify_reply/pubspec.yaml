@@ -1,6 +1,6 @@
 name: chatify_reply
 description: "Reply-to messages for Chatify chats"
-version: 0.0.2
+version: 0.0.3
 homepage:
 
 environment:
@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  chatify: ^0.1.5
+  chatify: ^0.1.6
   flutter_bloc: ^9.1.1
   equatable: ^2.0.7
   get: ^4.7.2

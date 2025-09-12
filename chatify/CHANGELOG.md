@@ -1,3 +1,7 @@
+## 0.1.6
+
+- Fix message mapping in web by adding type to `MessageProvider` and `MessageContent`
+
 ## 0.1.5
 
 - Minor fixes

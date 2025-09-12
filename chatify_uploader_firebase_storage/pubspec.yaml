@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  chatify: ^0.1.5
+  chatify: ^0.1.6
   firebase_storage: ^13.0.0
 
 dev_dependencies:

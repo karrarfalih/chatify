@@ -2,7 +2,7 @@ part of 'content.dart';
 
 final class UnsupportedMessage extends MessageContent {
   UnsupportedMessage({required super.id})
-      : super(content: 'Unsupported message');
+      : super(content: 'Unsupported message', type: 'TextMessage');
 
   @override
   Map<String, dynamic> toJson() {

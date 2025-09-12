@@ -28,7 +28,7 @@ class MessageProviderRegistry {
   }
 
   MessageProvider<MessageContent>? getByMessage(MessageContent message) {
-    return getByType(message.runtimeType.toString());
+    return getByType(message.type);
   }
 
   void ensureInitialized() {

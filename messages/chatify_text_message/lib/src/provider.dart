@@ -6,6 +6,9 @@ import 'widget.dart';
 
 class TextMessageProvider extends BasicMessageProvider<TextMessage> {
   @override
+  String get type => 'TextMessage';
+
+  @override
   TextMessage fromJson(Map<String, dynamic> data, String id) {
     return TextMessage.fromJson(data, id);
   }

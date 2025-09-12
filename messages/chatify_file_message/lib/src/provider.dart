@@ -8,6 +8,9 @@ import 'get_file.dart';
 
 class FileMessageProvider extends MediaMessageProvider<FileMessage> {
   @override
+  String get type => 'FileMessage';
+
+  @override
   FileMessage fromJson(Map<String, dynamic> data, String id) {
     return FileMessage.fromJson(data, id);
   }
