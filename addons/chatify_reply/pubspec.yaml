@@ -1,7 +1,7 @@
 name: chatify_reply
 description: "Reply-to messages for Chatify chats"
 version: 0.0.3
-homepage:
+homepage: https://github.com/karrarfalih/chatify
 
 environment:
   sdk: ^3.8.1
