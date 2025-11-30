@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:diffutil_dart/diffutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
-import 'package:universal_html/html.dart' hide Animation;
+import 'package:universal_web/web.dart' hide Animation;
 import '../../../domain/models/messages/message.dart';
 import '../bloc/bloc.dart';
 import 'message/message.dart';
@@ -26,7 +26,7 @@ class _ChatMessagesState extends State<ChatMessages> {
   @override
   void initState() {
     _contextMenuSubscription =
-        document.onContextMenu.listen((event) => event.preventDefault());
+        document.body?.onContextMenu.listen((event) => event.preventDefault());
     scrollController.addListener(() {
       if (scrollController.position.pixels >=
           scrollController.position.maxScrollExtent - 100) {

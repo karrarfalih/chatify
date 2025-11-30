@@ -1,3 +1,7 @@
+## 0.0.6
+
+- Remove `universal_html` and use `universal_web` instead to support fflutter wasm.
+
 ## 0.0.3
 
 - Update chatify to 0.1.6

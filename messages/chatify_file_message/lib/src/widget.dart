@@ -3,10 +3,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'dart:io';
+import 'dart:js_interop';
 import 'package:flutter/services.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:universal_web/web.dart' as html;
 
 import 'model.dart';
 import 'rotated_widget.dart';
@@ -58,10 +59,7 @@ class FileMessageWidget extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        FileImageWidget(
-                          message: message,
-                          isFailed: isFailed,
-                        ),
+                        FileImageWidget(message: message, isFailed: isFailed),
                         const SizedBox(width: 8),
                         Flexible(
                           child: Column(
@@ -143,13 +141,16 @@ class _FileImageWidgetState extends State<FileImageWidget> {
 
   Future<void> openFile(Uint8List bytes) async {
     if (kIsWeb) {
-      final blob = html.Blob([bytes]);
-
-      final url = html.Url.createObjectUrlFromBlob(blob);
-      html.AnchorElement(href: url)
-        ..setAttribute('download', file.name)
-        ..click();
-      html.Url.revokeObjectUrl(url);
+      final blob = html.Blob(<html.BlobPart>[bytes.toJS].toJS);
+      final url = html.URL.createObjectURL(blob);
+      final anchor = html.HTMLAnchorElement()
+        ..href = url
+        ..download = file.name;
+      html.document.body?.append(anchor);
+      anchor
+        ..click()
+        ..remove();
+      html.URL.revokeObjectURL(url);
     } else {
       final tempDir = '${(await getTemporaryDirectory()).path}/chat/${file.id}';
       final filePath = '$tempDir/${file.name}';
@@ -166,84 +167,67 @@ class _FileImageWidgetState extends State<FileImageWidget> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<MessageTask>(
-        stream: MessageTaskRegistry.instance.streamFor(file),
-        builder: (context, snapshot) {
-          final task = snapshot.data;
-          final bytes = task?.bytes;
-          final progress = task?.progress?.progress;
-          final state = task?.progress?.state;
-          return Stack(
-            alignment: Alignment.center,
-            children: [
-              if (widget.isFailed)
-                GestureDetector(
-                  onTap: () {
-                    if (file.url != null && file.url!.isNotEmpty) {
-                      MessageTaskRegistry.instance.startDownload(
-                        id: file.id,
-                        url: file.url!,
-                      );
-                    }
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: const Icon(
-                      Icons.refresh,
-                      color: Colors.white,
-                    ),
+      stream: MessageTaskRegistry.instance.streamFor(file),
+      builder: (context, snapshot) {
+        final task = snapshot.data;
+        final bytes = task?.bytes;
+        final progress = task?.progress?.progress;
+        final state = task?.progress?.state;
+        return Stack(
+          alignment: Alignment.center,
+          children: [
+            if (widget.isFailed)
+              GestureDetector(
+                onTap: () {
+                  if (file.url != null && file.url!.isNotEmpty) {
+                    MessageTaskRegistry.instance.startDownload(
+                      id: file.id,
+                      url: file.url!,
+                    );
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(50),
                   ),
-                )
-              else if (state == TaskStatus.completed)
-                GestureDetector(
-                  onTap: () => openFile(bytes!),
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
-                    child: const Icon(
-                      Iconsax.document_1,
-                      color: Colors.white,
-                      size: 20,
-                    ),
+                  child: const Icon(Icons.refresh, color: Colors.white),
+                ),
+              )
+            else if (state == TaskStatus.completed)
+              GestureDetector(
+                onTap: () => openFile(bytes!),
+                child: Container(
+                  padding: const EdgeInsets.all(2),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(50),
                   ),
-                )
-              else if (state == TaskStatus.running)
-                GestureDetector(
-                  onTap: () {
-                    MessageTaskRegistry.instance.cancel(file.id);
-                  },
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      AnimatedRotatingWidget(
-                        duration: const Duration(milliseconds: 3000),
-                        child: Builder(
-                          builder: (context) {
-                            if (progress == null) {
-                              return Container(
-                                padding: const EdgeInsets.all(4),
-                                width: 40,
-                                height: 40,
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.5),
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: const CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                  color: Colors.white,
-                                ),
-                              );
-                            }
+                  child: const Icon(
+                    Iconsax.document_1,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+              )
+            else if (state == TaskStatus.running)
+              GestureDetector(
+                onTap: () {
+                  MessageTaskRegistry.instance.cancel(file.id);
+                },
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    AnimatedRotatingWidget(
+                      duration: const Duration(milliseconds: 3000),
+                      child: Builder(
+                        builder: (context) {
+                          if (progress == null) {
                             return Container(
                               padding: const EdgeInsets.all(4),
                               width: 40,
@@ -252,46 +236,55 @@ class _FileImageWidgetState extends State<FileImageWidget> {
                                 color: Colors.black.withValues(alpha: 0.5),
                                 borderRadius: BorderRadius.circular(50),
                               ),
-                              child: CircularProgressIndicator(
-                                value: progress,
+                              child: const CircularProgressIndicator(
                                 strokeWidth: 2.5,
                                 color: Colors.white,
                               ),
                             );
-                          },
-                        ),
+                          }
+                          return Container(
+                            padding: const EdgeInsets.all(4),
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(50),
+                            ),
+                            child: CircularProgressIndicator(
+                              value: progress,
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          );
+                        },
                       ),
-                      const Icon(
-                        Icons.close_rounded,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
-                )
-              else if (state == TaskStatus.canceled)
-                GestureDetector(
-                  onTap: () {
-                    MessageTaskRegistry.instance.startDownload(
-                      id: file.id,
-                      url: file.url!,
-                    );
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(50),
                     ),
-                    child: const Icon(
-                      Icons.download_sharp,
-                      color: Colors.white,
-                    ),
-                  ),
+                    const Icon(Icons.close_rounded, color: Colors.white),
+                  ],
                 ),
-            ],
-          );
-        });
+              )
+            else if (state == TaskStatus.canceled)
+              GestureDetector(
+                onTap: () {
+                  MessageTaskRegistry.instance.startDownload(
+                    id: file.id,
+                    url: file.url!,
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                  child: const Icon(Icons.download_sharp, color: Colors.white),
+                ),
+              ),
+          ],
+        );
+      },
+    );
   }
 }

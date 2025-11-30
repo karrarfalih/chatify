@@ -1,3 +1,7 @@
+## 0.1.8
+
+- Remove `universal_html` and use `universal_web` instead to support flutter wasm.
+
 ## 0.1.6
 
 - Fix message mapping in web by adding type to `MessageProvider` and `MessageContent`
