@@ -1,4 +1,4 @@
-## 0.0.6
+## 0.0.7
 
 - Remove `universal_html` and use `universal_web` instead to support fflutter wasm.
 
